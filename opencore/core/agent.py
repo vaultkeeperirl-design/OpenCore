@@ -48,6 +48,27 @@ class Agent:
     def add_message(self, role: str, content: str):
         self.messages.append({"role": role, "content": content})
 
+    def _execute_tool_calls(self, tool_calls: List[Any]):
+        """Executes a list of tool calls and appends results to messages."""
+        for tool_call in tool_calls:
+            func_name = tool_call.function.name
+            arguments = json.loads(tool_call.function.arguments)
+
+            if func_name in self.tools:
+                print(f"[{self.name}] Executing {func_name} with {arguments}")
+                try:
+                    result = self.tools[func_name](**arguments)
+                except Exception as e:
+                    result = f"Error executing {func_name}: {str(e)}"
+            else:
+                result = f"Error: Tool {func_name} not found."
+
+            self.messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": str(result)
+            })
+
     def think(self, max_turns: int = 5) -> str:
         if max_turns <= 0:
             return "Error: Max turns reached."
@@ -72,27 +93,7 @@ class Agent:
             # If the model wants to call a tool
             if message.tool_calls:
                 self.messages.append(message) # Add the assistant's message with tool calls
-
-                # Execute tools
-                for tool_call in message.tool_calls:
-                    func_name = tool_call.function.name
-                    arguments = json.loads(tool_call.function.arguments)
-
-                    if func_name in self.tools:
-                        print(f"[{self.name}] Executing {func_name} with {arguments}")
-                        try:
-                            result = self.tools[func_name](**arguments)
-                        except Exception as e:
-                            result = f"Error executing {func_name}: {str(e)}"
-                    else:
-                        result = f"Error: Tool {func_name} not found."
-
-                    self.messages.append({
-                        "role": "tool",
-                        "tool_call_id": tool_call.id,
-                        "content": str(result)
-                    })
-
+                self._execute_tool_calls(message.tool_calls)
                 # Recursively think again to process the tool output and generate a final response
                 return self.think(max_turns=max_turns - 1)
 
