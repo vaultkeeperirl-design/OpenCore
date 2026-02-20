@@ -1,10 +1,14 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from opencore.core.swarm import Swarm
+from opencore.interface.middleware import global_exception_handler
 import os
 
 app = FastAPI()
+
+# Register centralized error handler
+app.add_exception_handler(Exception, global_exception_handler)
 
 # Initialize Swarm
 swarm = Swarm()
@@ -19,23 +23,18 @@ class ChatResponse(BaseModel):
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
-    try:
-        # In a real streaming scenario, we would use Server-Sent Events (SSE) or WebSockets.
-        # For this MVP, we block and return the final response, but the frontend shows a loading state.
+    # In a real streaming scenario, we would use Server-Sent Events (SSE) or WebSockets.
+    # For this MVP, we block and return the final response, but the frontend shows a loading state.
 
-        # We could potentially capture logs here by inspecting the agent's recent messages
-        # but the current `think` method returns just the string.
+    # We could potentially capture logs here by inspecting the agent's recent messages
+    # but the current `think` method returns just the string.
 
-        response = swarm.chat(request.message)
+    response = swarm.chat(request.message)
 
-        return ChatResponse(
-            response=response,
-            agents=list(swarm.agents.keys())
-        )
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+    return ChatResponse(
+        response=response,
+        agents=list(swarm.agents.keys())
+    )
 
 @app.get("/agents")
 async def get_agents():
