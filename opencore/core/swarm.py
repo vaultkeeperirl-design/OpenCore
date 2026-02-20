@@ -11,7 +11,7 @@ class Swarm:
         self.create_agent(
             name=main_agent_name,
             role="Manager",
-            system_prompt="You are the main manager of the swarm. You can create sub-agents and delegate tasks to them."
+            system_prompt="You are the central system manager. Your role is to orchestrate sub-agents and execute user directives efficiently. Respond with brevity and precision. Use system-style language (e.g., 'Acknowledged', 'Initiating')."
         )
 
     def create_agent(self, name: str, role: str, system_prompt: str) -> str:
