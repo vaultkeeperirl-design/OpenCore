@@ -3,106 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenCore Swarm</title>
-    <style>
-        body { font-family: sans-serif; display: flex; height: 100vh; margin: 0; background-color: #f4f4f9; }
-        #sidebar { width: 250px; background: #2c3e50; color: white; padding: 20px; display: flex; flex-direction: column; }
-        #sidebar h2 { margin-top: 0; }
-        #agent-list { list-style: none; padding: 0; }
-        #agent-list li { padding: 10px; border-bottom: 1px solid #34495e; }
-        #chat-container { flex: 1; display: flex; flex-direction: column; padding: 20px; }
-        #messages { flex: 1; overflow-y: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .message { margin-bottom: 10px; padding: 10px; border-radius: 5px; }
-        .user { background-color: #e1f5fe; align-self: flex-end; text-align: right; }
-        .assistant { background-color: #e8f5e9; align-self: flex-start; }
-        #input-area { display: flex; }
-        #message-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
-        #send-btn { padding: 10px 20px; background: #27ae60; color: white; border: none; border-radius: 4px; margin-left: 10px; cursor: pointer; font-size: 16px; }
-        #send-btn:disabled { background: #95a5a6; }
-        .loading { font-style: italic; color: #7f8c8d; }
-    </style>
+    <title>OpenCore | Swarm Intelligence</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico"> <!-- Optional if you have one -->
 </head>
 <body>
     <div id="sidebar">
-        <h2>OpenCore</h2>
-        <h3>Agents</h3>
+        <div class="brand">
+            <!-- Simple SVG Logo -->
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M2 17L12 22L22 17" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M2 12L12 17L22 12" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <h1>OpenCore</h1>
+        </div>
+
+        <div class="section-title">Active Agents</div>
         <ul id="agent-list">
-            <li>Manager</li>
+            <!-- Populated dynamically -->
+            <li class="agent-item">
+                <div class="agent-avatar">M</div>
+                <div class="agent-info">
+                    <span class="agent-name">Manager</span>
+                    <span class="agent-role">Orchestrator</span>
+                </div>
+                <div class="status-dot"></div>
+            </li>
         </ul>
-    </div>
-    <div id="chat-container">
-        <div id="messages"></div>
-        <div id="input-area">
-            <input type="text" id="message-input" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
-            <button id="send-btn" onclick="sendMessage()">Send</button>
+
+        <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color); color: var(--text-secondary); font-size: 11px; text-align: center;">
+            v0.1.0-alpha • Powered by Swarm
         </div>
     </div>
 
-    <script>
-        const messageInput = document.getElementById('message-input');
-        const messagesDiv = document.getElementById('messages');
-        const sendBtn = document.getElementById('send-btn');
-        const agentList = document.getElementById('agent-list');
+    <div id="chat-container">
+        <div id="messages">
+            <!-- Messages will appear here -->
+            <div class="message-wrapper assistant">
+                <div class="message-header">
+                    <div class="agent-avatar" style="width:24px;height:24px;font-size:10px;">AI</div>
+                    <span>Manager</span>
+                </div>
+                <div class="message-content">
+                    Hello! I'm the Swarm Manager. I can help you orchestrate tasks by spawning specialized agents. How can I assist you today?
+                </div>
+            </div>
+        </div>
 
-        function handleKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        }
+        <div id="input-area">
+            <div class="input-wrapper">
+                <input type="text" id="message-input" placeholder="Describe a task for the swarm..." autocomplete="off">
+            </div>
+            <button id="send-btn" title="Send Message">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+    </div>
 
-        async function sendMessage() {
-            const text = messageInput.value.trim();
-            if (!text) return;
-
-            addMessage('user', text);
-            messageInput.value = '';
-            sendBtn.disabled = true;
-
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'message assistant loading';
-            loadingDiv.innerText = 'Thinking...';
-            messagesDiv.appendChild(loadingDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-            try {
-                const response = await fetch('/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                messagesDiv.removeChild(loadingDiv);
-                addMessage('assistant', data.response);
-                updateAgents(data.agents);
-            } catch (error) {
-                messagesDiv.removeChild(loadingDiv);
-                addMessage('assistant', `Error: ${error.message}`);
-            } finally {
-                sendBtn.disabled = false;
-            }
-        }
-
-        function addMessage(role, text) {
-            const div = document.createElement('div');
-            div.className = `message ${role}`;
-            div.innerText = text;
-            messagesDiv.appendChild(div);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        function updateAgents(agents) {
-            agentList.innerHTML = '';
-            agents.forEach(agent => {
-                const li = document.createElement('li');
-                li.innerText = agent;
-                agentList.appendChild(li);
-            });
-        }
-    </script>
+    <script src="js/app.js"></script>
 </body>
 </html>

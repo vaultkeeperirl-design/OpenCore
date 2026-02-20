@@ -15,16 +15,26 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str
     agents: list
+    tool_logs: list = [] # Future: detailed logs
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     try:
+        # In a real streaming scenario, we would use Server-Sent Events (SSE) or WebSockets.
+        # For this MVP, we block and return the final response, but the frontend shows a loading state.
+
+        # We could potentially capture logs here by inspecting the agent's recent messages
+        # but the current `think` method returns just the string.
+
         response = swarm.chat(request.message)
+
         return ChatResponse(
             response=response,
             agents=list(swarm.agents.keys())
         )
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/agents")
