@@ -16,7 +16,7 @@
 }
 
 body {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg-primary);
     color: var(--text-primary);
     display: flex;
@@ -26,7 +26,7 @@ body {
     position: relative;
 }
 
-/* CRT Scanline Effect */
+/* CRT Scanline Effect - REDUCED INTENSITY */
 body::before {
     content: " ";
     display: block;
@@ -35,10 +35,11 @@ body::before {
     left: 0;
     bottom: 0;
     right: 0;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
     z-index: 1000;
     background-size: 100% 2px, 3px 100%;
     pointer-events: none;
+    opacity: 0.4; /* Much subtler */
 }
 
 /* Sidebar */
@@ -235,27 +236,29 @@ body::before {
 }
 
 .message-content {
-    padding: 20px;
+    padding: 24px;
     font-size: 16px;
-    line-height: 1.6;
-    background: rgba(10, 10, 10, 0.9);
+    line-height: 1.7; /* Better readability */
+    background: rgba(18, 18, 18, 0.95); /* Slightly lighter black */
     border: 1px solid var(--border-color);
     position: relative;
-    color: var(--text-primary);
+    color: #f1f5f9; /* Bright, clean white */
     box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    border-radius: 4px;
 }
 
-/* Cyberpunk decorative corners */
+/* Cyberpunk decorative corners - Simplified for readability */
 .message-content::before, .message-content::after {
     content: '';
     position: absolute;
-    width: 10px;
-    height: 10px;
+    width: 6px;
+    height: 6px;
     transition: all 0.3s ease;
 }
 
 .assistant .message-content {
     border-left: 3px solid var(--neon-green);
+    background: rgba(0, 40, 0, 0.2); /* Slight tint for assistant */
 }
 
 .assistant .message-content::before {
@@ -275,6 +278,8 @@ body::before {
 .user .message-content {
     border-right: 3px solid var(--neon-pink);
     text-align: right;
+    background: rgba(40, 0, 40, 0.2); /* Slight tint for user */
+    color: #fff;
 }
 
 .user .message-content::before {
@@ -293,7 +298,7 @@ body::before {
 
 /* Input Area */
 #input-area {
-    padding: 32px;
+    padding: 24px 32px;
     background-color: var(--bg-secondary);
     border-top: 1px solid var(--border-color);
     display: flex;
@@ -306,25 +311,26 @@ body::before {
 .input-wrapper {
     flex: 1;
     position: relative;
-    background-color: black;
+    background-color: #000;
     border: 1px solid var(--border-color);
-    padding: 2px;
+    padding: 4px 8px;
+    border-radius: 4px;
 }
 
 .input-wrapper:focus-within {
     border-color: var(--neon-blue);
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
 }
 
 #message-input {
     width: 100%;
     background: transparent;
     border: none;
-    color: var(--neon-blue);
-    padding: 16px;
+    color: var(--text-primary); /* Use standard text color */
+    padding: 12px;
     font-size: 16px;
     outline: none;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: 'Inter', sans-serif; /* Clean font for input */
 }
 
 #send-btn {
