@@ -16,57 +16,73 @@ class TestIntegration(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json()["response"], "Hello from Manager!")
 
-    def test_swarm_delegation_flow(self):
+    @patch("opencore.core.agent.completion")
+    def test_swarm_delegation_flow(self, mock_completion):
         swarm = Swarm("Manager")
-
         swarm.create_agent("Coder", "Developer", "Code stuff")
-        coder = swarm.agents["Coder"]
-        coder.client = MagicMock()
-        coder_response = MagicMock()
 
-        # Setup Coder response
-        coder_msg = MagicMock()
-        coder_msg.content = "Code written."
-        coder_msg.tool_calls = None
-        coder_response.choices = [MagicMock(message=coder_msg)]
+        # Define side effect function to simulate conversation flow
+        def completion_side_effect(*args, **kwargs):
+            messages = kwargs.get("messages")
+            # Check who is calling based on system prompt in messages[0]
+            system_content = messages[0]["content"]
 
-        coder.client.chat.completions.create.return_value = coder_response
+            if "Manager" in system_content:
+                last_msg = messages[-1]
 
-        manager = swarm.agents["Manager"]
-        manager.client = MagicMock()
+                # Check if this is the first user message or a tool response
+                if last_msg["role"] == "user":
+                    # First call: Manager decides to delegate
+                    msg = MagicMock()
+                    msg.content = None
+                    tc = MagicMock()
+                    tc.id = "call_1"
+                    tc.function.name = "delegate_task"
+                    tc.function.arguments = '{"to_agent": "Coder", "task": "Code X"}'
+                    msg.tool_calls = [tc]
 
-        # Tool call response
-        tool_call_msg = MagicMock()
-        tool_call_msg.content = None
+                    resp = MagicMock()
+                    resp.choices = [MagicMock(message=msg)]
+                    return resp
 
-        # Correctly setup tool_call mock
-        tool_call = MagicMock()
-        tool_call.id = "call_1"
-        tool_call.function.name = "delegate_task"
-        tool_call.function.arguments = '{"to_agent": "Coder", "task": "Code X"}'
+                elif last_msg["role"] == "tool":
+                    # Second call: Manager receives tool output and finishes
+                    msg = MagicMock()
+                    msg.content = "Done."
+                    msg.tool_calls = None
+                    resp = MagicMock()
+                    resp.choices = [MagicMock(message=msg)]
+                    return resp
 
-        tool_call_msg.tool_calls = [tool_call]
+            elif "Coder" in system_content:
+                # Coder simply replies
+                msg = MagicMock()
+                msg.content = "Code written."
+                msg.tool_calls = None
+                resp = MagicMock()
+                resp.choices = [MagicMock(message=msg)]
+                return resp
 
-        # Final response
-        final_msg = MagicMock()
-        final_msg.content = "Done."
-        final_msg.tool_calls = None
+            # Fallback
+            msg = MagicMock()
+            msg.content = "Error."
+            msg.tool_calls = None
+            resp = MagicMock()
+            resp.choices = [MagicMock(message=msg)]
+            return resp
 
-        # Set side effect
-        manager.client.chat.completions.create.side_effect = [
-            MagicMock(choices=[MagicMock(message=tool_call_msg)]),
-            MagicMock(choices=[MagicMock(message=final_msg)])
-        ]
+        mock_completion.side_effect = completion_side_effect
 
         print("Starting chat...")
         response = swarm.chat("Code X")
         print(f"Response: {response}")
 
-        print("Manager calls:", manager.client.chat.completions.create.call_count)
-        print("Coder calls:", coder.client.chat.completions.create.call_count)
-
-        # Verify Coder was called
-        coder.client.chat.completions.create.assert_called()
+        # Verify calls were made
+        # 1. Manager -> delegate
+        # 2. Coder -> responds
+        # 3. Manager -> final response
+        self.assertEqual(mock_completion.call_count, 3)
+        self.assertEqual(response, "Done.")
 
 if __name__ == "__main__":
     unittest.main()

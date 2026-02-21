@@ -12,7 +12,9 @@ class TestSwarm(unittest.TestCase):
         swarm = Swarm("Boss")
         result = swarm.create_agent("Worker", "Coder", "Write code.")
         self.assertIn("Worker", swarm.agents)
-        self.assertEqual(result, "Agent 'Worker' created successfully.")
+        # Verify result message contains success and model
+        self.assertTrue("Agent 'Worker' created successfully" in result)
+        self.assertTrue("gpt-4o" in result)
 
         # Verify worker has tools
         worker = swarm.agents["Worker"]
