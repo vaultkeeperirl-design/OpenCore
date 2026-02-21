@@ -1,15 +1,15 @@
 # OpenCore
 
-OpenCore is a powerful Python-based AI Agent Swarm system, inspired by OpenClaw but designed for dynamic agent collaboration. It allows you to run a team of autonomous agents that can communicate, delegate tasks, and execute tools on your local machine.
+OpenCore is a **cybernetic swarm intelligence framework**. It transforms your local machine into a collaborative network of autonomous agents. You are the operator; OpenCore is the system.
 
-## Features
+## System Capabilities
 
-- **Agent Swarms**: A main "Manager" agent can spawn new sub-agents (e.g., "Coder", "Researcher") on the fly.
-- **Hierarchical Delegation**: Agents can delegate tasks to other agents and wait for results.
-- **Tool Use**: Agents have built-in access to file system operations and command execution.
-- **Multi-Provider Support**: Supports OpenAI, Google Vertex AI, AWS Bedrock, Anthropic, Mistral, Groq, and Ollama (Local) via `litellm`.
-- **Chat Interface**: A clean, web-based chat interface to interact with your swarm.
-- **Extensible**: Easy to add new tools or agent types.
+- **Autonomous Swarms**: The "Overseer" agent deploys specialized sub-units (e.g., "Coder", "Researcher") autonomously.
+- **Neural Delegation**: Agents maintain a hierarchical command structure, delegating tasks and synthesizing results.
+- **Direct Interface**: Execute file system operations and system commands directly through the agent network.
+- **Multi-Model Support**: Agnostic integration with OpenAI, Google Vertex AI, AWS Bedrock, Anthropic, Mistral, Groq, and Ollama (Local).
+- **Command Terminal**: A high-fidelity, cyberpunk web interface for interacting with your swarm.
+- **Modular Architecture**: Easily extendable toolsets and agent archetypes.
 
 ## Installation
 
