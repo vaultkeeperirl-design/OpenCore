@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import traceback
 import logging
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -39,14 +40,18 @@ async def global_exception_handler(request: Request, exc: Exception):
     traceback.print_exc()
 
     # Return generic 500 error for unexpected exceptions
+    # In production, we hide details to prevent information leakage
+    details = None
+    if os.getenv("APP_ENV", "production") == "development":
+        details = str(exc)
+
     return JSONResponse(
         status_code=500,
         content=ErrorResponse(
             error=ErrorDetails(
                 code="INTERNAL_SERVER_ERROR",
                 message="An unexpected error occurred.",
-                # In production, we might want to hide details
-                details=str(exc)
+                details=details
             )
         ).model_dump()
     )
