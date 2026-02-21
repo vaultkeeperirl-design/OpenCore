@@ -1,24 +1,31 @@
 from typing import Dict, Optional, Any
 from opencore.core.agent import Agent
 from opencore.tools.base import register_base_tools
+import os
 
 class Swarm:
-    def __init__(self, main_agent_name: str = "Manager"):
+    def __init__(self, main_agent_name: str = "Manager", default_model: str = "gpt-4o"):
         self.agents: Dict[str, Agent] = {}
         self.main_agent_name = main_agent_name
+        # Allow env var to override default model
+        self.default_model = os.getenv("LLM_MODEL", default_model)
 
         # Create the main agent
         self.create_agent(
             name=main_agent_name,
             role="Manager",
-            system_prompt="You are the central system manager. Your role is to orchestrate sub-agents and execute user directives efficiently. Respond with brevity and precision. Use system-style language (e.g., 'Acknowledged', 'Initiating')."
+            system_prompt="You are the central system manager. Your role is to orchestrate sub-agents and execute user directives efficiently. Respond with brevity and precision. Use system-style language (e.g., 'Acknowledged', 'Initiating').",
+            model=self.default_model
         )
 
-    def create_agent(self, name: str, role: str, system_prompt: str) -> str:
+    def create_agent(self, name: str, role: str, system_prompt: str, model: Optional[str] = None) -> str:
         if name in self.agents:
             return f"Error: Agent '{name}' already exists."
 
-        new_agent = Agent(name, role, system_prompt)
+        # Use passed model, or swarm default
+        agent_model = model if model else self.default_model
+
+        new_agent = Agent(name, role, system_prompt, model=agent_model)
         self.agents[name] = new_agent
 
         # Register swarm tools for the new agent
@@ -27,7 +34,7 @@ class Swarm:
         # Register base tools (filesystem, command execution)
         register_base_tools(new_agent)
 
-        return f"Agent '{name}' created successfully."
+        return f"Agent '{name}' created successfully using model '{agent_model}'."
 
     def get_agent(self, name: str) -> Optional[Agent]:
         return self.agents.get(name)
@@ -44,15 +51,16 @@ class Swarm:
                     "properties": {
                         "name": {"type": "string", "description": "The name of the new agent."},
                         "role": {"type": "string", "description": "The role of the new agent (e.g., 'Coder', 'Researcher')."},
-                        "instructions": {"type": "string", "description": "Specific system instructions for the agent."}
+                        "instructions": {"type": "string", "description": "Specific system instructions for the agent."},
+                        "model": {"type": "string", "description": "Optional model to use (e.g., 'gpt-4o', 'vertex_ai/gemini-pro', 'ollama/llama3'). Defaults to system default."}
                     },
                     "required": ["name", "role", "instructions"]
                 }
             }
         }
 
-        def create_agent_wrapper(name: str, role: str, instructions: str):
-            return self.create_agent(name, role, instructions)
+        def create_agent_wrapper(name: str, role: str, instructions: str, model: Optional[str] = None):
+            return self.create_agent(name, role, instructions, model)
 
         agent.register_tool(create_agent_wrapper, create_agent_schema)
 
