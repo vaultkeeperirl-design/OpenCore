@@ -22,7 +22,7 @@ class ChatResponse(BaseModel):
     tool_logs: list = [] # Future: detailed logs
 
 @app.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest):
+def chat(request: ChatRequest):
     # In a real streaming scenario, we would use Server-Sent Events (SSE) or WebSockets.
     # For this MVP, we block and return the final response, but the frontend shows a loading state.
 
