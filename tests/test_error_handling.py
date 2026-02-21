@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 from opencore.interface.api import app
-import os
+from opencore.config import settings
 
 class TestErrorHandling(unittest.TestCase):
     def setUp(self):
@@ -15,7 +15,7 @@ class TestErrorHandling(unittest.TestCase):
         mock_swarm.chat.side_effect = Exception("Something went wrong!")
 
         # Make request with APP_ENV=development
-        with patch.dict(os.environ, {"APP_ENV": "development"}):
+        with patch.object(settings, "app_env", "development"):
             response = self.client.post("/chat", json={"message": "Hello"})
 
         # Assert status code
@@ -35,7 +35,7 @@ class TestErrorHandling(unittest.TestCase):
         mock_swarm.chat.side_effect = Exception("Secret info leaked!")
 
         # Make request with APP_ENV=production
-        with patch.dict(os.environ, {"APP_ENV": "production"}):
+        with patch.object(settings, "app_env", "production"):
             response = self.client.post("/chat", json={"message": "Hello"})
 
         # Assert status code

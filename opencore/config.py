@@ -1,0 +1,19 @@
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+class Settings:
+    def __init__(self):
+        self.app_env = os.getenv("APP_ENV", "production")
+        self.llm_model = os.getenv("LLM_MODEL")
+        self.host = os.getenv("HOST", "0.0.0.0")
+        self.port = int(os.getenv("PORT", 8000))
+        self.log_level = os.getenv("LOG_LEVEL", "INFO")
+
+    @property
+    def is_dev(self) -> bool:
+        return self.app_env == "development"
+
+settings = Settings()

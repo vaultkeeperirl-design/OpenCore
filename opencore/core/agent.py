@@ -1,10 +1,6 @@
-import os
 import json
 from typing import List, Dict, Any, Callable, Optional
-from dotenv import load_dotenv
 from litellm import completion
-
-load_dotenv()
 
 class Agent:
     def __init__(self, name: str, role: str, system_prompt: str, model: str = "gpt-4o", client: Any = None):
