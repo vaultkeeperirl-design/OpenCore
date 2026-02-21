@@ -1,13 +1,13 @@
 import os
 import json
 from typing import List, Dict, Any, Callable, Optional
-from openai import OpenAI
 from dotenv import load_dotenv
+from litellm import completion
 
 load_dotenv()
 
 class Agent:
-    def __init__(self, name: str, role: str, system_prompt: str, model: str = "gpt-4o", client: Optional[OpenAI] = None):
+    def __init__(self, name: str, role: str, system_prompt: str, model: str = "gpt-4o", client: Any = None):
         self.name = name
         self.role = role
         self.system_prompt = system_prompt
@@ -18,16 +18,8 @@ class Agent:
         self.tools: Dict[str, Callable] = {}
         self.tool_definitions: List[Dict[str, Any]] = []
 
-        # Initialize OpenAI client
-        if client:
-            self.client = client
-        else:
-            api_key = os.getenv("OPENAI_API_KEY")
-            if api_key:
-                self.client = OpenAI(api_key=api_key)
-            else:
-                self.client = None
-                print("Warning: OPENAI_API_KEY not found. Agent will not function correctly without it.")
+        # Client is kept for backward compatibility but logic uses litellm which handles auth via env vars
+        self.client = client
 
     def register_tool(self, func: Callable, schema: Dict[str, Any]):
         """
@@ -73,16 +65,10 @@ class Agent:
         if max_turns <= 0:
             return "Error: Max turns reached."
 
-        if not self.client:
-            return "Error: No API Key provided."
-
         try:
-            # We must pass messages without tool definitions for simplicity in this loop
-            # BUT OpenAI expects a specific format.
-            # self.messages is a list of dicts or ChatCompletionMessage objects.
-            # We need to ensure we pass serializable objects or the correct objects.
-
-            response = self.client.chat.completions.create(
+            # Litellm handles various providers (OpenAI, Anthropic, Vertex, Bedrock, Ollama)
+            # automatically based on the model name and environment variables.
+            response = completion(
                 model=self.model,
                 messages=self.messages,
                 tools=self.tool_definitions if self.tool_definitions else None,
