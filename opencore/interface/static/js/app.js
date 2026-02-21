@@ -16,12 +16,18 @@ document.addEventListener('DOMContentLoaded', () => {
     sendBtn.addEventListener('click', sendMessage);
 
     async function sendMessage() {
+        if (sendBtn.disabled) return;
+
         const text = messageInput.value.trim();
         if (!text) return;
+
+        const originalBtnText = sendBtn.innerText;
 
         // Add user message
         addMessage('user', text);
         messageInput.value = '';
+
+        sendBtn.innerText = 'WAIT...';
         sendBtn.disabled = true;
 
         // Add typing indicator
@@ -53,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
             removeMessage(typingId);
             addMessage('assistant', `SYSTEM_ERROR: ${error.message}`, true);
         } finally {
+            sendBtn.innerText = originalBtnText;
             sendBtn.disabled = false;
             messageInput.focus();
         }
