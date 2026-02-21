@@ -77,6 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
     async function addMessageWithTypingEffect(role, text) {
         const wrapper = createMessageWrapper(role, false);
         const content = wrapper.querySelector('.message-content');
+
+        // A11y: Mark as busy while typing so screen readers wait
+        wrapper.setAttribute('aria-busy', 'true');
+
         messagesDiv.appendChild(wrapper);
         scrollToBottom();
 
@@ -90,6 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // Random delay for realism
             await new Promise(r => setTimeout(r, Math.random() * 10 + 5));
         }
+
+        // A11y: Mark as finished
+        wrapper.setAttribute('aria-busy', 'false');
         scrollToBottom();
     }
 
@@ -125,6 +132,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const wrapper = document.createElement('div');
         wrapper.className = 'message-wrapper assistant';
         wrapper.id = 'typing-' + Date.now();
+
+        // A11y: Hide typing indicator from screen readers
+        wrapper.setAttribute('aria-hidden', 'true');
 
         const header = document.createElement('div');
         header.className = 'message-header';

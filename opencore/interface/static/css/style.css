@@ -368,6 +368,12 @@ body::before {
     text-shadow: 0 0 5px var(--neon-pink);
 }
 
+#send-btn:focus-visible {
+    outline: 2px solid var(--neon-blue);
+    outline-offset: 2px;
+    box-shadow: 0 0 15px var(--neon-blue);
+}
+
 #send-btn:hover::after {
     left: 100%;
 }
