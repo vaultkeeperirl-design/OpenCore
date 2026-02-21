@@ -34,7 +34,7 @@
     </div>
 
     <div id="chat-container">
-        <div id="messages">
+        <div id="messages" role="log" aria-live="polite" aria-atomic="false">
             <!-- Messages will appear here -->
             <div class="message-wrapper assistant">
                 <div class="message-header">
@@ -49,9 +49,9 @@
 
         <div id="input-area">
             <div class="input-wrapper">
-                <input type="text" id="message-input" placeholder="> Enter command sequence..." autocomplete="off">
+                <input type="text" id="message-input" placeholder="> Enter command sequence..." autocomplete="off" aria-label="Command Input">
             </div>
-            <button id="send-btn" title="EXECUTE">
+            <button id="send-btn" title="EXECUTE" aria-label="Execute Command">
                 EXEC
             </button>
         </div>
