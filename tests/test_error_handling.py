@@ -1,8 +1,9 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 from opencore.interface.api import app
 from opencore.config import settings
+
 
 class TestErrorHandling(unittest.TestCase):
     def setUp(self):

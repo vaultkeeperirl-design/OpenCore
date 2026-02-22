@@ -1,7 +1,8 @@
-from typing import Dict, Optional, Any
+from typing import Dict, Optional
 from opencore.core.agent import Agent
 from opencore.tools.base import register_base_tools
 from opencore.config import settings
+
 
 class Swarm:
     def __init__(self, main_agent_name: str = "Manager", default_model: str = "gpt-4o"):
