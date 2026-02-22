@@ -9,13 +9,14 @@ OpenCore is a powerful Python-based AI Agent Swarm system, inspired by OpenClaw 
 - **Tool Use**: Agents have built-in access to file system operations and command execution.
 - **Multi-Provider Support**: Supports OpenAI, Google Vertex AI, AWS Bedrock, Anthropic, Mistral, Groq, and Ollama (Local) via `litellm`.
 - **Chat Interface**: A clean, web-based chat interface to interact with your swarm.
+- **Accessibility**: Screen reader support and keyboard navigation for a better user experience.
 - **Extensible**: Easy to add new tools or agent types.
 
 ## Installation
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/yourusername/opencore.git
+    git clone https://github.com/vaultkeeperirl-design/OpenCore.git
     cd opencore
     ```
 
@@ -26,6 +27,18 @@ OpenCore is a powerful Python-based AI Agent Swarm system, inspired by OpenClaw 
 
 3.  **Set up Environment Variables**:
     Create a `.env` file in the root directory.
+
+## Configuration
+
+You can configure the application using environment variables in your `.env` file.
+
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `APP_ENV` | Application environment (`development` or `production`). | `production` |
+| `LLM_MODEL` | The LLM model to use (see Supported Models below). | `gpt-4o` |
+| `HOST` | The host to bind the server to. | `0.0.0.0` |
+| `PORT` | The port to listen on. | `8000` |
+| `LOG_LEVEL` | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`). | `INFO` |
 
 ## Supported Models & Providers
 
@@ -110,10 +123,11 @@ DEEPSEEK_API_KEY=sk-...
     ```bash
     python3 main.py
     ```
-    This will start the backend server on `http://localhost:8000`.
+    This will start the backend server. By default, it runs on `http://0.0.0.0:8000`.
+    Check the console output for logs (controlled by `LOG_LEVEL`).
 
 2.  **Access the Interface**:
-    Open your browser and navigate to `http://localhost:8000`.
+    Open your browser and navigate to `http://localhost:8000` (or the port you configured).
 
 3.  **Chat with the Swarm**:
     - Type a message to the Manager.
