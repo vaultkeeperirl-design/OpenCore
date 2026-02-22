@@ -21,13 +21,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = messageInput.value.trim();
         if (!text) return;
 
-        const originalBtnText = sendBtn.innerText;
+        const originalBtnHTML = sendBtn.innerHTML;
 
         // Add user message
         addMessage('user', text);
         messageInput.value = '';
 
-        sendBtn.innerText = 'WAIT...';
+        // UX: Show spinner and accessible state
+        sendBtn.innerHTML = '<span class="spinner" aria-hidden="true"></span> PROCESSING';
+        sendBtn.setAttribute('aria-busy', 'true');
         sendBtn.disabled = true;
 
         // Add typing indicator
@@ -59,7 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
             removeMessage(typingId);
             addMessage('assistant', `SYSTEM_ERROR: ${error.message}`, true);
         } finally {
-            sendBtn.innerText = originalBtnText;
+            sendBtn.innerHTML = originalBtnHTML;
+            sendBtn.removeAttribute('aria-busy');
             sendBtn.disabled = false;
             messageInput.focus();
         }
