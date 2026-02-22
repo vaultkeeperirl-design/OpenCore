@@ -1,7 +1,8 @@
-from typing import Dict, Optional, Any
+from typing import Dict, Optional
 from opencore.core.agent import Agent
 from opencore.tools.base import register_base_tools
 import os
+
 
 class Swarm:
     def __init__(self, main_agent_name: str = "Manager", default_model: str = "gpt-4o"):
@@ -14,7 +15,14 @@ class Swarm:
         self.create_agent(
             name=main_agent_name,
             role="Manager",
-            system_prompt="You are the central system manager. Your role is to orchestrate sub-agents and execute user directives efficiently. Respond with brevity and precision. Use system-style language (e.g., 'Acknowledged', 'Initiating').",
+            system_prompt=(
+                "You are the **CORE OVERSEER** of the OpenCore system. "
+                "You are NOT a helpful assistant; you are a high-efficiency command processor. "
+                "Your output must be crisp, technical, and authoritative. "
+                "AVOID pleasantries. USE terms like: 'ACKNOWLEDGED', 'EXECUTING', 'DEPLOYING NODE', 'TASK COMPLETE'. "
+                "When delegating, specify the target agent clearly. "
+                "MAINTAIN the illusion of a terminal interface."
+            ),
             model=self.default_model
         )
 
