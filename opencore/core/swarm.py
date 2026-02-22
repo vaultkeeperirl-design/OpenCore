@@ -1,6 +1,7 @@
 from typing import Dict, Optional, Any
 from opencore.core.agent import Agent
 from opencore.tools.base import register_base_tools
+from opencore.config import settings
 import os
 
 class Swarm:

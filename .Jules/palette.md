@@ -9,3 +9,7 @@
 
 **Learning:** Verifying ARIA attributes (like `aria-live` and `aria-busy`) requires careful inspection of the DOM state during dynamic updates. Using browser automation scripts (Playwright) to check attribute presence is effective for verifying structural changes, even if auditory verification is not possible.
 **Action:** Use Playwright scripts to assert the presence and correct values of ARIA attributes for future accessibility tasks.
+
+## 2024-10-24 - Async Action Feedback Pattern
+**Learning:** For async actions like form submission in the Neon theme, replacing the button text with a spinner and "PROCESSING" provides clear visual and screen-reader feedback, avoiding layout shifts and user uncertainty.
+**Action:** Adopt the "Spinner in Button" pattern for all future async triggers: Disable button, set `aria-busy="true"`, inject `.spinner`, and update text to present tense (e.g., "PROCESSING").
