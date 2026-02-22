@@ -1,10 +1,12 @@
 import json
-from typing import List, Dict, Any, Callable
+import logging
+from typing import List, Dict, Any, Callable, Optional
 from dotenv import load_dotenv
 from litellm import completion
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
 
 class Agent:
     def __init__(self, name: str, role: str, system_prompt: str, model: str = "gpt-4o", client: Any = None):
@@ -47,13 +49,16 @@ class Agent:
             arguments = json.loads(tool_call.function.arguments)
 
             if func_name in self.tools:
-                print(f"[{self.name}] Executing {func_name} with {arguments}")
+                logger.info(f"[{self.name}] Executing {func_name} with {arguments}")
                 try:
                     result = self.tools[func_name](**arguments)
                 except Exception as e:
+                    logger.error(f"[{self.name}] Error executing {func_name}: {e}")
                     result = f"Error executing {func_name}: {str(e)}"
             else:
-                result = f"Error: Tool {func_name} not found."
+                msg = f"Error: Tool {func_name} not found."
+                logger.error(f"[{self.name}] {msg}")
+                result = msg
 
             self.messages.append({
                 "role": "tool",
@@ -92,8 +97,7 @@ class Agent:
                     return "Error: Empty response from model."
 
         except Exception as e:
-            import traceback
-            traceback.print_exc()
+            logger.exception("Error during thought process")
             return f"Error during thought process: {str(e)}"
 
     def chat(self, message: str) -> str:
