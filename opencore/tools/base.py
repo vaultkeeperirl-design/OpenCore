@@ -1,7 +1,7 @@
 import os
 import subprocess
+from typing import Dict, Any, Callable
 from opencore.core.agent import Agent
-
 
 def execute_command(command: str) -> str:
     """Executes a shell command and returns the output."""
@@ -16,7 +16,6 @@ def execute_command(command: str) -> str:
     except Exception as e:
         return f"Error executing command: {str(e)}"
 
-
 def read_file(filepath: str) -> str:
     """Reads the content of a file."""
     try:
@@ -24,7 +23,6 @@ def read_file(filepath: str) -> str:
             return f.read()
     except Exception as e:
         return f"Error reading file: {str(e)}"
-
 
 def write_file(filepath: str, content: str) -> str:
     """Writes content to a file."""
@@ -34,7 +32,6 @@ def write_file(filepath: str, content: str) -> str:
         return f"File '{filepath}' written successfully."
     except Exception as e:
         return f"Error writing file: {str(e)}"
-
 
 def list_files(directory: str = ".") -> str:
     """Lists files in a directory."""
@@ -105,7 +102,6 @@ list_files_schema = {
         }
     }
 }
-
 
 def register_base_tools(agent: Agent):
     """Registers the base tools (execute_command, read_file, write_file, list_files) to an agent."""

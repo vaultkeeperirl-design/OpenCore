@@ -1,7 +1,9 @@
 import json
 import logging
-from typing import List, Dict, Any, Callable, Optional
+from typing import List, Dict, Any, Callable
 from litellm import completion
+
+logger = logging.getLogger(__name__)
 
 class Agent:
     def __init__(self, name: str, role: str, system_prompt: str, model: str = "gpt-4o", client: Any = None):
@@ -51,9 +53,8 @@ class Agent:
                     logger.error(f"[{self.name}] Error executing {func_name}: {e}")
                     result = f"Error executing {func_name}: {str(e)}"
             else:
-                msg = f"Error: Tool {func_name} not found."
-                logger.error(f"[{self.name}] {msg}")
-                result = msg
+                logger.error(f"[{self.name}] Error: Tool {func_name} not found.")
+                result = f"Error: Tool {func_name} not found."
 
             self.messages.append({
                 "role": "tool",
