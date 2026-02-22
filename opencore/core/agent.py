@@ -1,10 +1,13 @@
-import os
 import json
-from typing import List, Dict, Any, Callable, Optional
+import logging
+from typing import List, Dict, Any, Callable
 from dotenv import load_dotenv
 from litellm import completion
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
+
 
 class Agent:
     def __init__(self, name: str, role: str, system_prompt: str, model: str = "gpt-4o", client: Any = None):
@@ -48,7 +51,7 @@ class Agent:
                 arguments = json.loads(tool_call.function.arguments)
 
                 if func_name in self.tools:
-                    print(f"[{self.name}] Executing {func_name} with {arguments}")
+                    logger.info(f"[{self.name}] Executing {func_name} with {arguments}")
                     try:
                         result = self.tools[func_name](**arguments)
                     except Exception as e:
@@ -78,13 +81,15 @@ class Agent:
                 model=self.model,
                 messages=self.messages,
                 tools=self.tool_definitions if self.tool_definitions else None,
+                timeout=60,  # Prevent indefinite hanging
             )
 
             message = response.choices[0].message
 
             # If the model wants to call a tool
             if message.tool_calls:
-                self.messages.append(message) # Add the assistant's message with tool calls
+                # Add the assistant's message with tool calls
+                self.messages.append(message)
                 self._execute_tool_calls(message.tool_calls)
                 # Recursively think again to process the tool output and generate a final response
                 return self.think(max_turns=max_turns - 1)
