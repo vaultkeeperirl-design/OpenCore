@@ -40,6 +40,14 @@ class AsyncScheduler:
             return
 
         async def loop():
+            # Run immediately on start
+            try:
+                await job["func"]()
+            except asyncio.CancelledError:
+                return
+            except Exception as e:
+                logger.error(f"Error in job {job_id} (initial): {e}")
+
             while True:
                 try:
                     await asyncio.sleep(job["interval"])
