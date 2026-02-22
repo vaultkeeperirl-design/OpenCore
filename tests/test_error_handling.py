@@ -3,7 +3,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 from opencore.interface.api import app
 from opencore.config import settings
-
+import os
 
 class TestErrorHandling(unittest.TestCase):
     def setUp(self):
