@@ -2,20 +2,21 @@ from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from opencore.config import settings
-import traceback
 import logging
 
 # Configure logging
-logging.basicConfig(level=settings.log_level)
 logger = logging.getLogger("opencore.api")
+
 
 class ErrorDetails(BaseModel):
     code: str
     message: str
     details: str | None = None
 
+
 class ErrorResponse(BaseModel):
     error: ErrorDetails
+
 
 async def global_exception_handler(request: Request, exc: Exception):
     """
@@ -36,8 +37,10 @@ async def global_exception_handler(request: Request, exc: Exception):
         )
 
     # Log unexpected errors with full traceback
-    logger.error(f"Unhandled exception processing request {request.method} {request.url.path}: {exc}")
-    traceback.print_exc()
+    logger.exception(
+        f"Unhandled exception processing request "
+        f"{request.method} {request.url.path}: {exc}"
+    )
 
     # Return generic 500 error for unexpected exceptions
     # In production, we hide details to prevent information leakage
