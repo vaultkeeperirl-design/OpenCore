@@ -11,7 +11,7 @@ class Settings:
         self.host = os.getenv("HOST", "0.0.0.0")
         self.port = int(os.getenv("PORT", 8000))
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
-        self.heartbeat_interval = int(os.getenv("HEARTBEAT_INTERVAL", 60))
+        self.heartbeat_interval = int(os.getenv("HEARTBEAT_INTERVAL", 3600))
 
     @property
     def is_dev(self) -> bool:
