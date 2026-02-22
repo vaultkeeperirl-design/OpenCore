@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "opencore"
+version = "0.1.0"
+description = "OpenCore AI Agent Swarm"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "python-dotenv",
+    "litellm",
+    "boto3",
+    "google-cloud-aiplatform",
+    "anthropic",
+    "mistralai",
+    "groq",
+    "playwright",
+]
+
+[project.scripts]
+opencore = "opencore.cli.main:main"

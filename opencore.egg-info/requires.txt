@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-dotenv
+litellm
+boto3
+google-cloud-aiplatform
+anthropic
+mistralai
+groq
+playwright

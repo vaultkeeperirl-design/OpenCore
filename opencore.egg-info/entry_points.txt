@@ -1,0 +1,2 @@
+[console_scripts]
+opencore = opencore.cli.main:main

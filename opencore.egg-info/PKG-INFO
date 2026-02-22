@@ -1,3 +1,22 @@
+Metadata-Version: 2.4
+Name: opencore
+Version: 0.1.0
+Summary: OpenCore AI Agent Swarm
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: fastapi
+Requires-Dist: uvicorn
+Requires-Dist: python-dotenv
+Requires-Dist: litellm
+Requires-Dist: boto3
+Requires-Dist: google-cloud-aiplatform
+Requires-Dist: anthropic
+Requires-Dist: mistralai
+Requires-Dist: groq
+Requires-Dist: playwright
+Dynamic: license-file
+
 # OpenCore
 
 OpenCore is a powerful Python-based AI Agent Swarm system, inspired by OpenClaw but designed for dynamic agent collaboration. It allows you to run a team of autonomous agents that can communicate, delegate tasks, and execute tools on your local machine.
@@ -20,16 +39,13 @@ OpenCore is a powerful Python-based AI Agent Swarm system, inspired by OpenClaw 
     cd opencore
     ```
 
-2.  **Install the package**:
+2.  **Install dependencies**:
     ```bash
-    pip install -e .
+    pip install -r requirements.txt
     ```
 
-3.  **Configure the Environment**:
-    Run the onboarding wizard to set up your `.env` file and choose your LLM provider:
-    ```bash
-    opencore onboard
-    ```
+3.  **Set up Environment Variables**:
+    Create a `.env` file in the root directory.
 
 ## Configuration
 
@@ -124,9 +140,8 @@ DEEPSEEK_API_KEY=sk-...
 
 1.  **Start the Server**:
     ```bash
-    opencore start
+    python3 main.py
     ```
-    Alternatively, you can run `python3 main.py`.
     This will start the backend server. By default, it runs on `http://0.0.0.0:8000`.
     Check the console output for logs (controlled by `LOG_LEVEL`).
 
