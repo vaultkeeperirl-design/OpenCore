@@ -8,7 +8,7 @@ class Swarm:
         self.agents: Dict[str, Agent] = {}
         self.main_agent_name = main_agent_name
         # Allow env var to override default model
-        self.default_model = os.getenv("LLM_MODEL", default_model)
+        self.default_model = settings.llm_model or default_model
 
         # Create the main agent
         self.create_agent(

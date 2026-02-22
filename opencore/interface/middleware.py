@@ -1,12 +1,12 @@
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from opencore.config import settings
 import traceback
 import logging
-import os
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=settings.log_level)
 logger = logging.getLogger("opencore.api")
 
 class ErrorDetails(BaseModel):
@@ -42,7 +42,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     # Return generic 500 error for unexpected exceptions
     # In production, we hide details to prevent information leakage
     details = None
-    if os.getenv("APP_ENV", "production") == "development":
+    if settings.is_dev:
         details = str(exc)
 
     return JSONResponse(
