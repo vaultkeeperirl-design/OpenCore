@@ -46,8 +46,13 @@ class Agent:
     def _execute_tool_calls(self, tool_calls: List[Any]):
         """Executes a list of tool calls and appends results to messages."""
         for tool_call in tool_calls:
-            func_name = tool_call.function.name
+            result = ""
+            tool_id = "unknown"
+            func_name = "unknown"
+
             try:
+                tool_id = tool_call.id
+                func_name = tool_call.function.name
                 arguments = json.loads(tool_call.function.arguments)
 
                 if func_name in self.tools:
@@ -62,11 +67,12 @@ class Agent:
             except json.JSONDecodeError as e:
                 result = f"Error: Invalid JSON arguments for tool {func_name}: {str(e)}"
             except Exception as e:
+                logger.error(f"Error processing tool call {func_name}: {str(e)}")
                 result = f"Error processing tool call {func_name}: {str(e)}"
 
             self.messages.append({
                 "role": "tool",
-                "tool_call_id": tool_call.id,
+                "tool_call_id": tool_id,
                 "content": str(result)
             })
 
@@ -103,8 +109,7 @@ class Agent:
                     return "Error: Empty response from model."
 
         except Exception as e:
-            import traceback
-            traceback.print_exc()
+            logger.exception(f"Error during thought process: {str(e)}")
             return f"Error during thought process: {str(e)}"
 
     def chat(self, message: str) -> str:
