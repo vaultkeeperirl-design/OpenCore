@@ -44,16 +44,22 @@ class Agent:
         """Executes a list of tool calls and appends results to messages."""
         for tool_call in tool_calls:
             func_name = tool_call.function.name
-            arguments = json.loads(tool_call.function.arguments)
+            try:
+                arguments = json.loads(tool_call.function.arguments)
 
-            if func_name in self.tools:
-                print(f"[{self.name}] Executing {func_name} with {arguments}")
-                try:
-                    result = self.tools[func_name](**arguments)
-                except Exception as e:
-                    result = f"Error executing {func_name}: {str(e)}"
-            else:
-                result = f"Error: Tool {func_name} not found."
+                if func_name in self.tools:
+                    print(f"[{self.name}] Executing {func_name} with {arguments}")
+                    try:
+                        result = self.tools[func_name](**arguments)
+                    except Exception as e:
+                        result = f"Error executing {func_name}: {str(e)}"
+                else:
+                    result = f"Error: Tool {func_name} not found."
+
+            except json.JSONDecodeError as e:
+                result = f"Error: Invalid JSON arguments for tool {func_name}: {str(e)}"
+            except Exception as e:
+                result = f"Error processing tool call {func_name}: {str(e)}"
 
             self.messages.append({
                 "role": "tool",
