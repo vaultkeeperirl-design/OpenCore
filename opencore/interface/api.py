@@ -3,7 +3,6 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from opencore.core.swarm import Swarm
 from opencore.interface.middleware import global_exception_handler
-import os
 
 app = FastAPI()
 
@@ -13,13 +12,16 @@ app.add_exception_handler(Exception, global_exception_handler)
 # Initialize Swarm
 swarm = Swarm()
 
+
 class ChatRequest(BaseModel):
     message: str
+
 
 class ChatResponse(BaseModel):
     response: str
     agents: list
     tool_logs: list = [] # Future: detailed logs
+
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
@@ -35,6 +37,7 @@ def chat(request: ChatRequest):
         response=response,
         agents=list(swarm.agents.keys())
     )
+
 
 @app.get("/agents")
 async def get_agents():
