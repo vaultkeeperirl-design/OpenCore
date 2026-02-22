@@ -3,6 +3,21 @@ import subprocess
 from typing import Dict, Any, Callable
 from opencore.core.agent import Agent
 
+def _is_safe_path(path: str) -> bool:
+    """
+    Checks if the path is within the current working directory.
+    Prevents path traversal attacks by resolving symlinks and absolute paths.
+    """
+    try:
+        base_dir = os.path.realpath(os.getcwd())
+        # Resolve the target path, including symlinks
+        target_path = os.path.realpath(path)
+        # Check if the target path starts with the base directory
+        return os.path.commonpath([base_dir, target_path]) == base_dir
+    except Exception:
+        # If any error occurs (e.g. ValueError on Windows different drives), assume unsafe
+        return False
+
 def execute_command(command: str) -> str:
     """Executes a shell command and returns the output."""
     try:
@@ -18,6 +33,9 @@ def execute_command(command: str) -> str:
 
 def read_file(filepath: str) -> str:
     """Reads the content of a file."""
+    if not _is_safe_path(filepath):
+        return "Error: Access denied - Path traversal detected."
+
     try:
         with open(filepath, "r") as f:
             return f.read()
@@ -26,6 +44,9 @@ def read_file(filepath: str) -> str:
 
 def write_file(filepath: str, content: str) -> str:
     """Writes content to a file."""
+    if not _is_safe_path(filepath):
+        return "Error: Access denied - Path traversal detected."
+
     try:
         with open(filepath, "w") as f:
             f.write(content)
@@ -35,6 +56,9 @@ def write_file(filepath: str, content: str) -> str:
 
 def list_files(directory: str = ".") -> str:
     """Lists files in a directory."""
+    if not _is_safe_path(directory):
+        return "Error: Access denied - Path traversal detected."
+
     try:
         files = os.listdir(directory)
         return "\n".join(files)
