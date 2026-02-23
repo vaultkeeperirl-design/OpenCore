@@ -114,7 +114,6 @@ class Swarm:
 
     def update_settings(self):
         """Reloads configuration and updates agents."""
-        from opencore.config import settings
         # Allow env var to override default model
         self.default_model = settings.llm_model or "gpt-4o"
 

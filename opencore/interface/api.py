@@ -107,70 +107,33 @@ async def get_authentication_status():
 @app.get("/config")
 async def get_config():
     """Returns the current configuration (masked)."""
+    # Force reload to ensure we have the latest environment state
+    settings.reload()
     return {
-        "LLM_MODEL": os.getenv("LLM_MODEL", "gpt-4o"),
-        "HEARTBEAT_INTERVAL": os.getenv("HEARTBEAT_INTERVAL", "3600"),
-        "VERTEX_PROJECT": os.getenv("VERTEX_PROJECT", ""),
-        "VERTEX_LOCATION": os.getenv("VERTEX_LOCATION", ""),
-        "OLLAMA_API_BASE": os.getenv("OLLAMA_API_BASE", ""),
+        "LLM_MODEL": settings.llm_model or "gpt-4o",
+        "HEARTBEAT_INTERVAL": str(settings.heartbeat_interval),
+        "VERTEX_PROJECT": settings.vertex_project,
+        "VERTEX_LOCATION": settings.vertex_location,
+        "OLLAMA_API_BASE": settings.ollama_api_base,
         # Boolean flags for sensitive keys
-        "HAS_OPENAI_KEY": bool(os.getenv("OPENAI_API_KEY")),
-        "HAS_ANTHROPIC_KEY": bool(os.getenv("ANTHROPIC_API_KEY")),
-        "HAS_MISTRAL_KEY": bool(os.getenv("MISTRAL_API_KEY")),
-        "HAS_XAI_KEY": bool(os.getenv("XAI_API_KEY")), # Grok
-        "HAS_DASHSCOPE_KEY": bool(os.getenv("DASHSCOPE_API_KEY")),
-        "HAS_GEMINI_KEY": bool(os.getenv("GEMINI_API_KEY")),
-        "HAS_GROQ_KEY": bool(os.getenv("GROQ_API_KEY")),
+        "HAS_OPENAI_KEY": settings.has_openai_key,
+        "HAS_ANTHROPIC_KEY": settings.has_anthropic_key,
+        "HAS_MISTRAL_KEY": settings.has_mistral_key,
+        "HAS_XAI_KEY": settings.has_xai_key,
+        "HAS_DASHSCOPE_KEY": settings.has_dashscope_key,
+        "HAS_GEMINI_KEY": settings.has_gemini_key,
+        "HAS_GROQ_KEY": settings.has_groq_key,
     }
 
 @app.post("/config")
 async def update_config(config: Dict[str, Any]):
     """Updates the .env file and reloads configuration."""
-    env_path = ".env"
-    existing_env = {}
-
-    # Read existing .env if present
-    if os.path.exists(env_path):
-        try:
-            with open(env_path, "r") as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith("#") and "=" in line:
-                        key, val = line.split("=", 1)
-                        existing_env[key] = val
-        except Exception as e:
-            logger.error(f"Error reading .env: {e}")
-
-    # Update with new values
-    for k, v in config.items():
-        if v is not None:
-            val = str(v)
-            # Auto-correct known broken model strings before saving
-            if k == "LLM_MODEL":
-                if val == "gemini/gemini-1.5-flash":
-                    val = "gemini/gemini-1.5-flash-latest"
-                elif val == "openai/grok-2-1212":
-                    val = "xai/grok-2-vision-1212"
-
-            # If value is empty string, we set it (clearing the key effectively if we write it as KEY=)
-            existing_env[k] = val
-
-    # Write back to .env
     try:
-        with open(env_path, "w") as f:
-            for k, v in existing_env.items():
-                f.write(f"{k}={v}\n")
-    except Exception as e:
-        logger.error(f"Error writing .env: {e}")
-        return {"status": "error", "message": str(e)}
-
-    # Reload runtime settings
-    try:
-        settings.reload()
+        settings.update_env(config)
         swarm.update_settings()
     except Exception as e:
-        logger.error(f"Error reloading settings: {e}")
-        return {"status": "error", "message": "Saved .env but failed to reload runtime settings."}
+        logger.error(f"Error updating configuration: {e}")
+        return {"status": "error", "message": str(e)}
 
     return {"status": "success", "message": "Configuration updated."}
 
