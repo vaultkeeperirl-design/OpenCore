@@ -114,7 +114,8 @@ class Agent:
             logger.exception(f"Error during thought process: {error_msg}")
 
             # User-friendly error for missing credentials
-            if "credentials were not found" in error_msg or "api_key" in error_msg.lower():
+            error_msg_lower = error_msg.lower()
+            if "credentials were not found" in error_msg_lower or "api_key" in error_msg_lower or "api key" in error_msg_lower:
                  return "SYSTEM ALERT: LLM configuration invalid or missing. Please configure your provider in Settings."
 
             return f"Error during thought process: {error_msg}"
