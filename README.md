@@ -11,7 +11,7 @@ Designed for dynamic collaboration, it orchestrates a network of specialized int
 -   **Neural Link**: Agents communicate, delegate, and synthesize information hierarchically.
 -   **Hardline Access**: Direct file system manipulation and command execution capabilities.
 -   **Multi-Model Matrix**: Seamless integration with OpenAI, Vertex AI, Bedrock, Anthropic, Mistral, Groq, and local Ollama nodes via `litellm`.
--   **Cyberdeck Interface**: A reactive, cyberpunk-themed command center for swarm interaction.
+-   **Cyberdeck Interface**: A reactive, cyberpunk-themed command center built with Next.js 15 and React Flow.
 -   **Accessibility Protocol**: Full screen reader support and keyboard navigation.
 
 ## // DEPLOYMENT_PROTOCOL
@@ -110,18 +110,45 @@ GROQ_API_KEY=gsk_...
     Server binds to `http://0.0.0.0:8000` by default.
 
 2.  **Access the Cyberdeck**:
-    Navigate to `http://localhost:8000`.
+    Navigate to `http://localhost:8000` to access the Next.js powered interface.
 
 3.  **Execute Command Sequence**:
-    -   Input a directive to the Manager.
-    -   Example: "Create a 'PythonCoder' agent using `ollama/qwen2.5` and ask it to write a snake game."
-    -   Observe the Manager spawn agents and delegate tasks.
+    -   Input a directive to the Manager via text or voice.
+    -   Visualize the agent swarm topology in real-time.
+    -   Monitor system metrics and agent status.
+
+## // FRONTEND_DEVELOPMENT (Next.js)
+
+The modern frontend is built with Next.js 15, React Flow, and Tailwind CSS.
+Source code is located in `frontend/`.
+
+**Development Protocol:**
+1.  Navigate to the frontend directory: `cd frontend`.
+2.  Install dependencies: `npm install`.
+3.  Start the development server (proxies API requests to backend):
+    ```bash
+    npm run dev
+    ```
+4.  Access the UI at `http://localhost:3000`.
+
+**Build Protocol:**
+To update the static assets served by the Python backend:
+1.  Build the frontend:
+    ```bash
+    cd frontend && npm run build
+    ```
+2.  Deploy artifacts (automatically handles static export):
+    ```bash
+    rm -rf ../opencore/interface/static/*
+    cp -r out/* ../opencore/interface/static/
+    ```
 
 ## // SYSTEM_ARCHITECTURE
 
 -   `opencore/core/`: Core logic for `Agent` and `Swarm`.
 -   `opencore/tools/`: Standard tools (Filesystem, System).
--   `opencore/interface/`: FastAPI backend and HTML frontend.
+-   `opencore/interface/`: FastAPI backend.
+-   `frontend/`: Next.js source code.
 -   `main.py`: Application entry point.
 
 ## // DIAGNOSTICS
