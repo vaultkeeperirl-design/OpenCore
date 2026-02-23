@@ -114,8 +114,8 @@ class Agent:
             error_msg_lower = error_msg.lower()
 
             # User-friendly error for missing credentials
+            error_msg_lower = error_msg.lower()
             if "credentials were not found" in error_msg_lower or "api_key" in error_msg_lower or "api key" in error_msg_lower:
-                 logger.warning(f"LLM Configuration Error: {error_msg}")
                  return "SYSTEM ALERT: LLM configuration invalid or missing. Please configure your provider in Settings."
 
             logger.exception(f"Error during thought process: {error_msg}")
