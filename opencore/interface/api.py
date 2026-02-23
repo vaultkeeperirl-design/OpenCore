@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from typing import Dict, Any
+from typing import Dict, Any, List, Optional
 from contextlib import asynccontextmanager
 from opencore.core.swarm import Swarm
 from opencore.interface.middleware import global_exception_handler
@@ -70,6 +70,7 @@ app.include_router(auth_router)
 
 class ChatRequest(BaseModel):
     message: str
+    attachments: Optional[List[Dict[str, str]]] = None
 
 class ChatResponse(BaseModel):
     response: str
@@ -84,7 +85,7 @@ def chat(request: ChatRequest):
     # We could potentially capture logs here by inspecting the agent's recent messages
     # but the current `think` method returns just the string.
 
-    response = swarm.chat(request.message)
+    response = swarm.chat(request.message, attachments=request.attachments)
 
     return ChatResponse(
         response=response,
