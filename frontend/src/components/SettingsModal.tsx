@@ -146,16 +146,29 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
                      {/* Instructions for OAuth if not connected */}
                      {!item.isOAuth && item.key === "DASHSCOPE_API_KEY" && (
-                        <div className="mt-1 flex items-center gap-2">
-                           <span className="text-[10px] text-[#666] font-mono">OR USE OAUTH:</span>
-                           <code className="text-[10px] bg-[#222] px-1.5 py-0.5 rounded text-[#00ffff] font-mono">qwen auth</code>
-                           <span className="text-[10px] text-[#444]">(Run in terminal)</span>
+                        <div className="mt-2 flex items-center gap-2">
+                           <a
+                             href="/auth/qwen/login"
+                             target="_blank"
+                             rel="noopener noreferrer"
+                             className="px-3 py-1.5 bg-[#222] hover:bg-[#333] border border-[#333] hover:border-[#00ffff] rounded flex items-center gap-2 transition-all group/btn"
+                           >
+                              <span className="text-[10px] text-[#00ffff] font-mono font-bold tracking-wide group-hover/btn:text-white">CONNECT VIA ALIBABA CLOUD</span>
+                           </a>
+                           <span className="text-[10px] text-[#444] font-mono">(Get API Key)</span>
                         </div>
                      )}
                      {!item.isOAuth && item.key === "GEMINI_API_KEY" && (
-                        <div className="mt-1 flex items-center gap-2 flex-wrap">
-                           <span className="text-[10px] text-[#666] font-mono">OR USE OAUTH:</span>
-                           <code className="text-[10px] bg-[#222] px-1.5 py-0.5 rounded text-[#00ffff] font-mono">gcloud auth application-default login</code>
+                        <div className="mt-2 flex items-center gap-2">
+                           <a
+                             href="/auth/google/login"
+                             target="_blank"
+                             rel="noopener noreferrer"
+                             className="px-3 py-1.5 bg-[#222] hover:bg-[#333] border border-[#333] hover:border-[#00ffff] rounded flex items-center gap-2 transition-all group/btn"
+                           >
+                              <Image src="/globe.svg" alt="Google" width={12} height={12} className="opacity-70 group-hover/btn:opacity-100" />
+                              <span className="text-[10px] text-[#00ffff] font-mono font-bold tracking-wide group-hover/btn:text-white">SETUP GOOGLE ADC</span>
+                           </a>
                         </div>
                      )}
                    </div>
