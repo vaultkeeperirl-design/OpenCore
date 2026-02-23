@@ -7,6 +7,11 @@ from opencore.auth.qwen import get_qwen_credentials
 # Load environment variables from .env file
 load_dotenv()
 
+MODEL_CORRECTIONS = {
+    "gemini/gemini-1.5-flash": "gemini/gemini-1.5-flash-latest",
+    "openai/grok-2-1212": "xai/grok-2-vision-1212",
+}
+
 class Settings:
     def __init__(self):
         self.reload()
@@ -34,13 +39,10 @@ class Settings:
             pass
 
         self.app_env = os.getenv("APP_ENV", "production")
-        self.llm_model = os.getenv("LLM_MODEL")
 
-        # Auto-correct known broken model strings from older configs
-        if self.llm_model == "gemini/gemini-1.5-flash":
-            self.llm_model = "gemini/gemini-1.5-flash-latest"
-        elif self.llm_model == "openai/grok-2-1212":
-            self.llm_model = "xai/grok-2-vision-1212"
+        # Auto-correct known broken model strings
+        raw_model = os.getenv("LLM_MODEL")
+        self.llm_model = MODEL_CORRECTIONS.get(raw_model, raw_model)
 
         self.host = os.getenv("HOST", "0.0.0.0")
         self.port = int(os.getenv("PORT", 8000))
@@ -61,10 +63,7 @@ class Settings:
                 val = str(v)
                 # Auto-correct known broken model strings before saving
                 if k == "LLM_MODEL":
-                    if val == "gemini/gemini-1.5-flash":
-                        val = "gemini/gemini-1.5-flash-latest"
-                    elif val == "openai/grok-2-1212":
-                        val = "xai/grok-2-vision-1212"
+                    val = MODEL_CORRECTIONS.get(val, val)
 
                 # Use python-dotenv's set_key to preserve comments and structure
                 try:
