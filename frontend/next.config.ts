@@ -24,6 +24,10 @@ const nextConfig: NextConfig = {
           source: "/heartbeat",
           destination: "http://127.0.0.1:8000/heartbeat",
         },
+        {
+          source: "/auth/status",
+          destination: "http://127.0.0.1:8000/auth/status",
+        },
       ];
     }
     return [];
