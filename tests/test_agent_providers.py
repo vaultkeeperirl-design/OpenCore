@@ -25,6 +25,7 @@ class TestAgentProviders(unittest.TestCase):
         call_args = mock_completion.call_args
         self.assertEqual(call_args.kwargs["model"], "vertex_ai/gemini-pro")
 
+    @patch("opencore.config.settings.llm_model", None)
     @patch("opencore.core.agent.completion")
     def test_swarm_respects_model_config(self, mock_completion):
         # Setup mock response
