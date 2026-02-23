@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from typing import List, Dict, Any, Callable
 from dotenv import load_dotenv
 from litellm import completion
@@ -84,11 +85,30 @@ class Agent:
         try:
             # Litellm handles various providers (OpenAI, Anthropic, Vertex, Bedrock, Ollama)
             # automatically based on the model name and environment variables.
+
+            call_model = self.model
+            call_api_base = None
+            call_api_key = None
+
+            # Qwen OAuth Logic: If we have an OAuth token, redirect to Portal API as OpenAI-compatible
+            if ("qwen" in self.model.lower() or "dashscope" in self.model.lower()) and os.environ.get("QWEN_ACCESS_TOKEN"):
+                qwen_token = os.environ.get("QWEN_ACCESS_TOKEN")
+                # Extract pure model name
+                model_name = self.model.split("/", 1)[1] if "/" in self.model else self.model
+
+                # Use openai provider for compatibility with Portal API
+                call_model = f"openai/{model_name}"
+                call_api_base = "https://portal.qwen.ai/v1"
+                call_api_key = qwen_token
+                logger.info(f"Using Qwen OAuth for model {model_name}")
+
             response = completion(
-                model=self.model,
+                model=call_model,
                 messages=self.messages,
                 tools=self.tool_definitions if self.tool_definitions else None,
                 timeout=60,  # Prevent indefinite hanging
+                api_base=call_api_base,
+                api_key=call_api_key
             )
 
             message = response.choices[0].message
