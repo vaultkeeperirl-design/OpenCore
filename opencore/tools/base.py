@@ -1,6 +1,5 @@
 import os
 import subprocess
-import shlex
 from opencore.core.agent import Agent
 
 
@@ -16,7 +15,8 @@ def _is_safe_path(path: str) -> bool:
         # Check if the target path starts with the base directory
         return os.path.commonpath([base_dir, target_path]) == base_dir
     except Exception:
-        # If any error occurs (e.g. ValueError), assume unsafe
+        # If any error occurs (e.g. ValueError on Windows different drives),
+        # assume unsafe
         return False
 
 
@@ -88,7 +88,7 @@ execute_command_schema = {
             "properties": {
                 "command": {
                     "type": "string",
-                    "description": "The command to execute (e.g. 'ls -l')."
+                    "description": "The command to execute."
                 }
             },
             "required": ["command"]
