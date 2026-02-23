@@ -18,6 +18,9 @@ const shareTechMono = Share_Tech_Mono({
 export const metadata: Metadata = {
   title: "OpenCore | Neural OS",
   description: "Advanced Multi-Agent System Interface",
+  icons: {
+    icon: '/logo.svg',
+  },
 };
 
 export default function RootLayout({
