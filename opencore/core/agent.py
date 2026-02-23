@@ -111,12 +111,14 @@ class Agent:
 
         except Exception as e:
             error_msg = str(e)
-            logger.exception(f"Error during thought process: {error_msg}")
+            error_msg_lower = error_msg.lower()
 
             # User-friendly error for missing credentials
-            if "credentials were not found" in error_msg or "api_key" in error_msg.lower():
+            if "credentials were not found" in error_msg_lower or "api_key" in error_msg_lower or "api key" in error_msg_lower:
+                 logger.warning(f"LLM Configuration Error: {error_msg}")
                  return "SYSTEM ALERT: LLM configuration invalid or missing. Please configure your provider in Settings."
 
+            logger.exception(f"Error during thought process: {error_msg}")
             return f"Error during thought process: {error_msg}"
 
     def chat(self, message: str) -> str:
