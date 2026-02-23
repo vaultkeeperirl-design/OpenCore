@@ -16,6 +16,8 @@ Designed for dynamic collaboration, it orchestrates a network of specialized int
 
 ## // DEPLOYMENT_PROTOCOL
 
+### Standard Installation
+
 1.  **Clone Repository**:
     ```bash
     git clone https://github.com/vaultkeeperirl-design/OpenCore.git
@@ -33,9 +35,17 @@ Designed for dynamic collaboration, it orchestrates a network of specialized int
     opencore onboard
     ```
 
+4.  **Start the System**:
+    ```bash
+    opencore start
+    ```
+    Access the Cyberdeck at `http://localhost:8000`.
+
+*Note: The frontend is pre-built and included. No Node.js installation is required for standard usage.*
+
 ## // CONFIGURATION_MATRIX
 
-Configure the application using environment variables in your `.env` file.
+Configure the application using environment variables in your `.env` file or via the **SYSTEM CONFIG** modal in the UI.
 
 | Variable | Description | Default |
 | :--- | :--- | :--- |
@@ -100,24 +110,7 @@ LLM_MODEL=groq/llama3-70b-8192
 GROQ_API_KEY=gsk_...
 ```
 
-## // OPERATIONAL_PROCEDURES
-
-1.  **Start the System**:
-    ```bash
-    opencore start
-    ```
-    Alternatively: `python3 main.py`.
-    Server binds to `http://0.0.0.0:8000` by default.
-
-2.  **Access the Cyberdeck**:
-    Navigate to `http://localhost:8000` to access the Next.js powered interface.
-
-3.  **Execute Command Sequence**:
-    -   Input a directive to the Manager via text or voice.
-    -   Visualize the agent swarm topology in real-time.
-    -   Monitor system metrics and agent status.
-
-## // FRONTEND_DEVELOPMENT (Next.js)
+## // FRONTEND_DEVELOPMENT (Optional)
 
 The modern frontend is built with Next.js 15, React Flow, and Tailwind CSS.
 Source code is located in `frontend/`.
