@@ -78,9 +78,23 @@ class Agent:
                 "content": str(result)
             })
 
+    def _prune_messages(self):
+        """Prunes message history to prevent context window exhaustion."""
+        MAX_HISTORY = 100
+        # If history exceeds limit (plus system prompt)
+        if len(self.messages) > (MAX_HISTORY + 1):
+            # Preserve system prompt at index 0
+            system_prompt = self.messages[0]
+            # Keep the last MAX_HISTORY messages
+            recent_messages = self.messages[-MAX_HISTORY:]
+            self.messages = [system_prompt] + recent_messages
+            logger.warning(f"[{self.name}] Pruned message history to {len(self.messages)} items.")
+
     def think(self, max_turns: int = 5) -> str:
         if max_turns <= 0:
             return "Error: Max turns reached."
+
+        self._prune_messages()
 
         try:
             # Litellm handles various providers (OpenAI, Anthropic, Vertex, Bedrock, Ollama)
