@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, List, Any
 from opencore.core.agent import Agent
 from opencore.tools.base import register_base_tools
 from opencore.config import settings
@@ -125,9 +125,9 @@ class Swarm:
             # Clear client to ensure new auth is picked up if needed
             agent.client = None
 
-    def chat(self, message: str) -> str:
+    def chat(self, message: str, attachments: Optional[List[Dict[str, Any]]] = None) -> str:
         """
         Entry point for the user to chat with the main agent.
         """
         main_agent = self.agents[self.main_agent_name]
-        return main_agent.chat(message)
+        return main_agent.chat(message, attachments=attachments)
