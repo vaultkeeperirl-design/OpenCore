@@ -1,8 +1,7 @@
 import unittest
 import asyncio
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import AsyncMock
 from opencore.core.scheduler import AsyncScheduler
-import logging
 
 class TestSchedulerExecution(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):

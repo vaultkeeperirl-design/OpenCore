@@ -7,7 +7,6 @@ from opencore.interface.middleware import global_exception_handler
 from opencore.core.scheduler import AsyncScheduler
 from opencore.interface.heartbeat import heartbeat_manager
 from opencore.config import settings
-import os
 import logging
 from starlette.concurrency import run_in_threadpool
 

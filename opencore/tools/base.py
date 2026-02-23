@@ -1,4 +1,5 @@
 import os
+import shlex
 import subprocess
 from opencore.core.agent import Agent
 
