@@ -76,11 +76,10 @@ def run_onboarding(interactive=True):
 
         elif choice == "5":
             # Grok
-            model = input("Model name [default: openai/grok-2-1212]: ").strip()
-            config["LLM_MODEL"] = model if model else "openai/grok-2-1212"
+            model = input("Model name [default: xai/grok-2-vision-1212]: ").strip()
+            config["LLM_MODEL"] = model if model else "xai/grok-2-vision-1212"
             api_key = input("Enter your XAI_API_KEY (Grok): ").strip()
-            config["OPENAI_API_KEY"] = api_key # Grok uses OpenAI compatibility
-            config["OPENAI_API_BASE"] = "https://api.x.ai/v1"
+            config["XAI_API_KEY"] = api_key
 
         elif choice == "6":
             # Mistral

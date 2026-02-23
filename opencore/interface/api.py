@@ -134,8 +134,16 @@ async def update_config(config: Dict[str, Any]):
     # Update with new values
     for k, v in config.items():
         if v is not None:
+            val = str(v)
+            # Auto-correct known broken model strings before saving
+            if k == "LLM_MODEL":
+                if val == "gemini/gemini-1.5-flash":
+                    val = "gemini/gemini-1.5-flash-latest"
+                elif val == "openai/grok-2-1212":
+                    val = "xai/grok-2-vision-1212"
+
             # If value is empty string, we set it (clearing the key effectively if we write it as KEY=)
-            existing_env[k] = str(v)
+            existing_env[k] = val
 
     # Write back to .env
     try:

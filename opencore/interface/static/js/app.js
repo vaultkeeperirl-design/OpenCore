@@ -319,6 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('dashscope-status').textContent = config.HAS_DASHSCOPE_KEY ? " (Key Set)" : "";
             document.getElementById('gemini-status').textContent = config.HAS_GEMINI_KEY ? " (Key Set)" : "";
             document.getElementById('groq-status').textContent = config.HAS_GROQ_KEY ? " (Key Set)" : "";
+            document.getElementById('xai-status').textContent = config.HAS_XAI_KEY ? " (Key Set)" : "";
 
         } catch (e) {
             console.error("Failed to load config", e);
