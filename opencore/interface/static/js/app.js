@@ -91,14 +91,26 @@ document.addEventListener('DOMContentLoaded', () => {
         // A11y: Mark as busy while typing so screen readers wait
         wrapper.setAttribute('aria-busy', 'true');
 
+        // Create accessible structure:
+        // 1. Full text for screen readers (hidden visually)
+        const srText = document.createElement('span');
+        srText.style.cssText = 'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;';
+        srText.textContent = text;
+
+        // 2. Animated text for sighted users (hidden from screen readers)
+        const visualText = document.createElement('span');
+        visualText.setAttribute('aria-hidden', 'true');
+
+        content.appendChild(srText);
+        content.appendChild(visualText);
+
         messagesDiv.appendChild(wrapper);
         scrollToBottom();
 
         // Terminal typing effect
-        content.innerText = '';
         const chars = text.split('');
         for (let i = 0; i < chars.length; i++) {
-            content.textContent += chars[i];
+            visualText.textContent += chars[i];
             // Occasionally scroll to bottom during long messages
             if (i % 50 === 0) scrollToBottom();
             // Random delay for realism
