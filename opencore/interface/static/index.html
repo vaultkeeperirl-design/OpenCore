@@ -55,8 +55,8 @@
                             <option value="gpt-3.5-turbo">OpenAI GPT-3.5 Turbo</option>
                             <option value="anthropic/claude-3-5-sonnet-20240620">Anthropic Claude 3.5 Sonnet</option>
                             <option value="vertex_ai/gemini-1.5-pro">Google Vertex AI Gemini 1.5 Pro</option>
-                            <option value="gemini/gemini-1.5-flash">Google Gemini 1.5 Flash</option>
-                            <option value="openai/grok-2-1212">xAI Grok 2</option>
+                            <option value="gemini/gemini-1.5-flash-latest">Google Gemini 1.5 Flash</option>
+                            <option value="xai/grok-2-vision-1212">xAI Grok 2</option>
                             <option value="groq/llama3-8b-8192">Groq Llama 3 8B</option>
                             <option value="mistral/mistral-large-latest">Mistral Large</option>
                             <option value="dashscope/qwen-turbo">Alibaba Qwen Turbo</option>
@@ -64,6 +64,12 @@
                             <option value="custom">Custom...</option>
                         </select>
                         <input type="text" id="custom-model" name="CUSTOM_MODEL" class="mt-2" placeholder="provider/model-name (e.g. ollama/mistral)" style="display:none;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="xai-key">xAI API Key <a href="https://console.x.ai/" target="_blank" rel="noopener noreferrer">[Get Key]</a></label>
+                        <input type="password" id="xai-key" name="XAI_API_KEY" placeholder="xai-...">
+                        <span class="status-indicator" id="xai-status"></span>
                     </div>
 
                     <div class="form-group">
