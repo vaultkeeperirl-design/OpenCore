@@ -316,6 +316,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // Status indicators
             document.getElementById('openai-status').textContent = config.HAS_OPENAI_KEY ? " (Key Set)" : "";
             document.getElementById('anthropic-status').textContent = config.HAS_ANTHROPIC_KEY ? " (Key Set)" : "";
+            document.getElementById('dashscope-status').textContent = config.HAS_DASHSCOPE_KEY ? " (Key Set)" : "";
+            document.getElementById('gemini-status').textContent = config.HAS_GEMINI_KEY ? " (Key Set)" : "";
+            document.getElementById('groq-status').textContent = config.HAS_GROQ_KEY ? " (Key Set)" : "";
 
         } catch (e) {
             console.error("Failed to load config", e);
