@@ -155,6 +155,16 @@ python3 -m unittest discover tests
 
 Pull requests are welcome. For major architectural changes, please open an issue first to discuss.
 
+## // VERSIONING_PROTOCOL
+
+This project adheres to a strict versioning scheme (X.X.X):
+
+-   **Major Updates (X.0.0)**: Significant architectural changes or breaking modifications.
+-   **Larger Updates (0.X.0)**: New features, substantial improvements, or notable refactoring.
+-   **Minor Updates (0.0.X)**: Bug fixes, small patches, or minor adjustments.
+
+When contributing, ensure you update the version number in `opencore/__init__.py`, `pyproject.toml`, `frontend/package.json`, and the frontend UI (`frontend/src/app/page.tsx`) accordingly.
+
 ## // LICENSE
 
 [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.en.html)
