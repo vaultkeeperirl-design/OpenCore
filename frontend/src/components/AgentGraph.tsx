@@ -40,7 +40,14 @@ export default function AgentGraph({ agents }: { agents: string[] }) {
           return {
             id: agent,
             position: { x: centerX, y: centerY },
-            data: { label: agent },
+            data: {
+              label: (
+                <div className="flex items-center justify-center gap-2">
+                  <img src="/logo.svg" alt="OC" className="w-6 h-6" />
+                  <span>{agent}</span>
+                </div>
+              ),
+            },
             style: {
                 background: 'rgba(188, 19, 254, 0.1)',
                 color: '#bc13fe',
