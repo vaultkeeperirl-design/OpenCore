@@ -16,18 +16,13 @@ def run_onboarding(interactive=True):
         print("\n--- OpenCore Onboarding ---")
         print("Welcome! Let's get your AI Swarm environment set up.")
 
-        # 1. Environment
-        app_env = input("Environment (development/production) [default: production]: ").strip()
-        config["APP_ENV"] = app_env if app_env else "production"
+        # Default settings (can be changed in .env later)
+        config["APP_ENV"] = "production"
+        config["HOST"] = "0.0.0.0"
+        config["PORT"] = "8000"
+        config["HEARTBEAT_INTERVAL"] = "3600"
 
-        # 2. Host and Port
-        host = input("Host [default: 0.0.0.0]: ").strip()
-        config["HOST"] = host if host else "0.0.0.0"
-
-        port = input("Port [default: 8000]: ").strip()
-        config["PORT"] = port if port else "8000"
-
-        # 3. LLM Provider Selection
+        # LLM Provider Selection
         print("\nSelect your LLM Provider:")
         print("1. OpenAI (GPT-4o, GPT-3.5)")
         print("2. Anthropic (Claude 3.5 Sonnet, Opus)")
@@ -43,15 +38,13 @@ def run_onboarding(interactive=True):
 
         if choice == "1":
             # OpenAI
-            model = input("Model name [default: gpt-4o]: ").strip()
-            config["LLM_MODEL"] = model if model else "gpt-4o"
+            config["LLM_MODEL"] = "gpt-4o"
             api_key = input("Enter your OPENAI_API_KEY: ").strip()
             config["OPENAI_API_KEY"] = api_key
 
         elif choice == "2":
             # Anthropic
-            model = input("Model name [default: anthropic/claude-3-5-sonnet-20240620]: ").strip()
-            config["LLM_MODEL"] = model if model else "anthropic/claude-3-5-sonnet-20240620"
+            config["LLM_MODEL"] = "anthropic/claude-3-5-sonnet-20240620"
             api_key = input("Enter your ANTHROPIC_API_KEY: ").strip()
             config["ANTHROPIC_API_KEY"] = api_key
 
@@ -66,8 +59,7 @@ def run_onboarding(interactive=True):
 
         elif choice == "4":
             # Vertex AI
-            model = input("Model name [default: vertex_ai/gemini-1.5-pro]: ").strip()
-            config["LLM_MODEL"] = model if model else "vertex_ai/gemini-1.5-pro"
+            config["LLM_MODEL"] = "vertex_ai/gemini-1.5-pro"
             project_id = input("Google Cloud Project ID: ").strip()
             location = input("Region (e.g., us-central1): ").strip()
             config["VERTEX_PROJECT"] = project_id
@@ -76,16 +68,13 @@ def run_onboarding(interactive=True):
 
         elif choice == "5":
             # Grok
-            model = input("Model name [default: openai/grok-2-1212]: ").strip()
-            config["LLM_MODEL"] = model if model else "openai/grok-2-1212"
+            config["LLM_MODEL"] = "xai/grok-2-vision-1212"
             api_key = input("Enter your XAI_API_KEY (Grok): ").strip()
-            config["OPENAI_API_KEY"] = api_key # Grok uses OpenAI compatibility
-            config["OPENAI_API_BASE"] = "https://api.x.ai/v1"
+            config["XAI_API_KEY"] = api_key
 
         elif choice == "6":
             # Mistral
-            model = input("Model name [default: mistral/mistral-large-latest]: ").strip()
-            config["LLM_MODEL"] = model if model else "mistral/mistral-large-latest"
+            config["LLM_MODEL"] = "mistral/mistral-large-latest"
             api_key = input("Enter your MISTRAL_API_KEY: ").strip()
             config["MISTRAL_API_KEY"] = api_key
 
@@ -94,10 +83,6 @@ def run_onboarding(interactive=True):
             model = input("Enter full model string (e.g., provider/model-name): ").strip()
             config["LLM_MODEL"] = model
             print("You may need to manually add specific API keys to the .env file later.")
-
-        # 4. Heartbeat
-        interval = input("\nHeartbeat Interval (seconds) [default: 3600]: ").strip()
-        config["HEARTBEAT_INTERVAL"] = interval if interval else "3600"
 
     # Write to .env
     print("\nWriting configuration to .env file...")
