@@ -42,23 +42,30 @@ class AsyncScheduler:
         async def loop():
             # Run immediately on start
             try:
-                await job["func"]()
+                await self._execute_job_safe(job_id, job["func"], context="(initial)")
             except asyncio.CancelledError:
                 return
-            except Exception as e:
-                logger.error(f"Error in job {job_id} (initial): {e}")
 
             while True:
                 try:
                     await asyncio.sleep(job["interval"])
-                    await job["func"]()
+                    await self._execute_job_safe(job_id, job["func"])
                 except asyncio.CancelledError:
                     break
-                except Exception as e:
-                    logger.error(f"Error in job {job_id}: {e}")
 
         self.tasks[job_id] = asyncio.create_task(loop())
         logger.info(f"Started job: {job_id} (interval: {job['interval']}s)")
+
+    async def _execute_job_safe(self, job_id: str, func: Callable, context: str = ""):
+        """Executes a job safely, handling exceptions."""
+        try:
+            await func()
+        except asyncio.CancelledError:
+            # Re-raise cancellation to allow loop exit
+            raise
+        except Exception as e:
+            suffix = f" {context}" if context else ""
+            logger.error(f"Error in job {job_id}{suffix}: {e}")
 
     def start(self):
         """Starts all registered jobs."""
