@@ -41,6 +41,26 @@ class TestOnboarding(unittest.TestCase):
         self.assertIn("OPENAI_API_KEY=sk-test-key", content)
 
     @patch('builtins.input')
+    def test_run_onboarding_grok(self, mock_input):
+        # Sequence of inputs:
+        # 1. LLM Provider (5: Grok) -> "5"
+        # 2. API Key -> "xai-test-key"
+        mock_input.side_effect = [
+            "5",           # choice (Grok)
+            "xai-test-key", # api_key
+        ]
+
+        run_onboarding()
+
+        self.assertTrue(os.path.exists(".env"))
+        with open(".env", "r") as f:
+            content = f.read()
+
+        self.assertIn("APP_ENV=production", content)
+        self.assertIn("LLM_MODEL=xai/grok-2-vision-1212", content)
+        self.assertIn("XAI_API_KEY=xai-test-key", content)
+
+    @patch('builtins.input')
     def test_run_onboarding_ollama(self, mock_input):
         # Sequence of inputs:
         # 1. Choice -> "3" (Ollama)
