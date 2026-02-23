@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Send, Bot, User, Loader2, Sparkles } from "lucide-react";
+import { Send, User, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import VoiceInput from "./VoiceInput";
 import { toast } from "sonner";
@@ -117,7 +117,7 @@ export default function ChatInterface({
                   ? "bg-purple-500/10 border-purple-500/40 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.1)]"
                   : "bg-cyan-500/10 border-cyan-500/40 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
               }`}>
-                {msg.role === "user" ? <User size={20} /> : <Bot size={20} />}
+                {msg.role === "user" ? <User size={20} /> : <img src="/logo.svg" alt="OpenCore" className="w-6 h-6" />}
               </div>
 
               <div className={`max-w-[80%] p-4 rounded-xl border text-sm font-mono leading-relaxed shadow-md backdrop-blur-sm ${
@@ -138,7 +138,7 @@ export default function ChatInterface({
             className="flex gap-4"
           >
              <div className="w-10 h-10 rounded-lg border border-cyan-500/40 bg-cyan-500/10 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
-                <Bot size={20} />
+                <img src="/logo.svg" alt="Processing..." className="w-6 h-6 animate-pulse" />
              </div>
              <div className="flex items-center gap-1.5 h-10 px-2">
                <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_5px_rgba(6,182,212,0.8)]"></span>
