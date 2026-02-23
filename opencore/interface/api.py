@@ -11,6 +11,7 @@ from opencore.config import settings
 import logging
 import os
 from starlette.concurrency import run_in_threadpool
+from opencore.auth import get_auth_status
 
 # Initialize Scheduler
 scheduler = AsyncScheduler()
@@ -93,6 +94,11 @@ async def get_agents():
 @app.get("/heartbeat")
 async def get_heartbeat():
     return heartbeat_manager.get_status()
+
+@app.get("/auth/status")
+async def get_authentication_status():
+    """Returns the status of OAuth providers."""
+    return get_auth_status()
 
 @app.get("/config")
 async def get_config():

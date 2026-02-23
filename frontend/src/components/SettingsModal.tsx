@@ -12,6 +12,7 @@ interface SettingsModalProps {
 
 export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [config, setConfig] = useState<any>({});
+  const [authStatus, setAuthStatus] = useState<any>({ google: false, qwen: false });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -23,9 +24,16 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const fetchConfig = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/config");
-      const data = await res.json();
-      setConfig(data);
+      const [configRes, authRes] = await Promise.all([
+        fetch("/config"),
+        fetch("/auth/status")
+      ]);
+
+      const configData = await configRes.json();
+      const authData = await authRes.json();
+
+      setConfig(configData);
+      setAuthStatus(authData);
     } catch (err) {
       toast.error("Failed to load configuration");
     } finally {
@@ -98,27 +106,58 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                  {[
                    { key: "OPENAI_API_KEY", label: "OpenAI Key", hasKey: config.HAS_OPENAI_KEY },
                    { key: "ANTHROPIC_API_KEY", label: "Anthropic Key", hasKey: config.HAS_ANTHROPIC_KEY },
-                   { key: "GEMINI_API_KEY", label: "Gemini Key", hasKey: config.HAS_GEMINI_KEY },
+                   { key: "GEMINI_API_KEY", label: "Gemini Key", hasKey: config.HAS_GEMINI_KEY,
+                     isOAuth: authStatus.google, oauthLabel: "GOOGLE ADC ACTIVE" },
                    { key: "GROQ_API_KEY", label: "Groq Key", hasKey: config.HAS_GROQ_KEY },
-                   { key: "DASHSCOPE_API_KEY", label: "DashScope Key", hasKey: config.HAS_DASHSCOPE_KEY },
+                   { key: "DASHSCOPE_API_KEY", label: "DashScope Key (Qwen)", hasKey: config.HAS_DASHSCOPE_KEY,
+                     isOAuth: authStatus.qwen, oauthLabel: "QWEN OAUTH ACTIVE" },
                    { key: "XAI_API_KEY", label: "xAI (Grok) Key", hasKey: config.HAS_XAI_KEY },
                    { key: "MISTRAL_API_KEY", label: "Mistral Key", hasKey: config.HAS_MISTRAL_KEY },
-                 ].map((item) => (
+                 ].map((item: any) => (
                    <div key={item.key} className="flex flex-col gap-1 group">
-                     <label className="text-xs text-[#888] font-mono uppercase group-hover:text-[#00ffff]/70 transition-colors">{item.label}</label>
-                     <div className="flex gap-2">
-                       <div className="relative flex-1">
-                         <Key size={14} className="absolute left-3 top-3.5 text-[#666] group-focus-within:text-[#00ffff] transition-colors" />
-                         <input
-                           type="password"
-                           placeholder={item.hasKey ? "•••••••••••••••• (Set)" : "Enter API Key"}
-                           value={config[item.key] || ""}
-                           onChange={(e) => setConfig({...config, [item.key]: e.target.value})}
-                           className="w-full bg-black border border-[#333] rounded pl-9 p-2.5 text-sm focus:border-[#00ffff] focus:outline-none focus:ring-1 focus:ring-[#00ffff]/30 transition-all font-mono placeholder-[#444] text-[#e0e0e0]"
-                         />
-                       </div>
-                       {item.hasKey && <div className="px-3 py-1 text-[10px] font-mono tracking-wider bg-[#00ff41]/10 text-[#00ff41] border border-[#00ff41]/20 rounded flex items-center shadow-[0_0_10px_rgba(0,255,65,0.1)]">LINKED</div>}
+                     <div className="flex justify-between items-center">
+                        <label className="text-xs text-[#888] font-mono uppercase group-hover:text-[#00ffff]/70 transition-colors">{item.label}</label>
+                        {item.isOAuth && (
+                           <span className="text-[10px] text-[#00ff41] font-mono animate-pulse">{item.oauthLabel}</span>
+                        )}
                      </div>
+
+                     {item.isOAuth ? (
+                        <div className="flex items-center gap-3 p-2.5 border border-[#00ff41]/30 bg-[#00ff41]/5 rounded">
+                           <Key size={14} className="text-[#00ff41]" />
+                           <span className="text-xs text-[#e0e0e0] font-mono">Authenticated via System Credentials</span>
+                           <div className="ml-auto px-2 py-0.5 text-[10px] bg-[#00ff41]/20 text-[#00ff41] rounded border border-[#00ff41]/30">SECURE</div>
+                        </div>
+                     ) : (
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <Key size={14} className="absolute left-3 top-3.5 text-[#666] group-focus-within:text-[#00ffff] transition-colors" />
+                            <input
+                              type="password"
+                              placeholder={item.hasKey ? "•••••••••••••••• (Set)" : "Enter API Key"}
+                              value={config[item.key] || ""}
+                              onChange={(e) => setConfig({...config, [item.key]: e.target.value})}
+                              className="w-full bg-black border border-[#333] rounded pl-9 p-2.5 text-sm focus:border-[#00ffff] focus:outline-none focus:ring-1 focus:ring-[#00ffff]/30 transition-all font-mono placeholder-[#444] text-[#e0e0e0]"
+                            />
+                          </div>
+                          {item.hasKey && <div className="px-3 py-1 text-[10px] font-mono tracking-wider bg-[#00ff41]/10 text-[#00ff41] border border-[#00ff41]/20 rounded flex items-center shadow-[0_0_10px_rgba(0,255,65,0.1)]">LINKED</div>}
+                        </div>
+                     )}
+
+                     {/* Instructions for OAuth if not connected */}
+                     {!item.isOAuth && item.key === "DASHSCOPE_API_KEY" && (
+                        <div className="mt-1 flex items-center gap-2">
+                           <span className="text-[10px] text-[#666] font-mono">OR USE OAUTH:</span>
+                           <code className="text-[10px] bg-[#222] px-1.5 py-0.5 rounded text-[#00ffff] font-mono">qwen auth</code>
+                           <span className="text-[10px] text-[#444]">(Run in terminal)</span>
+                        </div>
+                     )}
+                     {!item.isOAuth && item.key === "GEMINI_API_KEY" && (
+                        <div className="mt-1 flex items-center gap-2 flex-wrap">
+                           <span className="text-[10px] text-[#666] font-mono">OR USE OAUTH:</span>
+                           <code className="text-[10px] bg-[#222] px-1.5 py-0.5 rounded text-[#00ffff] font-mono">gcloud auth application-default login</code>
+                        </div>
+                     )}
                    </div>
                  ))}
                </div>
