@@ -8,3 +8,9 @@
 **Vulnerability:** The default file manipulation tools (`read_file`, `write_file`, `list_files`) allowed path traversal via `../` or absolute paths, enabling agents to access files outside the project directory (e.g., `/etc/passwd`).
 **Learning:** Providing file system access to agents requires strict sandboxing. Relying on "good intentions" of the LLM is not security. `os.path.commonpath` combined with `os.path.realpath` is a robust way to enforce directory confinement in Python.
 **Prevention:** Implemented `_is_safe_path` check in `opencore/tools/base.py` that resolves symlinks and verifies the target path is within the current working directory.
+
+## 2026-02-21 - Command Injection in Agent Tools
+
+**Vulnerability:** The `execute_command` tool in `opencore/tools/base.py` used `shell=True`, allowing command injection (e.g., `echo test > injected.txt`).
+**Learning:** `shell=True` is fundamentally insecure for agent tools that accept arbitrary strings from an LLM. Agents often output unexpected characters or can be prompt-injected to run malicious commands.
+**Prevention:** Replaced `shell=True` with `shell=False` and used `shlex.split(command)` to parse arguments securely. Updated tool description to explicitly disallow shell features.

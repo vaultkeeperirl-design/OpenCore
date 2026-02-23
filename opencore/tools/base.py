@@ -1,7 +1,8 @@
 import os
 import subprocess
-from typing import Dict, Any, Callable
+import shlex
 from opencore.core.agent import Agent
+
 
 def _is_safe_path(path: str) -> bool:
     """
@@ -15,14 +16,18 @@ def _is_safe_path(path: str) -> bool:
         # Check if the target path starts with the base directory
         return os.path.commonpath([base_dir, target_path]) == base_dir
     except Exception:
-        # If any error occurs (e.g. ValueError on Windows different drives), assume unsafe
+        # If any error occurs (e.g. ValueError), assume unsafe
         return False
+
 
 def execute_command(command: str) -> str:
     """Executes a shell command and returns the output."""
     try:
+        # Security: Use shlex.split and shell=False to prevent injection
+        # This prevents chaining commands with &&, |, ;, etc.
+        args = shlex.split(command)
         result = subprocess.run(
-            command, shell=True, capture_output=True, text=True, timeout=30
+            args, shell=False, capture_output=True, text=True, timeout=30
         )
         output = result.stdout
         if result.stderr:
@@ -30,6 +35,7 @@ def execute_command(command: str) -> str:
         return output
     except Exception as e:
         return f"Error executing command: {str(e)}"
+
 
 def read_file(filepath: str) -> str:
     """Reads the content of a file."""
@@ -41,6 +47,7 @@ def read_file(filepath: str) -> str:
             return f.read()
     except Exception as e:
         return f"Error reading file: {str(e)}"
+
 
 def write_file(filepath: str, content: str) -> str:
     """Writes content to a file."""
@@ -54,6 +61,7 @@ def write_file(filepath: str, content: str) -> str:
     except Exception as e:
         return f"Error writing file: {str(e)}"
 
+
 def list_files(directory: str = ".") -> str:
     """Lists files in a directory."""
     if not _is_safe_path(directory):
@@ -65,16 +73,23 @@ def list_files(directory: str = ".") -> str:
     except Exception as e:
         return f"Error listing files: {str(e)}"
 
+
 # Schemas
 execute_command_schema = {
     "type": "function",
     "function": {
         "name": "execute_command",
-        "description": "Executes a shell command.",
+        "description": (
+            "Executes a single shell command. "
+            "Pipes, redirects, and shell operators (&&, ;, |) NOT supported."
+        ),
         "parameters": {
             "type": "object",
             "properties": {
-                "command": {"type": "string", "description": "The command to execute."}
+                "command": {
+                    "type": "string",
+                    "description": "The command to execute (e.g. 'ls -l')."
+                }
             },
             "required": ["command"]
         }
@@ -89,7 +104,10 @@ read_file_schema = {
         "parameters": {
             "type": "object",
             "properties": {
-                "filepath": {"type": "string", "description": "The path to the file."}
+                "filepath": {
+                    "type": "string",
+                    "description": "The path to the file."
+                }
             },
             "required": ["filepath"]
         }
@@ -104,8 +122,14 @@ write_file_schema = {
         "parameters": {
             "type": "object",
             "properties": {
-                "filepath": {"type": "string", "description": "The path to the file."},
-                "content": {"type": "string", "description": "The content to write."}
+                "filepath": {
+                    "type": "string",
+                    "description": "The path to the file."
+                },
+                "content": {
+                    "type": "string",
+                    "description": "The content to write."
+                }
             },
             "required": ["filepath", "content"]
         }
@@ -120,15 +144,19 @@ list_files_schema = {
         "parameters": {
             "type": "object",
             "properties": {
-                "directory": {"type": "string", "description": "The directory path (default: .)."}
+                "directory": {
+                    "type": "string",
+                    "description": "The directory path (default: .)."
+                }
             },
             "required": []
         }
     }
 }
 
+
 def register_base_tools(agent: Agent):
-    """Registers the base tools (execute_command, read_file, write_file, list_files) to an agent."""
+    """Registers the base tools to an agent."""
     agent.register_tool(execute_command, execute_command_schema)
     agent.register_tool(read_file, read_file_schema)
     agent.register_tool(write_file, write_file_schema)
