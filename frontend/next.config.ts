@@ -28,6 +28,14 @@ const nextConfig: NextConfig = {
           source: "/auth/status",
           destination: "http://127.0.0.1:8000/auth/status",
         },
+        {
+          source: "/auth/google/login",
+          destination: "http://127.0.0.1:8000/auth/google/login",
+        },
+        {
+          source: "/auth/qwen/login",
+          destination: "http://127.0.0.1:8000/auth/qwen/login",
+        },
       ];
     }
     return [];
