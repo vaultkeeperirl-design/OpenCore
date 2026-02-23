@@ -23,8 +23,11 @@ def _is_safe_path(path: str) -> bool:
 def execute_command(command: str) -> str:
     """Executes a shell command and returns the output."""
     try:
+        # Security: Use shlex.split and shell=False to prevent injection
+        # This prevents chaining commands with &&, |, ;, etc.
+        args = shlex.split(command)
         result = subprocess.run(
-            command, shell=True, capture_output=True, text=True, timeout=30
+            args, shell=False, capture_output=True, text=True, timeout=30
         )
         output = result.stdout
         if result.stderr:
@@ -76,7 +79,10 @@ execute_command_schema = {
     "type": "function",
     "function": {
         "name": "execute_command",
-        "description": "Executes a shell command.",
+        "description": (
+            "Executes a single shell command. "
+            "Pipes, redirects, and shell operators (&&, ;, |) NOT supported."
+        ),
         "parameters": {
             "type": "object",
             "properties": {

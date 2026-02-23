@@ -9,8 +9,8 @@
 **Learning:** Providing file system access to agents requires strict sandboxing. Relying on "good intentions" of the LLM is not security. `os.path.commonpath` combined with `os.path.realpath` is a robust way to enforce directory confinement in Python.
 **Prevention:** Implemented `_is_safe_path` check in `opencore/tools/base.py` that resolves symlinks and verifies the target path is within the current working directory.
 
-## 2026-02-23 - Unbounded Conversation History
+## 2026-02-21 - Command Injection in Agent Tools
 
-**Observation:** The `Agent` class in `opencore/core/agent.py` accumulates conversation history indefinitely. Since the main 'Manager' agent is long-lived, this leads to linear growth in context size for every user interaction.
-**Risk:** Eventually exceeds the LLM context window (causing API errors) and increases latency/cost.
-**Action:** Recommend implementing a history truncation strategy (e.g., sliding window of last N messages) or summarization mechanism to keep the context within manageable limits.
+**Vulnerability:** The `execute_command` tool in `opencore/tools/base.py` used `shell=True`, allowing command injection (e.g., `echo test > injected.txt`).
+**Learning:** `shell=True` is fundamentally insecure for agent tools that accept arbitrary strings from an LLM. Agents often output unexpected characters or can be prompt-injected to run malicious commands.
+**Prevention:** Replaced `shell=True` with `shell=False` and used `shlex.split(command)` to parse arguments securely. Updated tool description to explicitly disallow shell features.
