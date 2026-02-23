@@ -112,6 +112,20 @@ class Swarm:
 
         agent.register_tool(list_agents_wrapper, list_agents_schema)
 
+    def update_settings(self):
+        """Reloads configuration and updates agents."""
+        from opencore.config import settings
+        # Allow env var to override default model
+        self.default_model = settings.llm_model or "gpt-4o"
+
+        # Update existing agents to use the new default model
+        # Note: This updates all agents to the system default.
+        # If specific agents need specific models, this logic would need refinement.
+        for agent in self.agents.values():
+            agent.model = self.default_model
+            # Clear client to ensure new auth is picked up if needed
+            agent.client = None
+
     def chat(self, message: str) -> str:
         """
         Entry point for the user to chat with the main agent.

@@ -28,8 +28,75 @@
             </li>
         </ul>
 
-        <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color); color: var(--text-tertiary); font-size: 10px; text-align: center; font-family: 'Share Tech Mono';">
-            SYS.VER.0.1.0-alpha<br>STATUS: ONLINE
+        <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color);">
+            <button id="settings-toggle" class="sidebar-btn" aria-label="Open Settings">
+                SYSTEM CONFIG
+            </button>
+            <div style="color: var(--text-tertiary); font-size: 10px; text-align: center; font-family: 'Share Tech Mono'; margin-top: 15px;">
+                SYS.VER.0.1.0-alpha<br>STATUS: ONLINE
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal" aria-hidden="true" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>SYSTEM CONFIGURATION</h2>
+                <button class="close-modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="config-form">
+                    <div class="form-group">
+                        <label for="llm-model">LLM Model</label>
+                        <select id="llm-model" name="LLM_MODEL">
+                            <option value="gpt-4o">OpenAI GPT-4o</option>
+                            <option value="gpt-3.5-turbo">OpenAI GPT-3.5 Turbo</option>
+                            <option value="anthropic/claude-3-5-sonnet-20240620">Anthropic Claude 3.5 Sonnet</option>
+                            <option value="vertex_ai/gemini-1.5-pro">Google Vertex AI Gemini 1.5 Pro</option>
+                            <option value="openai/grok-2-1212">xAI Grok 2</option>
+                            <option value="mistral/mistral-large-latest">Mistral Large</option>
+                            <option value="ollama/llama3">Ollama Llama 3</option>
+                            <option value="custom">Custom...</option>
+                        </select>
+                        <input type="text" id="custom-model" name="CUSTOM_MODEL" class="mt-2" placeholder="provider/model-name (e.g. ollama/mistral)" style="display:none;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="openai-key">OpenAI API Key</label>
+                        <input type="password" id="openai-key" name="OPENAI_API_KEY" placeholder="sk-...">
+                        <span class="status-indicator" id="openai-status"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="anthropic-key">Anthropic API Key</label>
+                        <input type="password" id="anthropic-key" name="ANTHROPIC_API_KEY" placeholder="sk-ant-...">
+                        <span class="status-indicator" id="anthropic-status"></span>
+                    </div>
+
+                    <div class="form-group">
+                         <label for="vertex-project">Vertex AI Project ID</label>
+                         <input type="text" id="vertex-project" name="VERTEX_PROJECT">
+                    </div>
+                     <div class="form-group">
+                         <label for="vertex-location">Vertex AI Location</label>
+                         <input type="text" id="vertex-location" name="VERTEX_LOCATION" placeholder="us-central1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ollama-base">Ollama Base URL</label>
+                        <input type="text" id="ollama-base" name="OLLAMA_API_BASE" placeholder="http://localhost:11434">
+                    </div>
+
+                    <div id="save-status" class="status-message"></div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel close-modal">CANCEL</button>
+                        <button type="submit" class="btn-save">SAVE CONFIG</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 

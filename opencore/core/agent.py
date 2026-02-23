@@ -110,8 +110,14 @@ class Agent:
                     return "Error: Empty response from model."
 
         except Exception as e:
-            logger.exception(f"Error during thought process: {str(e)}")
-            return f"Error during thought process: {str(e)}"
+            error_msg = str(e)
+            logger.exception(f"Error during thought process: {error_msg}")
+
+            # User-friendly error for missing credentials
+            if "credentials were not found" in error_msg or "api_key" in error_msg.lower():
+                 return "SYSTEM ALERT: LLM configuration invalid or missing. Please configure your provider in Settings."
+
+            return f"Error during thought process: {error_msg}"
 
     def chat(self, message: str) -> str:
         self.add_message("user", message)
