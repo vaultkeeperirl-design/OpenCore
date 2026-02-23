@@ -56,7 +56,7 @@ export default function Home() {
                OPENCORE
              </h1>
              <div className="flex items-center gap-2 text-[10px] text-[#888888] font-mono tracking-widest">
-               <span>V2.0.0</span>
+               <span>V2.0.1</span>
                <span className="text-[#00ff41] drop-shadow-[0_0_5px_rgba(0,255,65,0.8)]">● SYSTEM ACTIVE</span>
              </div>
            </div>
