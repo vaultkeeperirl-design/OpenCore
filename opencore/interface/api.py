@@ -12,6 +12,7 @@ import logging
 import os
 from starlette.concurrency import run_in_threadpool
 from opencore.auth import get_auth_status
+from opencore.interface.auth_routes import auth_router
 
 # Initialize Scheduler
 scheduler = AsyncScheduler()
@@ -63,6 +64,9 @@ app = FastAPI(lifespan=lifespan)
 
 # Register centralized error handler
 app.add_exception_handler(Exception, global_exception_handler)
+
+# Include Auth Router
+app.include_router(auth_router)
 
 class ChatRequest(BaseModel):
     message: str
