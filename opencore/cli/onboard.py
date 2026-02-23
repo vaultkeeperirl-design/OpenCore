@@ -1,5 +1,3 @@
-import os
-
 def run_onboarding():
     print("\n--- OpenCore Onboarding ---")
     print("Welcome! Let's get your AI Swarm environment set up.")

@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Callable, Coroutine, Dict, Any, Optional
+from typing import Callable, Coroutine, Dict, Any
 
 logger = logging.getLogger("opencore.scheduler")
 
