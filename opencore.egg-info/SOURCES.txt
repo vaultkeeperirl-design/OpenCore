@@ -9,6 +9,9 @@ opencore.egg-info/dependency_links.txt
 opencore.egg-info/entry_points.txt
 opencore.egg-info/requires.txt
 opencore.egg-info/top_level.txt
+opencore/auth/__init__.py
+opencore/auth/google.py
+opencore/auth/qwen.py
 opencore/cli/__init__.py
 opencore/cli/main.py
 opencore/cli/onboard.py
@@ -26,6 +29,7 @@ tests/test_api_config.py
 tests/test_cli_onboard.py
 tests/test_command_injection.py
 tests/test_error_handling.py
+tests/test_heartbeat.py
 tests/test_heartbeat_scheduler.py
 tests/test_integration.py
 tests/test_logging.py

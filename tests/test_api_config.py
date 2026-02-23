@@ -26,8 +26,11 @@ class TestApiConfig(unittest.TestCase):
 
     @patch("os.getenv")
     def test_get_config_missing_keys(self, mock_getenv):
-        # Setup mock to return None
-        mock_getenv.return_value = None
+        # Setup mock to return default or None
+        def side_effect(key, default=None):
+            return default
+
+        mock_getenv.side_effect = side_effect
 
         response = client.get("/config")
         self.assertEqual(response.status_code, 200)

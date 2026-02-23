@@ -2,10 +2,8 @@ import json
 import logging
 import os
 from typing import List, Dict, Any, Callable
-from dotenv import load_dotenv
 from litellm import completion
 
-load_dotenv()
 
 logger = logging.getLogger(__name__)
 
