@@ -23,3 +23,8 @@ dependencies = [
 
 [project.scripts]
 opencore = "opencore.cli.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["opencore*"]
+exclude = ["frontend*", "tests*"]

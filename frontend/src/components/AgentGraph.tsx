@@ -42,11 +42,11 @@ export default function AgentGraph({ agents }: { agents: string[] }) {
             position: { x: centerX, y: centerY },
             data: {
               label: (
-                <div className="flex items-center justify-center gap-2">
-                  <img src="/logo.svg" alt="OC" className="w-6 h-6" />
-                  <span>{agent}</span>
+                <div className="flex items-center justify-center gap-3 pointer-events-none">
+                   <img src="/logo.svg" className="w-8 h-8 drop-shadow-[0_0_10px_#ff00ff]" alt="" />
+                   <span>MANAGER</span>
                 </div>
-              ),
+              )
             },
             style: {
                 background: 'rgba(188, 19, 254, 0.1)',
