@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenCore // SYSTEM.ACTIVE</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+</head>
+<body>
+    <div id="sidebar">
+        <div class="brand">
+            <img src="img/logo.svg" alt="OpenCore Logo" width="48" height="48">
+            <h1>OpenCore</h1>
+        </div>
+
+        <div class="section-title">ACTIVE_NODES</div>
+        <ul id="agent-list">
+            <!-- Populated dynamically -->
+            <li class="agent-item">
+                <div class="agent-avatar">MA</div>
+                <div class="agent-info">
+                    <span class="agent-name">Manager</span>
+                    <span class="agent-role">[ORCHESTRATOR]</span>
+                </div>
+                <div class="status-dot"></div>
+            </li>
+        </ul>
+
+        <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color);">
+            <button id="settings-toggle" class="sidebar-btn" aria-label="Open Settings">
+                SYSTEM CONFIG
+            </button>
+            <div style="color: var(--text-tertiary); font-size: 10px; text-align: center; font-family: 'Share Tech Mono'; margin-top: 15px;">
+                SYS.VER.0.1.0-alpha<br>STATUS: ONLINE
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal" aria-hidden="true" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>SYSTEM CONFIGURATION</h2>
+                <button class="close-modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="config-form">
+                    <div class="form-group">
+                        <label for="llm-model">LLM Model</label>
+                        <select id="llm-model" name="LLM_MODEL">
+                            <option value="gpt-4o">OpenAI GPT-4o</option>
+                            <option value="gpt-3.5-turbo">OpenAI GPT-3.5 Turbo</option>
+                            <option value="anthropic/claude-3-5-sonnet-20240620">Anthropic Claude 3.5 Sonnet</option>
+                            <option value="vertex_ai/gemini-1.5-pro">Google Vertex AI Gemini 1.5 Pro</option>
+                            <option value="gemini/gemini-1.5-flash-latest">Google Gemini 1.5 Flash</option>
+                            <option value="xai/grok-2-vision-1212">xAI Grok 2</option>
+                            <option value="groq/llama3-8b-8192">Groq Llama 3 8B</option>
+                            <option value="mistral/mistral-large-latest">Mistral Large</option>
+                            <option value="dashscope/qwen-turbo">Alibaba Qwen Turbo</option>
+                            <option value="ollama/llama3">Ollama Llama 3</option>
+                            <option value="custom">Custom...</option>
+                        </select>
+                        <input type="text" id="custom-model" name="CUSTOM_MODEL" class="mt-2" placeholder="provider/model-name (e.g. ollama/mistral)" style="display:none;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="xai-key">xAI API Key <a href="https://console.x.ai/" target="_blank" rel="noopener noreferrer">[Get Key]</a></label>
+                        <input type="password" id="xai-key" name="XAI_API_KEY" placeholder="xai-...">
+                        <span class="status-indicator" id="xai-status"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="openai-key">OpenAI API Key <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">[Get Key]</a></label>
+                        <input type="password" id="openai-key" name="OPENAI_API_KEY" placeholder="sk-...">
+                        <span class="status-indicator" id="openai-status"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="anthropic-key">Anthropic API Key <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">[Get Key]</a></label>
+                        <input type="password" id="anthropic-key" name="ANTHROPIC_API_KEY" placeholder="sk-ant-...">
+                        <span class="status-indicator" id="anthropic-status"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dashscope-key">Alibaba DashScope (Qwen) Key <a href="https://dashscope.console.aliyun.com/apiKey" target="_blank" rel="noopener noreferrer">[Get Key]</a></label>
+                        <input type="password" id="dashscope-key" name="DASHSCOPE_API_KEY" placeholder="sk-...">
+                        <span class="status-indicator" id="dashscope-status"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gemini-key">Google Gemini API Key <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer">[Get Key]</a></label>
+                        <input type="password" id="gemini-key" name="GEMINI_API_KEY" placeholder="AlzaSy...">
+                        <span class="status-indicator" id="gemini-status"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="groq-key">Groq API Key <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">[Get Key]</a></label>
+                        <input type="password" id="groq-key" name="GROQ_API_KEY" placeholder="gsk_...">
+                        <span class="status-indicator" id="groq-status"></span>
+                    </div>
+
+                    <div class="form-group">
+                         <label for="vertex-project">Vertex AI Project ID</label>
+                         <input type="text" id="vertex-project" name="VERTEX_PROJECT">
+                    </div>
+                     <div class="form-group">
+                         <label for="vertex-location">Vertex AI Location</label>
+                         <input type="text" id="vertex-location" name="VERTEX_LOCATION" placeholder="us-central1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ollama-base">Ollama Base URL</label>
+                        <input type="text" id="ollama-base" name="OLLAMA_API_BASE" placeholder="http://localhost:11434">
+                    </div>
+
+                    <div id="save-status" class="status-message"></div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel close-modal">CANCEL</button>
+                        <button type="submit" class="btn-save">SAVE CONFIG</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="chat-container">
+        <div id="messages" role="log" aria-live="polite" aria-atomic="false">
+            <!-- Messages will appear here -->
+            <div class="message-wrapper assistant">
+                <div class="message-header">
+                    <div class="agent-avatar">AI</div> SYSTEM_CORE: MANAGER
+                </div>
+                <div class="message-content">
+                    SYSTEM INITIALIZED.<br>
+                    Manager Unit Online. Ready to deploy sub-agents or execute tasks. Awaiting your command sequence.
+                </div>
+            </div>
+        </div>
+
+        <div id="input-area">
+            <div class="input-wrapper">
+                <input type="text" id="message-input" placeholder="> Enter command sequence..." autocomplete="off" aria-label="Command Input">
+            </div>
+            <button id="send-btn" title="EXECUTE" aria-label="Execute Command">
+                EXEC
+            </button>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
