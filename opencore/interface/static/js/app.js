@@ -214,4 +214,111 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(res => res.json())
         .then(data => updateAgents(data.agents))
         .catch(console.error);
+
+    // --- Configuration Modal Logic ---
+    const settingsToggle = document.getElementById('settings-toggle');
+    const settingsModal = document.getElementById('settings-modal');
+    const closeButtons = document.querySelectorAll('.close-modal');
+    const configForm = document.getElementById('config-form');
+    const llmModelSelect = document.getElementById('llm-model');
+    const customModelInput = document.getElementById('custom-model');
+    const saveStatus = document.getElementById('save-status');
+
+    if (settingsToggle) {
+        settingsToggle.addEventListener('click', async () => {
+            settingsModal.style.display = 'flex';
+            settingsModal.setAttribute('aria-hidden', 'false');
+            await loadConfig();
+        });
+
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                settingsModal.style.display = 'none';
+                settingsModal.setAttribute('aria-hidden', 'true');
+            });
+        });
+
+        // Close on outside click
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                settingsModal.style.display = 'none';
+                settingsModal.setAttribute('aria-hidden', 'true');
+            }
+        });
+
+        llmModelSelect.addEventListener('change', () => {
+            if (llmModelSelect.value === 'custom') {
+                customModelInput.style.display = 'block';
+            } else {
+                customModelInput.style.display = 'none';
+            }
+        });
+
+        configForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            saveStatus.textContent = "Saving...";
+            saveStatus.className = "status-message";
+
+            const formData = new FormData(configForm);
+            const data = Object.fromEntries(formData.entries());
+
+            // Handle custom model
+            if (data.LLM_MODEL === 'custom') {
+                 data.LLM_MODEL = data.CUSTOM_MODEL;
+            }
+
+            try {
+                const res = await fetch('/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+
+                if (result.status === 'success') {
+                    saveStatus.textContent = "Configuration saved. System reloaded.";
+                    saveStatus.className = "status-message status-success";
+                    setTimeout(() => {
+                        settingsModal.style.display = 'none';
+                        saveStatus.textContent = "";
+                    }, 1500);
+                } else {
+                    saveStatus.textContent = "Error: " + result.message;
+                    saveStatus.className = "status-message status-error";
+                }
+            } catch (error) {
+                saveStatus.textContent = "Network Error: " + error.message;
+                saveStatus.className = "status-message status-error";
+            }
+        });
+    }
+
+    async function loadConfig() {
+        try {
+            const res = await fetch('/config');
+            const config = await res.json();
+
+            // Populate fields
+            const options = Array.from(llmModelSelect.options).map(o => o.value);
+            if (options.includes(config.LLM_MODEL)) {
+                llmModelSelect.value = config.LLM_MODEL;
+                customModelInput.style.display = 'none';
+            } else {
+                llmModelSelect.value = 'custom';
+                customModelInput.value = config.LLM_MODEL;
+                customModelInput.style.display = 'block';
+            }
+
+            if (config.VERTEX_PROJECT) document.getElementById('vertex-project').value = config.VERTEX_PROJECT;
+            if (config.VERTEX_LOCATION) document.getElementById('vertex-location').value = config.VERTEX_LOCATION;
+            if (config.OLLAMA_API_BASE) document.getElementById('ollama-base').value = config.OLLAMA_API_BASE;
+
+            // Status indicators
+            document.getElementById('openai-status').textContent = config.HAS_OPENAI_KEY ? " (Key Set)" : "";
+            document.getElementById('anthropic-status').textContent = config.HAS_ANTHROPIC_KEY ? " (Key Set)" : "";
+
+        } catch (e) {
+            console.error("Failed to load config", e);
+        }
+    }
 });

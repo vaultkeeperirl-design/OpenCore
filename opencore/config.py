@@ -6,6 +6,10 @@ load_dotenv()
 
 class Settings:
     def __init__(self):
+        self.reload()
+
+    def reload(self):
+        load_dotenv(override=True)
         self.app_env = os.getenv("APP_ENV", "production")
         self.llm_model = os.getenv("LLM_MODEL")
         self.host = os.getenv("HOST", "0.0.0.0")

@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from typing import Dict, Any
 from contextlib import asynccontextmanager
 from opencore.core.swarm import Swarm
 from opencore.interface.middleware import global_exception_handler
@@ -8,6 +9,7 @@ from opencore.core.scheduler import AsyncScheduler
 from opencore.interface.heartbeat import heartbeat_manager
 from opencore.config import settings
 import logging
+import os
 from starlette.concurrency import run_in_threadpool
 
 # Initialize Scheduler
@@ -91,6 +93,65 @@ async def get_agents():
 @app.get("/heartbeat")
 async def get_heartbeat():
     return heartbeat_manager.get_status()
+
+@app.get("/config")
+async def get_config():
+    """Returns the current configuration (masked)."""
+    return {
+        "LLM_MODEL": os.getenv("LLM_MODEL", "gpt-4o"),
+        "HEARTBEAT_INTERVAL": os.getenv("HEARTBEAT_INTERVAL", "3600"),
+        "VERTEX_PROJECT": os.getenv("VERTEX_PROJECT", ""),
+        "VERTEX_LOCATION": os.getenv("VERTEX_LOCATION", ""),
+        "OLLAMA_API_BASE": os.getenv("OLLAMA_API_BASE", ""),
+        # Boolean flags for sensitive keys
+        "HAS_OPENAI_KEY": bool(os.getenv("OPENAI_API_KEY")),
+        "HAS_ANTHROPIC_KEY": bool(os.getenv("ANTHROPIC_API_KEY")),
+        "HAS_MISTRAL_KEY": bool(os.getenv("MISTRAL_API_KEY")),
+        "HAS_XAI_KEY": bool(os.getenv("XAI_API_KEY")), # Grok
+    }
+
+@app.post("/config")
+async def update_config(config: Dict[str, Any]):
+    """Updates the .env file and reloads configuration."""
+    env_path = ".env"
+    existing_env = {}
+
+    # Read existing .env if present
+    if os.path.exists(env_path):
+        try:
+            with open(env_path, "r") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        key, val = line.split("=", 1)
+                        existing_env[key] = val
+        except Exception as e:
+            logger.error(f"Error reading .env: {e}")
+
+    # Update with new values
+    for k, v in config.items():
+        if v is not None:
+            # If value is empty string, we set it (clearing the key effectively if we write it as KEY=)
+            existing_env[k] = str(v)
+
+    # Write back to .env
+    try:
+        with open(env_path, "w") as f:
+            for k, v in existing_env.items():
+                f.write(f"{k}={v}\n")
+    except Exception as e:
+        logger.error(f"Error writing .env: {e}")
+        return {"status": "error", "message": str(e)}
+
+    # Reload runtime settings
+    try:
+        settings.reload()
+        swarm.update_settings()
+    except Exception as e:
+        logger.error(f"Error reloading settings: {e}")
+        return {"status": "error", "message": "Saved .env but failed to reload runtime settings."}
+
+    return {"status": "success", "message": "Configuration updated."}
 
 # Mount static files
 app.mount("/", StaticFiles(directory="opencore/interface/static", html=True), name="static")
