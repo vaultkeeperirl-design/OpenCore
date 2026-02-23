@@ -68,8 +68,7 @@ def run_onboarding(interactive=True):
 
         elif choice == "5":
             # Grok
-            model = input("Model name [default: xai/grok-2-vision-1212]: ").strip()
-            config["LLM_MODEL"] = model if model else "xai/grok-2-vision-1212"
+            config["LLM_MODEL"] = "xai/grok-2-vision-1212"
             api_key = input("Enter your XAI_API_KEY (Grok): ").strip()
             config["XAI_API_KEY"] = api_key
 
