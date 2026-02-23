@@ -108,6 +108,9 @@ async def get_config():
         "HAS_ANTHROPIC_KEY": bool(os.getenv("ANTHROPIC_API_KEY")),
         "HAS_MISTRAL_KEY": bool(os.getenv("MISTRAL_API_KEY")),
         "HAS_XAI_KEY": bool(os.getenv("XAI_API_KEY")), # Grok
+        "HAS_DASHSCOPE_KEY": bool(os.getenv("DASHSCOPE_API_KEY")),
+        "HAS_GEMINI_KEY": bool(os.getenv("GEMINI_API_KEY")),
+        "HAS_GROQ_KEY": bool(os.getenv("GROQ_API_KEY")),
     }
 
 @app.post("/config")
