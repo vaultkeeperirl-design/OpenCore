@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, Save, Key, Cpu, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import Image from "next/image";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -54,29 +55,29 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl bg-[#0a0a15] border border-cyan-500/30 rounded-xl shadow-[0_0_30px_rgba(0,243,255,0.1)] overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5 shrink-0">
-          <h2 className="text-xl font-bold flex items-center gap-2 text-cyan-400 font-orbitron tracking-wider">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+      <div className="w-full max-w-2xl bg-[#0a0a0a] border border-[#00ffff] rounded shadow-[0_0_30px_rgba(0,255,255,0.1)] overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between p-4 border-b border-[#333] bg-[#111] shrink-0">
+          <h2 className="text-xl font-bold flex items-center gap-2 text-[#00ffff] font-orbitron tracking-[2px]">
             <Cpu size={24} /> SYSTEM CONFIGURATION
           </h2>
-          <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white">
+          <button onClick={onClose} className="p-1 hover:bg-[#333] rounded transition-colors text-[#888] hover:text-[#ff00ff]">
             <X size={24} />
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto space-y-6 flex-1 scrollbar-thin scrollbar-thumb-cyan-900 scrollbar-track-transparent">
+        <div className="p-6 overflow-y-auto space-y-6 flex-1 scrollbar-thin scrollbar-thumb-[#00ffff] scrollbar-track-[#111]">
            {loading ? (
-             <div className="flex justify-center p-8"><RefreshCw className="animate-spin text-cyan-500" /></div>
+             <div className="flex justify-center p-8"><RefreshCw className="animate-spin text-[#00ffff]" /></div>
            ) : (
              <>
                {/* LLM Model Selection */}
                <div className="space-y-2">
-                 <label className="text-xs text-cyan-500 font-mono tracking-widest uppercase mb-1 block">ACTIVE MODEL NODE</label>
+                 <label className="text-xs text-[#00ffff] font-mono tracking-widest uppercase mb-1 block">ACTIVE MODEL NODE</label>
                  <select
                    value={config.LLM_MODEL || "gpt-4o"}
                    onChange={(e) => setConfig({...config, LLM_MODEL: e.target.value})}
-                   className="w-full bg-black/40 border border-white/20 rounded p-3 text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 font-mono text-sm transition-all appearance-none"
+                   className="w-full bg-black border border-[#333] rounded p-3 text-[#e0e0e0] focus:border-[#00ffff] focus:outline-none focus:ring-1 focus:ring-[#00ffff]/50 font-mono text-sm transition-all appearance-none"
                    style={{backgroundImage: 'none'}}
                  >
                    <option value="gpt-4o">OpenAI GPT-4o</option>
@@ -92,7 +93,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
                {/* API Keys Section */}
                <div className="space-y-4">
-                 <h3 className="text-lg font-semibold text-white/80 border-b border-white/10 pb-2 mt-4 font-orbitron tracking-wide">NEURAL CREDENTIALS</h3>
+                 <h3 className="text-lg font-semibold text-[#e0e0e0] border-b border-[#333] pb-2 mt-4 font-orbitron tracking-wide">NEURAL CREDENTIALS</h3>
 
                  {[
                    { key: "OPENAI_API_KEY", label: "OpenAI Key", hasKey: config.HAS_OPENAI_KEY },
@@ -104,19 +105,19 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                    { key: "MISTRAL_API_KEY", label: "Mistral Key", hasKey: config.HAS_MISTRAL_KEY },
                  ].map((item) => (
                    <div key={item.key} className="flex flex-col gap-1 group">
-                     <label className="text-xs text-gray-500 font-mono uppercase group-hover:text-cyan-400/70 transition-colors">{item.label}</label>
+                     <label className="text-xs text-[#888] font-mono uppercase group-hover:text-[#00ffff]/70 transition-colors">{item.label}</label>
                      <div className="flex gap-2">
                        <div className="relative flex-1">
-                         <Key size={14} className="absolute left-3 top-3.5 text-gray-600 group-focus-within:text-cyan-500 transition-colors" />
+                         <Key size={14} className="absolute left-3 top-3.5 text-[#666] group-focus-within:text-[#00ffff] transition-colors" />
                          <input
                            type="password"
                            placeholder={item.hasKey ? "•••••••••••••••• (Set)" : "Enter API Key"}
                            value={config[item.key] || ""}
                            onChange={(e) => setConfig({...config, [item.key]: e.target.value})}
-                           className="w-full bg-black/40 border border-white/10 rounded pl-9 p-2.5 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/30 transition-all font-mono placeholder-gray-700"
+                           className="w-full bg-black border border-[#333] rounded pl-9 p-2.5 text-sm focus:border-[#00ffff] focus:outline-none focus:ring-1 focus:ring-[#00ffff]/30 transition-all font-mono placeholder-[#444] text-[#e0e0e0]"
                          />
                        </div>
-                       {item.hasKey && <div className="px-3 py-1 text-[10px] font-mono tracking-wider bg-green-500/10 text-green-400 border border-green-500/20 rounded flex items-center shadow-[0_0_10px_rgba(34,197,94,0.1)]">LINKED</div>}
+                       {item.hasKey && <div className="px-3 py-1 text-[10px] font-mono tracking-wider bg-[#00ff41]/10 text-[#00ff41] border border-[#00ff41]/20 rounded flex items-center shadow-[0_0_10px_rgba(0,255,65,0.1)]">LINKED</div>}
                      </div>
                    </div>
                  ))}
@@ -125,17 +126,17 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
            )}
         </div>
 
-        <div className="p-4 border-t border-white/10 bg-white/5 flex justify-end gap-3 shrink-0">
+        <div className="p-4 border-t border-[#333] bg-[#111] flex justify-end gap-3 shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded hover:bg-white/10 transition-colors text-sm font-mono text-gray-400 hover:text-white"
+            className="px-4 py-2 rounded border border-[#333] hover:bg-[#333] transition-colors text-sm font-mono text-[#888] hover:text-[#fff]"
           >
             CANCEL
           </button>
           <button
             onClick={saveConfig}
             disabled={loading}
-            className="px-6 py-2 bg-cyan-600/80 hover:bg-cyan-500 text-white rounded font-medium shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] transition-all flex items-center gap-2 font-orbitron tracking-wider text-sm border border-cyan-400/50"
+            className="px-6 py-2 bg-[#00ffff] hover:bg-[#fff] text-black rounded font-bold shadow-[0_0_15px_rgba(0,255,255,0.4)] hover:shadow-[0_0_25px_rgba(0,255,255,0.6)] transition-all flex items-center gap-2 font-orbitron tracking-wider text-sm border border-transparent"
           >
             <Save size={16} /> SAVE CONFIG
           </button>

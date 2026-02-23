@@ -4,14 +4,26 @@
   --font-orbitron: 'Orbitron', sans-serif;
   --font-share-tech-mono: 'Share Tech Mono', monospace;
 
-  --color-neon-blue: #00f3ff;
-  --color-neon-purple: #bc13fe;
-  --color-neon-green: #0aff0a;
-  --color-dark-bg: #050510;
-  --color-panel-bg: rgba(10, 10, 20, 0.8);
-  --color-border: rgba(0, 243, 255, 0.2);
+  --color-neon-blue: #00ffff;
+  --color-neon-purple: #ff00ff;
+  --color-neon-green: #00ff41;
+  --color-dark-bg: #050505;
+  --color-panel-bg: rgba(10, 10, 10, 0.95);
+  --color-border: #333;
 
   --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-flicker: flicker 4s infinite;
+
+  @keyframes flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 5px var(--color-neon-purple));
+    }
+    20%, 24%, 55% {
+        opacity: 0.5;
+        filter: none;
+    }
+  }
 }
 
 @layer utilities {
@@ -20,8 +32,8 @@
     box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
   }
 
-  .neon-text {
-    text-shadow: 0 0 5px currentColor;
+  .neon-text-logo {
+    text-shadow: 2px 2px 0px var(--color-neon-purple), -2px -2px 0px var(--color-neon-blue);
   }
 
   .glass-panel {
@@ -48,8 +60,8 @@
 }
 
 :root {
-  --background: #050510;
-  --foreground: #e0e0ff;
+  --background: #050505;
+  --foreground: #e0e0e0;
 }
 
 body {
@@ -57,4 +69,20 @@ body {
   color: var(--foreground);
   font-family: var(--font-share-tech-mono);
   overflow: hidden;
+}
+
+/* CRT Scanline Effect - REDUCED INTENSITY */
+body::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+    z-index: 1000;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    opacity: 0.4; /* Much subtler */
 }

@@ -5,6 +5,7 @@ import ChatInterface from "@/components/ChatInterface";
 import AgentGraph from "@/components/AgentGraph";
 import SettingsModal from "@/components/SettingsModal";
 import { Settings, Activity, Shield, Users, Command, Terminal } from "lucide-react";
+import Image from "next/image";
 
 export default function Home() {
   const [agents, setAgents] = useState<string[]>([]);
@@ -41,23 +42,22 @@ export default function Home() {
   };
 
   return (
-    <main className="h-screen w-screen bg-[#050510] text-white overflow-hidden flex flex-col relative">
-       {/* Background Grid */}
-       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none" />
-
+    <main className="h-screen w-screen bg-[#050505] text-white overflow-hidden flex flex-col relative">
        {/* Header */}
-       <header className="h-16 border-b border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-between px-6 shrink-0 z-10 relative shadow-[0_5px_20px_rgba(0,0,0,0.5)]">
+       <header className="h-20 border-b border-[#333] bg-[#0a0a0a] flex items-center justify-between px-6 shrink-0 z-10 relative shadow-[5px_0_20px_rgba(0,255,65,0.05)]">
          <div className="flex items-center gap-4">
-           <div className="w-10 h-10 border border-cyan-500/50 bg-cyan-500/10 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.4)]">
-             <Terminal className="text-cyan-400" />
+           {/* Legacy Logo */}
+           <div className="relative w-12 h-12 filter drop-shadow-[0_0_5px_var(--color-neon-purple)] animate-[flicker_4s_infinite]">
+              <Image src="/logo.svg" alt="OpenCore Logo" fill className="object-contain" priority />
            </div>
+
            <div>
-             <h1 className="font-orbitron text-2xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 neon-text drop-shadow-[0_0_10px_rgba(0,243,255,0.5)]">
+             <h1 className="font-orbitron text-2xl font-black tracking-[2px] text-[#e0e0e0] uppercase neon-text-logo">
                OPENCORE
              </h1>
-             <div className="flex items-center gap-2 text-[10px] text-gray-400 font-mono tracking-widest">
+             <div className="flex items-center gap-2 text-[10px] text-[#888888] font-mono tracking-widest">
                <span>V2.0.0</span>
-               <span className="text-green-500 drop-shadow-[0_0_5px_rgba(34,197,94,0.8)]">● SYSTEM ACTIVE</span>
+               <span className="text-[#00ff41] drop-shadow-[0_0_5px_rgba(0,255,65,0.8)]">● SYSTEM ACTIVE</span>
              </div>
            </div>
          </div>
@@ -65,23 +65,23 @@ export default function Home() {
          <div className="flex items-center gap-6">
            {/* Status Indicators */}
            <div className="hidden md:flex gap-4">
-             <div className="flex items-center gap-2 px-3 py-1 rounded border border-white/5 bg-white/5 backdrop-blur-sm">
-               <Activity size={14} className="text-green-400" />
-               <span className="text-xs font-mono text-gray-300">UPTIME: {heartbeat?.uptime || "00:00:00"}</span>
+             <div className="flex items-center gap-2 px-3 py-1 rounded border border-[#333] bg-[#111] backdrop-blur-sm">
+               <Activity size={14} className="text-[#00ff41]" />
+               <span className="text-xs font-mono text-[#888]">UPTIME: {heartbeat?.uptime || "00:00:00"}</span>
              </div>
-             <div className="flex items-center gap-2 px-3 py-1 rounded border border-white/5 bg-white/5 backdrop-blur-sm">
-               <Shield size={14} className="text-purple-400" />
-               <span className="text-xs font-mono text-gray-300">SECURITY: MAX</span>
+             <div className="flex items-center gap-2 px-3 py-1 rounded border border-[#333] bg-[#111] backdrop-blur-sm">
+               <Shield size={14} className="text-[#ff00ff]" />
+               <span className="text-xs font-mono text-[#888]">SECURITY: MAX</span>
              </div>
-             <div className="flex items-center gap-2 px-3 py-1 rounded border border-white/5 bg-white/5 backdrop-blur-sm">
-               <Users size={14} className="text-cyan-400" />
-               <span className="text-xs font-mono text-gray-300">AGENTS: {agents.length}</span>
+             <div className="flex items-center gap-2 px-3 py-1 rounded border border-[#333] bg-[#111] backdrop-blur-sm">
+               <Users size={14} className="text-[#00ffff]" />
+               <span className="text-xs font-mono text-[#888]">AGENTS: {agents.length}</span>
              </div>
            </div>
 
            <button
              onClick={() => setSettingsOpen(true)}
-             className="p-2 hover:bg-white/10 rounded-lg transition-all border border-transparent hover:border-white/20 text-cyan-400 hover:text-white hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] active:scale-95"
+             className="p-2 hover:bg-[#111] rounded-lg transition-all border border-transparent hover:border-[#333] text-[#00ffff] hover:text-white hover:shadow-[0_0_15px_rgba(0,255,255,0.3)] active:scale-95"
            >
              <Settings size={24} />
            </button>
@@ -92,8 +92,8 @@ export default function Home() {
        <div className="flex-1 flex overflow-hidden p-6 gap-6 relative z-0">
           {/* Left Panel: Chat */}
           <section className="w-1/3 min-w-[400px] flex flex-col gap-4 z-10 transition-all duration-500 ease-in-out">
-            <div className="flex items-center justify-between px-1">
-              <h2 className="text-sm font-orbitron text-cyan-500 tracking-widest flex items-center gap-2 drop-shadow-[0_0_5px_rgba(6,182,212,0.8)]">
+            <div className="flex items-center justify-between px-1 border-b border-[#333] pb-2">
+              <h2 className="text-sm font-orbitron text-[#00ffff] tracking-[2px] uppercase flex items-center gap-2">
                 <Command size={16} /> COMMAND LINE
               </h2>
             </div>
@@ -104,12 +104,12 @@ export default function Home() {
 
           {/* Right Panel: Visualization */}
           <section className="flex-1 flex flex-col gap-4 z-0 transition-all duration-500 ease-in-out">
-             <div className="flex items-center justify-between px-1">
-              <h2 className="text-sm font-orbitron text-purple-500 tracking-widest flex items-center gap-2 drop-shadow-[0_0_5px_rgba(168,85,247,0.8)]">
+             <div className="flex items-center justify-between px-1 border-b border-[#333] pb-2">
+              <h2 className="text-sm font-orbitron text-[#00ffff] tracking-[2px] uppercase flex items-center gap-2">
                 <Activity size={16} /> NEURAL TOPOLOGY
               </h2>
             </div>
-            <div className="flex-1 border border-white/10 rounded-xl bg-black/20 backdrop-blur-sm relative overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+            <div className="flex-1 border border-[#333] rounded bg-[#0a0a0a] relative overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)]">
                <AgentGraph agents={agents} />
             </div>
           </section>
