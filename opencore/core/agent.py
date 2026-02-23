@@ -60,6 +60,7 @@ class Agent:
                     try:
                         result = self.tools[func_name](**arguments)
                     except Exception as e:
+                        logger.exception(f"Error executing {func_name}: {str(e)}")
                         result = f"Error executing {func_name}: {str(e)}"
                 else:
                     result = f"Error: Tool {func_name} not found."
@@ -67,7 +68,7 @@ class Agent:
             except json.JSONDecodeError as e:
                 result = f"Error: Invalid JSON arguments for tool {func_name}: {str(e)}"
             except Exception as e:
-                logger.error(f"Error processing tool call {func_name}: {str(e)}")
+                logger.exception(f"Error processing tool call {func_name}: {str(e)}")
                 result = f"Error processing tool call {func_name}: {str(e)}"
 
             self.messages.append({
