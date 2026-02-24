@@ -15,7 +15,7 @@ class TestConfigRefine(unittest.TestCase):
         # Test Case 1: Deprecated Gemini Model
         mock_getenv.side_effect = lambda key, default=None: "gemini/gemini-1.5-flash-latest" if key == "LLM_MODEL" else default
         settings = Settings()
-        self.assertEqual(settings.llm_model, "gemini/gemini-1.5-flash")
+        self.assertEqual(settings.llm_model, "gemini/gemini-1.5-flash-001")
 
         # Test Case 2: Deprecated Grok Model
         mock_getenv.side_effect = lambda key, default=None: "openai/grok-2-1212" if key == "LLM_MODEL" else default
@@ -52,7 +52,7 @@ class TestConfigRefine(unittest.TestCase):
 
         # Test Update with Deprecated Gemini Model
         settings.update_env({"LLM_MODEL": "gemini/gemini-1.5-flash-latest"})
-        mock_set_key.assert_any_call(".env", "LLM_MODEL", "gemini/gemini-1.5-flash")
+        mock_set_key.assert_any_call(".env", "LLM_MODEL", "gemini/gemini-1.5-flash-001")
 
         # Test Update with Deprecated Grok Model
         settings.update_env({"LLM_MODEL": "openai/grok-2-1212"})

@@ -35,7 +35,7 @@ class TestOnboarding(unittest.TestCase):
             content = f.read()
 
         self.assertIn("APP_ENV=production", content)
-        self.assertIn("HOST=0.0.0.0", content)
+        self.assertIn("HOST=127.0.0.1", content)
         self.assertIn("PORT=8000", content)
         self.assertIn("LLM_MODEL=gpt-4o", content)
         self.assertIn("OPENAI_API_KEY=sk-test-key", content)

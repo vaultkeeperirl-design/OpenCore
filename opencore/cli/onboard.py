@@ -6,7 +6,7 @@ def run_onboarding(interactive=True):
         print(">> INITIALIZING DEFAULT CONFIGURATION MATRIX...")
         config = {
             "APP_ENV": "production",
-            "HOST": "0.0.0.0",
+            "HOST": "127.0.0.1",
             "PORT": "8000",
             "LLM_MODEL": "gpt-4o",
             "HEARTBEAT_INTERVAL": "3600",
@@ -18,7 +18,7 @@ def run_onboarding(interactive=True):
 
         # Default settings (can be changed in .env later)
         config["APP_ENV"] = "production"
-        config["HOST"] = "0.0.0.0"
+        config["HOST"] = "127.0.0.1"
         config["PORT"] = "8000"
         config["HEARTBEAT_INTERVAL"] = "3600"
 
