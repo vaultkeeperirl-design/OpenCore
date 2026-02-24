@@ -15,3 +15,7 @@
 ## 2026-02-24 - Frontend Validation Gaps
 **Learning:** The `ChatInterface` component lacked client-side size validation for file uploads, relying solely on backend (or crashing before reaching backend).
 **Action:** Enforce size limits on all file inputs/drops in frontend components.
+
+## 2026-02-24 - Orphaned Tool Messages in History Pruning
+**Learning:** The `Agent._prune_messages` method naively sliced the message history, which could split a `tool_calls` / `tool` message pair, leaving an orphaned `tool` message at the start of the conversation history. This causes schema validation errors in strict LLM APIs (like OpenAI).
+**Action:** Updated `_prune_messages` to recursively remove `tool` messages if they appear at the start of the pruned history (after the system prompt).
