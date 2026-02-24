@@ -9,6 +9,11 @@ def get_google_credentials_status():
     Checks for standard Application Default Credentials (ADC) locations.
     """
     try:
+        # Check for OAuth refresh token
+        if os.getenv("GOOGLE_REFRESH_TOKEN"):
+            logger.info("Found Google OAuth Refresh Token in ENV")
+            return True
+
         # Standard locations
         if os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
             path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
