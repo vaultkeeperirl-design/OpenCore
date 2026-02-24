@@ -92,7 +92,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                    <option value="gpt-4o">OpenAI GPT-4o</option>
                    <option value="anthropic/claude-3-5-sonnet-20240620">Claude 3.5 Sonnet</option>
                    <option value="dashscope/qwen-turbo">Qwen Turbo (Free Tier)</option>
-                   <option value="gemini/gemini-1.5-flash-latest">Gemini Flash (Free Tier)</option>
+                   <option value="gemini/gemini-1.5-flash-001">Gemini Flash (Free Tier)</option>
                    <option value="groq/llama3-8b-8192">Llama 3 (Groq/Free)</option>
                    <option value="xai/grok-2-vision-1212">Grok 2 (xAI)</option>
                    <option value="mistral/mistral-large-latest">Mistral Large</option>
