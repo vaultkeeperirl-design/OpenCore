@@ -231,3 +231,10 @@ body::before {
 .react-flow__controls-button:last-child {
   border-bottom: none !important;
 }
+
+/* React Flow Node Override */
+.react-flow__node {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
