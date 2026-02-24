@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   ReactFlow,
   Background,
@@ -145,6 +145,13 @@ const getLayout = (nodesData: AgentNode[]): Node[] => {
 export default function AgentGraph({ graphData }: { graphData: AgentGraphData }) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const [now, setNow] = useState(Date.now());
+
+  // Update time every second to prune old interactions
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!graphData?.nodes) return;
@@ -156,7 +163,7 @@ export default function AgentGraph({ graphData }: { graphData: AgentGraphData })
     // 2. Generate Edges
     const newEdges: Edge[] = [];
 
-    // Structural Edges
+    // Structural Edges (Parent -> Child)
     graphData.nodes.forEach(node => {
         if (node.parent && graphData.nodes.find(n => n.id === node.parent)) {
             newEdges.push({
@@ -164,16 +171,62 @@ export default function AgentGraph({ graphData }: { graphData: AgentGraphData })
                 source: node.parent,
                 target: node.id,
                 animated: false,
-                style: { stroke: 'var(--border-primary)', strokeWidth: 1, strokeDasharray: '5,5' },
-                type: 'straight', // Straight or smoothstep
-                markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--border-primary)' },
+                style: { stroke: '#333', strokeWidth: 1, strokeDasharray: '5,5' },
+                type: 'straight',
+                markerEnd: { type: MarkerType.ArrowClosed, color: '#333' },
             });
         }
     });
 
-    // Interaction Edges
+    // Sibling/Team Edges (Child <-> Child)
+    const nodesByParent: Record<string, AgentNode[]> = {};
+    graphData.nodes.forEach(node => {
+        if (node.parent) {
+             if (!nodesByParent[node.parent]) nodesByParent[node.parent] = [];
+             nodesByParent[node.parent].push(node);
+        }
+    });
+
+    Object.entries(nodesByParent).forEach(([parentId, children]) => {
+         if (children.length > 1) {
+             // Sort by ID to match layout order (alphabetical usually)
+             children.sort((a, b) => a.id.localeCompare(b.id));
+
+             for (let i = 0; i < children.length - 1; i++) {
+                 const current = children[i];
+                 const next = children[i+1];
+                 newEdges.push({
+                     id: `sibling-${current.id}-${next.id}`,
+                     source: current.id,
+                     target: next.id,
+                     animated: false,
+                     style: {
+                         stroke: '#00f3ff',
+                         strokeWidth: 2,
+                         strokeOpacity: 0.3
+                     },
+                     type: 'straight',
+                     zIndex: -1 // Behind nodes
+                 });
+             }
+         }
+    });
+
+    // Interaction Edges (Ephemeral)
     if (graphData.edges) {
         graphData.edges.forEach((edge, i) => {
+             // Filter by time: Only show if < 5 seconds old
+             if (edge.timestamp) {
+                 const edgeTime = new Date(edge.timestamp).getTime();
+                 if (now - edgeTime > 5000) return; // Skip old edges
+             } else {
+                 // Backward compatibility or fallback: don't show if no timestamp?
+                 // Or show briefly? Let's assume new backend always sends timestamp.
+                 // If no timestamp, maybe it's very old or just created.
+                 // Safe to hide to ensure "only when talking".
+                 return;
+             }
+
              const isResponse = edge.label.startsWith("Response: ");
              const color = isResponse ? 'var(--text-primary)' : 'var(--accent-1)';
 
@@ -189,7 +242,7 @@ export default function AgentGraph({ graphData }: { graphData: AgentGraphData })
                 style: {
                     stroke: color,
                     strokeWidth: 2,
-                    strokeDasharray: isResponse ? '5,5' : undefined // Dashed for response
+                    strokeDasharray: isResponse ? '5,5' : undefined
                 },
                 type: 'default',
                 markerEnd: { type: MarkerType.ArrowClosed, color: color },
@@ -200,7 +253,7 @@ export default function AgentGraph({ graphData }: { graphData: AgentGraphData })
     setEdges(newEdges);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(graphData), setNodes, setEdges]);
+  }, [JSON.stringify(graphData), now, setNodes, setEdges]);
 
   return (
     <div className="w-full h-full bg-bg-primary relative overflow-hidden transition-colors duration-300">
