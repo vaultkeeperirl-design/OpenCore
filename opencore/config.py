@@ -32,6 +32,7 @@ ALLOWED_CONFIG_KEYS = {
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
     "GOOGLE_REFRESH_TOKEN",
+    "ALLOW_UNSAFE_SYSTEM_ACCESS",
 }
 
 class Settings:
@@ -145,5 +146,14 @@ class Settings:
     @property
     def has_groq_key(self) -> bool:
         return bool(os.getenv("GROQ_API_KEY"))
+
+    @property
+    def allow_unsafe_system_access(self) -> bool:
+        """
+        Returns True if the system is configured to allow unrestricted file access
+        and potentially dangerous shell commands.
+        """
+        val = os.getenv("ALLOW_UNSAFE_SYSTEM_ACCESS", "false").lower()
+        return val in ("true", "1", "yes")
 
 settings = Settings()

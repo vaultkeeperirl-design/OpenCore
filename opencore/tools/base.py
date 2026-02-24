@@ -1,7 +1,9 @@
 import os
+import re
 import shlex
 import subprocess
 from opencore.core.agent import Agent
+from opencore.config import settings
 
 
 def _is_safe_path(path: str) -> bool:
@@ -9,6 +11,9 @@ def _is_safe_path(path: str) -> bool:
     Checks if the path is within the current working directory.
     Prevents path traversal attacks by resolving symlinks and absolute paths.
     """
+    if settings.allow_unsafe_system_access:
+        return True
+
     try:
         base_dir = os.path.realpath(os.getcwd())
         # Resolve the target path, including symlinks
@@ -23,13 +28,37 @@ def _is_safe_path(path: str) -> bool:
 
 def execute_command(command: str) -> str:
     """Executes a shell command and returns the output."""
+    # Global Safety Guard: Block catastrophic deletion commands
+    # This applies regardless of ALLOW_UNSAFE_SYSTEM_ACCESS
+
+    # Regex patterns for dangerous commands
+    # We use (\s+|$) to ensure we are matching the exact path and not a prefix (e.g., /tmp)
+    dangerous_patterns = [
+        # rm -rf / or rm -rf /*
+        r"rm\s+(-[rRfF]{2,}|-[rR]\s+-[fF]|-[fF]\s+-[rR])\s+(/|/\*)(\s+|$)",
+        # rd /s /q c:\ or rd /s /q /
+        r"rd\s+(/s\s+/q|/q\s+/s)\s+(c:\\|/)(\s+|$)",
+    ]
+
+    cmd_lower = command.lower().strip()
+    for pattern in dangerous_patterns:
+        if re.search(pattern, cmd_lower):
+             return f"Error: Command blocked by safety guard. usage of dangerous pattern '{pattern}' is not allowed."
+
     try:
-        # Security: Use shlex.split and shell=False to prevent injection
-        # This prevents chaining commands with &&, |, ;, etc.
-        args = shlex.split(command)
-        result = subprocess.run(
-            args, shell=False, capture_output=True, text=True, timeout=30
-        )
+        if settings.allow_unsafe_system_access:
+            # Unrestricted access: shell=True allows pipes, redirects, &&, etc.
+            result = subprocess.run(
+                command, shell=True, capture_output=True, text=True, timeout=30
+            )
+        else:
+            # Security: Use shlex.split and shell=False to prevent injection
+            # This prevents chaining commands with &&, |, ;, etc.
+            args = shlex.split(command)
+            result = subprocess.run(
+                args, shell=False, capture_output=True, text=True, timeout=30
+            )
+
         output = result.stdout
         if result.stderr:
             output += f"\nError: {result.stderr}"
