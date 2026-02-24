@@ -1,9 +1,9 @@
-# Sentinel Report: Command Injection in execute_command
+# Sentinel Report: Unlimited Client-Side File Processing
 
-**Observation:** The `execute_command` tool in `opencore/tools/base.py` utilized `subprocess.run` with `shell=True`. This allowed the execution of arbitrary shell commands, including chaining commands (e.g., `&&`, `;`) and redirects (`>`), directly from the agent's input.
+**Observation:** The `ChatInterface` component allows users to drag and drop files of any size. The browser attempts to read the entire file into memory as a Base64 string via `FileReader`.
 
-**Impact:** **Critical**. An attacker (or a compromised/hallucinating agent) could execute arbitrary code on the host system. This included potential for data exfiltration, file system destruction (`rm -rf /`), or installing backdoors.
+**Impact:** **High**. Large files (e.g., >50MB) can cause the browser tab to freeze or crash due to memory exhaustion. Additionally, sending massive payloads to the backend without size validation can lead to server-side memory pressure or denial of service.
 
-**Suggested Action:** Modified `execute_command` to use `shlex.split(command)` and `shell=False`. This treats the command string as a single executable with arguments, preventing shell operator injection. Updated the tool description to explicitly state that shell features are not supported.
+**Suggested Action:** Implement a client-side file size check (e.g., 10MB limit) in the `onDrop` handler and `handleSubmit` function. Display a toast error if the file exceeds the limit.
 
-**Future Benefit:** Significantly reduced attack surface for the agent system. Prevents a large class of RCE vulnerabilities, ensuring that the agent can only execute intended binaries and not arbitrary shell scripts.
+**Future Benefit:** Improved UX stability and backend protection against resource exhaustion attacks.
