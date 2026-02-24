@@ -22,12 +22,20 @@ const nodeTypes = {
 };
 
 // Helper to create a node object
-const createNode = (data: AgentNode, x: number, y: number): Node => {
+const createNode = (
+  data: AgentNode,
+  x: number,
+  y: number,
+  onDelete?: (name: string) => void,
+  onToggle?: (name: string) => void
+): Node => {
     return {
         id: data.id,
         position: { x, y },
         data: {
-            ...data
+            ...data,
+            onDelete,
+            onToggle
         },
         type: 'customAgent',
     };

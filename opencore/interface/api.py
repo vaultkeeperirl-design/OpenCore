@@ -74,11 +74,21 @@ class ChatRequest(BaseModel):
     message: str
     attachments: Optional[List[Dict[str, str]]] = None
 
+class ActivityItem(BaseModel):
+    type: str  # interaction, lifecycle
+    subtype: Optional[str] = None # create, remove
+    source: Optional[str] = None
+    target: Optional[str] = None
+    summary: Optional[str] = None
+    agent: Optional[str] = None
+    timestamp: str
+
 class ChatResponse(BaseModel):
     response: str
     agents: list
     tool_logs: list = [] # Future: detailed logs
     graph: Optional[Dict[str, Any]] = None
+    activity_log: List[ActivityItem] = []
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
@@ -93,7 +103,8 @@ def chat(request: ChatRequest):
     return ChatResponse(
         response=response,
         agents=list(swarm.agents.keys()),
-        graph=swarm.get_graph_data()
+        graph=swarm.get_graph_data(),
+        activity_log=swarm.current_turn_activity
     )
 
 @app.post("/transcribe")
