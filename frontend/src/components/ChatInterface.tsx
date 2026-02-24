@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Send, User, Sparkles, Image as ImageIcon, FileText, X, Paperclip } from "lucide-react";
+import { Send, User, Sparkles, Image as ImageIcon, FileText, X, Paperclip, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import VoiceInput from "./VoiceInput";
 import { toast } from "sonner";
@@ -239,7 +239,11 @@ export default function ChatInterface({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-cyan-900/50 scrollbar-track-transparent">
+      <div
+        className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-cyan-900/50 scrollbar-track-transparent"
+        role="log"
+        aria-live="polite"
+      >
         <AnimatePresence>
           {messages.map((msg) => (
             <motion.div
@@ -321,9 +325,10 @@ export default function ChatInterface({
                     <div key={i} className="relative group shrink-0 w-16 h-16 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center">
                         <button
                             onClick={() => removeAttachment(i)}
+                            aria-label={`Remove attachment ${file.name}`}
                             className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-red-600 transition-colors z-10"
                         >
-                            <X size={12} />
+                            <X size={12} aria-hidden="true" />
                         </button>
                         {file.type.startsWith("image/") ? (
                              <ImageIcon size={20} className="text-cyan-400" />
@@ -341,6 +346,7 @@ export default function ChatInterface({
 
            <input
              type="text"
+             aria-label="Chat input"
              value={input}
              onChange={(e) => setInput(e.target.value)}
              placeholder={attachments.length > 0 ? "Add message to files..." : "Enter command directive..."}
@@ -351,9 +357,15 @@ export default function ChatInterface({
            <button
              type="submit"
              disabled={(!input.trim() && attachments.length === 0) || loading}
-             className="p-3 bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-400 border border-cyan-500/50 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] active:scale-95"
+             aria-label={loading ? "Sending message..." : "Send message"}
+             aria-busy={loading}
+             className="p-3 bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-400 border border-cyan-500/50 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] active:scale-95 flex items-center justify-center min-w-[3rem]"
            >
-             <Send size={20} />
+             {loading ? (
+               <Loader2 size={20} className="animate-spin" aria-hidden="true" />
+             ) : (
+               <Send size={20} aria-hidden="true" />
+             )}
            </button>
         </form>
       </div>

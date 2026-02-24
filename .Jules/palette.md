@@ -18,3 +18,8 @@
 
 **Learning:** Terminal typing effects create a jarring experience for screen reader users, who hear fragmented character announcements. Using `aria-busy` is insufficient as it blocks updates but doesn't guarantee coherent reading.
 **Action:** Implement a "Split Content" pattern for typing effects: Inject the full text immediately in a visually-hidden (`sr-only`) element for screen readers, and use an `aria-hidden` element for the character-by-character visual animation.
+
+## 2025-02-17 - Accessible Chat Patterns
+
+**Learning:** Chat interfaces need `role="log"` and `aria-live="polite"` on the container for automatic announcements. For submit buttons, combining `disabled`, `aria-busy="true"`, and a dynamic `aria-label` (e.g., "Sending...") provides robust feedback.
+**Action:** Apply `role="log"`/`aria-live="polite"` to all chat containers and the combined loading pattern to all async submit buttons.
