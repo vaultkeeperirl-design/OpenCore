@@ -20,3 +20,8 @@
 **Vulnerability:** The `POST /config` endpoint allowed unauthenticated users to inject arbitrary keys into the `.env` file via `Settings.update_env`, potentially leading to RCE or system compromise.
 **Learning:** Never trust input for configuration updates. Configuration endpoints are high-value targets and must be strictly validated. Whitelisting is the only safe approach for runtime configuration updates.
 **Prevention:** Implemented a strict whitelist `ALLOWED_CONFIG_KEYS` in `opencore/config.py` and enforced validation in `Settings.update_env`.
+
+## 2026-02-27 - Unlimited Client-Side File Processing
+
+**Observation:** The `ChatInterface` component allows users to drag and drop files of any size. The browser attempts to read the entire file into memory as a Base64 string via `FileReader`. Large files (e.g., >50MB) can cause the browser tab to freeze or crash due to memory exhaustion. Additionally, sending massive payloads to the backend without size validation can lead to server-side memory pressure or denial of service.
+**Action:** Recommended implementation of client-side file size check (e.g., 10MB limit) in the `onDrop` handler and `handleSubmit` function to prevent browser crashes and backend DOS.
