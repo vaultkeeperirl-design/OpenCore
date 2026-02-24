@@ -9,11 +9,12 @@ logger = logging.getLogger(__name__)
 
 
 class Agent:
-    def __init__(self, name: str, role: str, system_prompt: str, model: str = "gpt-4o", client: Any = None):
+    def __init__(self, name: str, role: str, system_prompt: str, model: str = "gpt-4o", client: Any = None, is_custom_model: bool = False):
         self.name = name
         self.role = role
         self.system_prompt = system_prompt
         self.model = model
+        self.is_custom_model = is_custom_model
         self.messages: List[Dict[str, Any]] = [
             {"role": "system", "content": f"You are {name}, a {role}. {system_prompt}"}
         ]
