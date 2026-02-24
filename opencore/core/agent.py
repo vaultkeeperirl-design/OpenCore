@@ -3,6 +3,7 @@ import logging
 from typing import List, Dict, Any, Callable, Optional, Union
 from opencore.llm import get_llm_provider
 from opencore.llm.base import LLMResponse
+from opencore.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ class Agent:
         self.model = model
         self.is_custom_model = is_custom_model
         self.created_by = created_by
+        self.status = "active"
         self.last_thought: str = "Idle"
         sys_msg = f"You are {name}, a {role}. {system_prompt}"
         self.messages: List[Dict[str, Any]] = [
@@ -111,7 +113,13 @@ class Agent:
                 f"[{self.name}] Pruned history to {len(self.messages)} items."
             )
 
-    def think(self, max_turns: int = 5) -> str:
+    def think(self, max_turns: Optional[int] = None) -> str:
+        if self.status == "inactive":
+            return f"Error: Agent '{self.name}' is currently inactive."
+
+        if max_turns is None:
+            max_turns = settings.max_turns
+
         if max_turns <= 0:
             return "Error: Max turns reached."
 

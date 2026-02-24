@@ -134,6 +134,20 @@ async def get_agents():
         "graph": swarm.get_graph_data()
     }
 
+@app.delete("/agents/{name}")
+async def delete_agent(name: str):
+    result = swarm.remove_agent(name)
+    if "Error" in result:
+        return {"status": "error", "message": result}
+    return {"status": "success", "message": result, "graph": swarm.get_graph_data()}
+
+@app.post("/agents/{name}/toggle")
+async def toggle_agent(name: str):
+    result = swarm.toggle_agent(name)
+    if "Error" in result:
+        return {"status": "error", "message": result}
+    return {"status": "success", "message": result, "graph": swarm.get_graph_data()}
+
 @app.get("/heartbeat")
 async def get_heartbeat():
     return heartbeat_manager.get_status()

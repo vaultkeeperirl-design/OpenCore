@@ -22,9 +22,10 @@ class TestAgentProviders(unittest.TestCase):
         self.assertEqual(response, "Hello from Gemini")
         mock_get_provider.assert_called_once_with("vertex_ai/gemini-pro", is_custom_model=False)
 
+    @patch("opencore.core.swarm.is_provider_available", return_value=True)
     @patch("opencore.config.settings.llm_model", None)
     @patch("opencore.core.agent.get_llm_provider")
-    def test_swarm_respects_model_config(self, mock_get_provider):
+    def test_swarm_respects_model_config(self, mock_get_provider, mock_is_provider_avail):
         # Setup mock response
         mock_provider = MagicMock()
         mock_provider.chat.return_value = LLMResponse(content="Hello from Ollama", tool_calls=None)

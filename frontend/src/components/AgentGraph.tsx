@@ -34,7 +34,11 @@ const createNode = (data: AgentNode, x: number, y: number): Node => {
 };
 
 // Helper to calculate tree layout
-const getLayout = (nodesData: AgentNode[]): Node[] => {
+const getLayout = (
+    nodesData: AgentNode[],
+    onDelete: (name: string) => void,
+    onToggle: (name: string) => void
+): Node[] => {
     if (!nodesData.length) return [];
 
     const parentMap: Record<string, string[]> = {};
@@ -92,17 +96,52 @@ const getLayout = (nodesData: AgentNode[]): Node[] => {
         nodesInLevel.forEach((nodeId, index) => {
              const x = startX + (index * SIBLING_SPACING);
              const y = 50 + (lvl * LEVEL_HEIGHT);
-             layoutNodes.push(createNode(nodesData.find(n => n.id === nodeId)!, x, y));
+             layoutNodes.push(createNode(nodesData.find(n => n.id === nodeId)!, x, y, onDelete, onToggle));
         });
     });
 
     return layoutNodes;
 };
 
-export default function AgentGraph({ graphData }: { graphData: AgentGraphData }) {
+export default function AgentGraph({
+    graphData,
+    onRefresh
+}: {
+    graphData: AgentGraphData;
+    onRefresh?: () => void;
+}) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [now, setNow] = useState(Date.now());
+
+  const handleDelete = async (name: string) => {
+      if (!confirm(`Are you sure you want to remove agent '${name}'?`)) return;
+      try {
+          const res = await fetch(`/agents/${name}`, { method: 'DELETE' });
+          const data = await res.json();
+          if (data.status === 'success') {
+              if (onRefresh) onRefresh();
+          } else {
+              alert(data.message);
+          }
+      } catch (e) {
+          console.error("Failed to delete agent", e);
+      }
+  };
+
+  const handleToggle = async (name: string) => {
+      try {
+          const res = await fetch(`/agents/${name}/toggle`, { method: 'POST' });
+          const data = await res.json();
+          if (data.status === 'success') {
+              if (onRefresh) onRefresh();
+          } else {
+              alert(data.message);
+          }
+      } catch (e) {
+          console.error("Failed to toggle agent", e);
+      }
+  };
 
   // Update time every second to prune old interactions
   useEffect(() => {
@@ -114,7 +153,7 @@ export default function AgentGraph({ graphData }: { graphData: AgentGraphData })
     if (!graphData?.nodes) return;
 
     // 1. Generate Nodes
-    const newNodes = getLayout(graphData.nodes);
+    const newNodes = getLayout(graphData.nodes, handleDelete, handleToggle);
     setNodes(newNodes);
 
     // 2. Generate Edges
