@@ -1,5 +1,10 @@
 # Conductor Journal
 
+## 2026-02-24 - Emergency Fix for Dependency Regression (v2.0.6)
+
+**Observation:** User reported `ModuleNotFoundError: No module named 'google_auth_oauthlib'` on `opencore start`. This dependency was missing in `pyproject.toml` despite being in `requirements.txt`. Additionally, `google-generativeai` was listed but deprecated.
+**Action:** Removed `google-generativeai` and added `google-genai` and `google-auth-oauthlib` to `pyproject.toml`. Bumped version to v2.0.6. Synchronized `opencore/__init__.py` and `frontend/package.json`.
+
 ## 2026-02-24 - Project Version Synchronization (v2.0.4)
 
 **Observation:** Detected massive version discrepancy between documented history (v0.3.1) and actual codebase/package version (v2.0.4). No intermediate git tags or changelog entries were found for the gap between 0.3.1 and 2.0.4, indicating a breakdown in the release process.
