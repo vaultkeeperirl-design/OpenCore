@@ -5,11 +5,12 @@ import ChatInterface from "@/components/ChatInterface";
 import AgentGraph from "@/components/AgentGraph";
 import { HEARTBEAT_INTERVAL, API_AGENTS, API_HEARTBEAT } from "@/constants";
 import SettingsModal from "@/components/SettingsModal";
-import { Settings, Activity, Shield, Users, Command, Terminal } from "lucide-react";
+import { Settings, Activity, Shield, Users, Command } from "lucide-react";
 import Image from "next/image";
+import { AgentGraphData } from "@/types/agent";
 
 export default function Home() {
-  const [agents, setAgents] = useState<string[]>([]);
+  const [graphData, setGraphData] = useState<AgentGraphData>({ nodes: [], edges: [] });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [heartbeat, setHeartbeat] = useState<any>(null);
   const [uptimeString, setUptimeString] = useState("00:00:00");
@@ -47,7 +48,15 @@ export default function Home() {
     try {
       const res = await fetch(API_AGENTS);
       const data = await res.json();
-      if (data.agents) setAgents(data.agents);
+      if (data.graph) {
+          setGraphData(data.graph);
+      } else if (data.agents) {
+          // Fallback for older API format
+          setGraphData({
+              nodes: data.agents.map((a: string) => ({ id: a, name: a, parent: null })),
+              edges: []
+          });
+      }
     } catch (e) {
       console.error("Failed to fetch agents", e);
     }
@@ -99,7 +108,7 @@ export default function Home() {
              </div>
              <div className="flex items-center gap-2 px-3 py-1 rounded border border-[#333] bg-[#111] backdrop-blur-sm">
                <Users size={14} className="text-[#00ffff]" />
-               <span className="text-xs font-mono text-[#888]">AGENTS: {agents.length}</span>
+               <span className="text-xs font-mono text-[#888]">AGENTS: {graphData.nodes.length}</span>
              </div>
            </div>
 
@@ -122,7 +131,7 @@ export default function Home() {
               </h2>
             </div>
             <div className="flex-1 h-full min-h-0">
-               <ChatInterface onAgentsUpdate={setAgents} />
+               <ChatInterface onGraphUpdate={setGraphData} />
             </div>
           </section>
 
@@ -134,7 +143,7 @@ export default function Home() {
               </h2>
             </div>
             <div className="flex-1 border border-[#333] rounded bg-[#0a0a0a] relative overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)]">
-               <AgentGraph agents={agents} />
+               <AgentGraph graphData={graphData} />
             </div>
           </section>
        </div>

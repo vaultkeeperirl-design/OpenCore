@@ -15,13 +15,16 @@ class Agent:
         system_prompt: str,
         model: str = "gpt-4o",
         client: Any = None,
-        is_custom_model: bool = False
+        is_custom_model: bool = False,
+        created_by: Optional[str] = None
     ):
         self.name = name
         self.role = role
         self.system_prompt = system_prompt
         self.model = model
         self.is_custom_model = is_custom_model
+        self.created_by = created_by
+        self.last_thought: str = "Idle"
         sys_msg = f"You are {name}, a {role}. {system_prompt}"
         self.messages: List[Dict[str, Any]] = [
             {"role": "system", "content": sys_msg}
@@ -147,13 +150,16 @@ class Agent:
 
             # If tool calls present
             if response.tool_calls:
+                self.last_thought = "Executing tools..."
                 self._execute_tool_calls(response.tool_calls)
                 # Recursively think again to process the tool output
                 return self.think(max_turns=max_turns - 1)
             else:
                 if response.content:
+                    self.last_thought = response.content
                     return response.content
                 else:
+                    self.last_thought = "Error: Empty response."
                     return "Error: Empty response from model."
 
         except Exception as e:
