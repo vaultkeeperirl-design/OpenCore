@@ -11,3 +11,7 @@
 ## 2026-02-23 - Unbounded Message History Growth
 **Learning:** The `Agent` class allowed infinite message accumulation, leading to potential context window exhaustion and memory leaks.
 **Action:** Implemented a rolling window pruning mechanism in `Agent.think` to limit history while preserving the system prompt. Future agents should support configurable history limits.
+
+## 2026-02-24 - Frontend Validation Gaps
+**Learning:** The `ChatInterface` component lacked client-side size validation for file uploads, relying solely on backend (or crashing before reaching backend).
+**Action:** Enforce size limits on all file inputs/drops in frontend components.
