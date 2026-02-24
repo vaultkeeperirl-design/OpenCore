@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "opencore"
-version = "2.1.1"
+dynamic = ["version"]
 description = "OpenCore AI Agent Swarm"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -25,6 +25,9 @@ dependencies = [
 
 [project.scripts]
 opencore = "opencore.cli.main:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "opencore.__version__"}
 
 [tool.setuptools.packages.find]
 where = ["."]
