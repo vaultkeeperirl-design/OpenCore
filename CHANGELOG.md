@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-02-24
+
+### Added
+- **Theme Manager**: New UI feature allowing users to switch between 6 persistent themes (Cyberpunk, Dark Cool, Forest, Corporate Light, Warm Light, Lavender Light).
+- **Theme Persistence**: Selected theme is saved to local storage and automatically applied on visit.
+- **Frontend UI Refresh**: Updated frontend build artifacts to include the latest UI components and accessibility improvements.
+
 ## [2.0.6] - 2026-02-24
 
 ### Fixed
