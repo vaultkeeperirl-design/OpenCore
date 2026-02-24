@@ -41,6 +41,12 @@ Designed for dynamic collaboration, it orchestrates a network of specialized int
     ```
     Access the Cyberdeck at `http://localhost:8000`.
 
+5.  **Update the System**:
+    To update to the latest build (code and assets):
+    ```bash
+    opencore update
+    ```
+
 *Note: The frontend is pre-built and included. No Node.js installation is required for standard usage.*
 
 ## // CONFIGURATION_MATRIX

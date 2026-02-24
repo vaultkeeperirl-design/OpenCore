@@ -11,6 +11,9 @@ def main():
     # onboard command
     subparsers.add_parser("onboard", help="Run the onboarding wizard to configure the environment")
 
+    # update command
+    subparsers.add_parser("update", help="Update OpenCore to the latest version")
+
     # start command
     start_parser = subparsers.add_parser("start", help="Start the OpenCore server")
     start_parser.add_argument("--host", default=None, help="Host to bind (default: 127.0.0.1 or from .env)")
@@ -21,6 +24,9 @@ def main():
 
     if args.command == "onboard":
         run_onboarding()
+    elif args.command == "update":
+        from opencore.cli.update import update_system
+        update_system()
     elif args.command == "start":
         # Check for .env before importing config if possible, or handle missing config gracefully
         if not os.path.exists(".env"):
