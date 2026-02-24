@@ -158,6 +158,17 @@ class Swarm:
             # We add the sender's context implicitly by just chatting with the target
             # In a more complex system, we'd pass the sender's name.
             response = target_agent.chat(f"Request from {agent.name}: {task}")
+
+            # Record response interaction
+            self.interactions.append({
+                "source": to_agent,
+                "target": agent.name,
+                "summary": "Response: " + (response[:50] + "..." if len(response) > 50 else response),
+                "timestamp": "now"
+            })
+            if len(self.interactions) > 20:
+                self.interactions.pop(0)
+
             return f"Response from {to_agent}: {response}"
 
         agent.register_tool(delegate_task_wrapper, delegate_schema)
