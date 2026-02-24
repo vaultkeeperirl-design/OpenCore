@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Send, User, Sparkles, Image as ImageIcon, FileText, X, Paperclip, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import VoiceInput from "./VoiceInput";
@@ -48,6 +48,10 @@ export default function ChatInterface({
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  const handleTranscript = useCallback((text: string) => {
+    setInput(text);
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -362,7 +366,7 @@ export default function ChatInterface({
         )}
 
         <form onSubmit={handleSubmit} className="flex gap-3 relative items-center">
-           <VoiceInput onTranscript={(text) => setInput(text)} disabled={loading} />
+           <VoiceInput onTranscript={handleTranscript} disabled={loading} />
 
            <input
              type="text"

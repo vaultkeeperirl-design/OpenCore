@@ -14,65 +14,108 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { AgentGraphData, AgentNode } from "@/types/agent";
+import { Users, Bot } from "lucide-react";
 
 // Helper to create a node object
 const createNode = (data: AgentNode, x: number, y: number): Node => {
     const isManager = data.id === "Manager";
+    const isTeamLead = data.parent === "Manager";
+
+    // Define styles based on role
+    let nodeStyle = {};
+    let iconElement = null;
+    let borderColor = "";
+    let textColor = "";
+
+    if (isManager) {
+        borderColor = "#bc13fe";
+        textColor = "#bc13fe";
+        nodeStyle = {
+            background: 'rgba(188, 19, 254, 0.08)',
+            color: textColor,
+            border: `1px solid ${borderColor}`,
+            boxShadow: `0 0 30px rgba(188, 19, 254, 0.2)`,
+            borderRadius: '12px',
+            padding: '16px',
+            width: 240,
+            textAlign: 'center' as const,
+            fontFamily: 'var(--font-orbitron)',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            backdropFilter: 'blur(10px)',
+            textTransform: 'uppercase' as const,
+            letterSpacing: '1px'
+        };
+        iconElement = <img src="/logo.svg" className="w-8 h-8 drop-shadow-[0_0_10px_#ff00ff]" alt="" />;
+    } else if (isTeamLead) {
+        borderColor = "#00f3ff"; // Cyan for Team Lead
+        textColor = "#00f3ff";
+        nodeStyle = {
+            background: 'rgba(0, 243, 255, 0.08)',
+            color: textColor,
+            border: `1px solid ${borderColor}`,
+            boxShadow: `0 0 20px rgba(0, 243, 255, 0.2)`,
+            borderRadius: '12px',
+            padding: '14px',
+            width: 220,
+            textAlign: 'center' as const,
+            fontFamily: 'var(--font-orbitron)',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            backdropFilter: 'blur(8px)',
+            textTransform: 'uppercase' as const,
+            letterSpacing: '0.5px'
+        };
+        iconElement = <Users className="w-6 h-6 text-cyan-400 drop-shadow-[0_0_8px_rgba(0,243,255,0.8)]" />;
+    } else {
+        // Worker
+        borderColor = "#22c55e"; // Green for Worker
+        textColor = "#4ade80";
+        nodeStyle = {
+            background: 'rgba(34, 197, 94, 0.08)',
+            color: textColor,
+            border: `1px solid ${borderColor}`,
+            boxShadow: `0 0 15px rgba(34, 197, 94, 0.15)`,
+            borderRadius: '10px',
+            padding: '12px',
+            width: 200,
+            textAlign: 'center' as const,
+            fontFamily: 'var(--font-share-tech-mono)',
+            fontSize: '12px',
+            fontWeight: 'normal',
+            backdropFilter: 'blur(5px)',
+            textTransform: 'none' as const
+        };
+        iconElement = <Bot className="w-5 h-5 text-green-400 drop-shadow-[0_0_5px_rgba(34,197,94,0.8)]" />;
+    }
+
     return {
         id: data.id,
         position: { x, y },
         data: {
-            label: isManager ? (
+            label: (
                 <div className="flex flex-col items-center justify-center gap-2 pointer-events-none w-full h-full">
-                    <div className="flex items-center justify-center gap-2">
-                        <img src="/logo.svg" className="w-8 h-8 drop-shadow-[0_0_10px_#ff00ff]" alt="" />
-                        <span>MANAGER</span>
+                    <div className="flex items-center justify-center gap-2 w-full">
+                        {iconElement}
+                        <span className="truncate max-w-[150px]" title={data.name}>
+                            {data.name.replace(/_/g, ' ')}
+                        </span>
                     </div>
                     {data.last_thought && data.last_thought !== "Idle" && (
-                        <div className="text-[10px] text-fuchsia-200/70 font-mono mt-1 w-full truncate px-2 border-t border-fuchsia-500/30 pt-1">
-                            {data.last_thought}
-                        </div>
-                    )}
-                </div>
-            ) : (
-                <div className="flex flex-col items-center w-full h-full">
-                    <div className="font-bold mb-1">{data.name}</div>
-                    {data.last_thought && data.last_thought !== "Idle" && (
-                         <div className="text-[10px] text-cyan-200/70 font-mono w-full truncate border-t border-cyan-500/30 pt-1 px-1">
+                        <div
+                            className="text-[10px] font-mono mt-1 w-full truncate px-2 border-t pt-2 opacity-80"
+                            style={{
+                                borderColor: `${borderColor}40`,
+                                color: isManager ? '#f5d0fe' : (isTeamLead ? '#cffafe' : '#dcfce7')
+                            }}
+                        >
                             {data.last_thought}
                         </div>
                     )}
                 </div>
             )
         },
-        style: isManager ? {
-            background: 'rgba(188, 19, 254, 0.1)',
-            color: '#bc13fe',
-            border: '1px solid #bc13fe',
-            boxShadow: '0 0 30px rgba(188, 19, 254, 0.2)',
-            borderRadius: '12px',
-            padding: '16px',
-            width: 220,
-            textAlign: 'center',
-            fontFamily: 'var(--font-orbitron)',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            backdropFilter: 'blur(10px)',
-            textTransform: 'uppercase',
-            letterSpacing: '1px'
-        } : {
-            background: 'rgba(5, 5, 16, 0.8)',
-            color: '#00f3ff',
-            border: '1px solid #00f3ff',
-            boxShadow: '0 0 15px rgba(0, 243, 255, 0.15)',
-            borderRadius: '8px',
-            padding: '12px',
-            width: 180,
-            textAlign: 'center',
-            fontFamily: 'var(--font-share-tech-mono)',
-            fontSize: '12px',
-            backdropFilter: 'blur(5px)'
-        },
+        style: nodeStyle,
         type: 'default',
         sourcePosition: Position.Bottom,
         targetPosition: Position.Top,
@@ -99,20 +142,12 @@ const getLayout = (nodesData: AgentNode[]): Node[] => {
         }
     });
 
-    // Ensure Manager is treated as root if it exists
-    const manager = nodesData.find(n => n.id === "Manager");
-    if (manager && !roots.includes("Manager")) {
-         // If manager is somewhere in the list but not detected as root (e.g. if parent is null)
-         // But logic above handles null parent.
-         // What if Manager has a parent? Unlikely.
-    }
-
     // Sort roots: Manager first
     roots.sort((a, b) => (a === "Manager" ? -1 : b === "Manager" ? 1 : a.localeCompare(b)));
 
     const layoutNodes: Node[] = [];
     const LEVEL_HEIGHT = 150;
-    const SIBLING_SPACING = 220; // Increased for wider nodes
+    const SIBLING_SPACING = 240; // Increased spacing for larger nodes
 
     // Assign Levels
     const levels: Record<string, number> = {};
@@ -130,16 +165,10 @@ const getLayout = (nodesData: AgentNode[]): Node[] => {
         nodesByLevel[lvl].push(n.id);
     });
 
-    // Calculate Positions
-    // For a better tree look, we should center children under parents.
-    // But simple level-based is safer for arbitrary graph changes.
-    // Let's stick to level-based centering for now.
-
     Object.keys(nodesByLevel).forEach(lvlStr => {
         const lvl = parseInt(lvlStr);
         const nodesInLevel = nodesByLevel[lvl];
-        // Sort nodes in level to keep siblings together if possible?
-        // Sorting by parent ID helps
+        // Sort nodes in level
         nodesInLevel.sort((a, b) => {
              const pA = nodesData.find(n => n.id === a)?.parent || "";
              const pB = nodesData.find(n => n.id === b)?.parent || "";
@@ -168,9 +197,6 @@ export default function AgentGraph({ graphData }: { graphData: AgentGraphData })
 
     // 1. Generate Nodes
     const newNodes = getLayout(graphData.nodes);
-
-    // Maintain node positions if they exist? No, we force layout updates on data change.
-    // React Flow might animate if we just update the props.
     setNodes(newNodes);
 
     // 2. Generate Edges
