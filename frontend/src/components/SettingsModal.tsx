@@ -188,16 +188,56 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         </div>
                      )}
                      {!item.isOAuth && item.key === "GEMINI_API_KEY" && (
-                        <div className="mt-2 flex items-center gap-2">
-                           <a
-                             href={API_AUTH_GOOGLE_LOGIN}
-                             target="_blank"
-                             rel="noopener noreferrer"
-                             className="px-3 py-1.5 bg-[#222] hover:bg-[#333] border border-[#333] hover:border-[#00ffff] rounded flex items-center gap-2 transition-all group/btn"
+                        <div className="mt-2 flex flex-col gap-2 p-3 border border-[#333] rounded bg-[#111]">
+                           <span className="text-[10px] text-[#00ffff] font-mono uppercase mb-1">Google Cloud OAuth (Recommended)</span>
+
+                           <div className="flex flex-col gap-1">
+                               <label className="text-[10px] text-[#888] font-mono">Client ID</label>
+                               <input
+                                   type="text"
+                                   value={config.GOOGLE_CLIENT_ID || ""}
+                                   onChange={(e) => setConfig({...config, GOOGLE_CLIENT_ID: e.target.value})}
+                                   className="w-full bg-black border border-[#333] rounded p-1.5 text-xs font-mono text-[#e0e0e0] focus:border-[#00ffff] focus:outline-none"
+                                   placeholder="...apps.googleusercontent.com"
+                               />
+                           </div>
+
+                           <div className="flex flex-col gap-1">
+                               <label className="text-[10px] text-[#888] font-mono">Client Secret</label>
+                               <input
+                                   type="password"
+                                   value={config.GOOGLE_CLIENT_SECRET || ""}
+                                   onChange={(e) => setConfig({...config, GOOGLE_CLIENT_SECRET: e.target.value})}
+                                   className="w-full bg-black border border-[#333] rounded p-1.5 text-xs font-mono text-[#e0e0e0] focus:border-[#00ffff] focus:outline-none"
+                                   placeholder="GOCSPX-..."
+                               />
+                           </div>
+
+                           <button
+                             onClick={async () => {
+                                 try {
+                                     setLoading(true);
+                                     const res = await fetch(API_CONFIG, {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify(config),
+                                      });
+                                      if (res.ok) {
+                                          window.location.href = API_AUTH_GOOGLE_LOGIN;
+                                      } else {
+                                          toast.error("Failed to save credentials before connecting.");
+                                          setLoading(false);
+                                      }
+                                 } catch (e) {
+                                     toast.error("Error saving config.");
+                                     setLoading(false);
+                                 }
+                             }}
+                             className="mt-2 w-full py-1.5 bg-[#222] hover:bg-[#333] border border-[#333] hover:border-[#00ffff] rounded flex items-center justify-center gap-2 transition-all group/btn"
                            >
                               <Image src="/globe.svg" alt="Google" width={12} height={12} className="opacity-70 group-hover/btn:opacity-100" />
-                              <span className="text-[10px] text-[#00ffff] font-mono font-bold tracking-wide group-hover/btn:text-white">SETUP GOOGLE ADC</span>
-                           </a>
+                              <span className="text-[10px] text-[#00ffff] font-mono font-bold tracking-wide group-hover/btn:text-white">CONNECT WITH GOOGLE CLOUD</span>
+                           </button>
                         </div>
                      )}
                    </div>
