@@ -8,8 +8,9 @@ from opencore.auth.qwen import get_qwen_credentials
 load_dotenv()
 
 MODEL_CORRECTIONS = {
-    "gemini/gemini-1.5-flash": "gemini/gemini-1.5-flash-001",
-    "gemini/gemini-1.5-flash-latest": "gemini/gemini-1.5-flash-001",
+    "gemini/gemini-1.5-flash": "gemini/gemini-2.0-flash",
+    "gemini/gemini-1.5-flash-latest": "gemini/gemini-2.0-flash",
+    "gemini/gemini-1.5-flash-001": "gemini/gemini-2.0-flash",
     "openai/grok-2-1212": "xai/grok-2-vision-1212",
 }
 

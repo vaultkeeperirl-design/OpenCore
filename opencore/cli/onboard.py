@@ -120,7 +120,7 @@ def run_onboarding(interactive=True):
 
             elif choice == "4":
                 # Google Gemini (AI Studio)
-                config["LLM_MODEL"] = "gemini/gemini-1.5-flash-001"
+                config["LLM_MODEL"] = "gemini/gemini-2.0-flash"
                 api_key = input("ENTER GEMINI_API_KEY (AI Studio): ").strip()
                 config["GEMINI_API_KEY"] = api_key
 
