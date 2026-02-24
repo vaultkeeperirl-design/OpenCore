@@ -24,6 +24,20 @@ def update_system():
     print(f"Updating OpenCore from {repo_root}...")
 
     try:
+        # Clean up build artifacts that might cause conflicts
+        # specifically opencore.egg-info which is often modified by pip install -e .
+        if (repo_root / "opencore.egg-info").exists():
+            print(">> Cleaning build artifacts...")
+            try:
+                subprocess.run(
+                    ["git", "checkout", "HEAD", "--", "opencore.egg-info"],
+                    cwd=repo_root,
+                    check=False,  # Don't fail if it doesn't exist in HEAD or other minor issues
+                    stderr=subprocess.DEVNULL
+                )
+            except Exception:
+                pass  # Best effort cleanup
+
         # Run git pull
         print(">> Pulling latest changes from git...")
         subprocess.check_call(["git", "pull"], cwd=repo_root)
