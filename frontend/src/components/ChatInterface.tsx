@@ -7,6 +7,8 @@ import VoiceInput from "./VoiceInput";
 import { toast } from "sonner";
 import { API_CHAT, SUPPORTED_FILE_EXTENSIONS_REGEX } from "@/constants";
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 interface Attachment {
   name: string;
   type: string;
@@ -111,6 +113,12 @@ export default function ChatInterface({
           if (!isValid) {
                toast.error(`File type not supported: ${file.name}`);
           }
+
+          if (file.size > MAX_FILE_SIZE) {
+               toast.error(`File too large: ${file.name} (max 10MB)`);
+               return false;
+          }
+
           return isValid;
       });
       setAttachments(prev => [...prev, ...validFiles]);
@@ -129,6 +137,11 @@ export default function ChatInterface({
     const processedAttachments: Attachment[] = [];
     try {
         for (const file of attachments) {
+          if (file.size > MAX_FILE_SIZE) {
+            toast.error(`File too large: ${file.name} (max 10MB)`);
+            return;
+          }
+
           const content = await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => resolve(reader.result as string);
