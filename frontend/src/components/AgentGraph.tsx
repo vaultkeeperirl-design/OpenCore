@@ -14,13 +14,20 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { AgentGraphData, AgentNode } from "@/types/agent";
-import { Users, Bot } from "lucide-react";
+import { Users, Bot, X, Power } from "lucide-react";
 import Image from "next/image";
 
 // Helper to create a node object
-const createNode = (data: AgentNode, x: number, y: number): Node => {
+const createNode = (
+    data: AgentNode,
+    x: number,
+    y: number,
+    onDelete: (name: string) => void,
+    onToggle: (name: string) => void
+): Node => {
     const isManager = data.id === "Manager";
     const isTeamLead = data.parent === "Manager";
+    const isInactive = data.status === "inactive";
 
     let className = "";
     let iconElement = null;
@@ -28,16 +35,16 @@ const createNode = (data: AgentNode, x: number, y: number): Node => {
 
     if (isManager) {
         borderColor = "var(--accent-2)";
-        className = "bg-accent-2/10 border border-accent-2 text-accent-2 shadow-[0_0_30px_color-mix(in_srgb,var(--accent-2),transparent_80%)] rounded-xl p-4 w-[240px] text-center font-orbitron text-sm font-bold backdrop-blur-md uppercase tracking-wider";
+        className = "bg-accent-2/10 border border-accent-2 text-accent-2 shadow-[0_0_30px_color-mix(in_srgb,var(--accent-2),transparent_80%)] rounded-xl p-4 w-[240px] text-center font-orbitron text-sm font-bold backdrop-blur-md uppercase tracking-wider relative group";
         iconElement = <Image src="/logo.svg" width={32} height={32} className="w-8 h-8 drop-shadow-[0_0_10px_var(--accent-2)]" alt="" />;
     } else if (isTeamLead) {
         borderColor = "var(--accent-1)";
-        className = "bg-accent-1/10 border border-accent-1 text-accent-1 shadow-[0_0_20px_color-mix(in_srgb,var(--accent-1),transparent_80%)] rounded-xl p-3.5 w-[220px] text-center font-orbitron text-xs font-bold backdrop-blur-sm uppercase tracking-wide";
+        className = `bg-accent-1/10 border border-accent-1 text-accent-1 shadow-[0_0_20px_color-mix(in_srgb,var(--accent-1),transparent_80%)] rounded-xl p-3.5 w-[220px] text-center font-orbitron text-xs font-bold backdrop-blur-sm uppercase tracking-wide relative group ${isInactive ? 'opacity-50 grayscale' : ''}`;
         iconElement = <Users className="w-6 h-6 text-accent-1 drop-shadow-[0_0_8px_var(--accent-1)]" />;
     } else {
         // Worker
         borderColor = "var(--accent-3)";
-        className = "bg-accent-3/10 border border-accent-3 text-accent-3 shadow-[0_0_15px_color-mix(in_srgb,var(--accent-3),transparent_85%)] rounded-lg p-3 w-[200px] text-center font-mono text-xs font-normal backdrop-blur-sm";
+        className = `bg-accent-3/10 border border-accent-3 text-accent-3 shadow-[0_0_15px_color-mix(in_srgb,var(--accent-3),transparent_85%)] rounded-lg p-3 w-[200px] text-center font-mono text-xs font-normal backdrop-blur-sm relative group ${isInactive ? 'opacity-50 grayscale' : ''}`;
         iconElement = <Bot className="w-5 h-5 text-accent-3 drop-shadow-[0_0_5px_var(--accent-3)]" />;
     }
 
@@ -46,7 +53,31 @@ const createNode = (data: AgentNode, x: number, y: number): Node => {
         position: { x, y },
         data: {
             label: (
-                <div className="flex flex-col items-center justify-center gap-2 pointer-events-none w-full h-full">
+                <div className="flex flex-col items-center justify-center gap-2 pointer-events-none w-full h-full relative">
+                    {!isManager && (
+                        <div className="absolute -top-8 right-0 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onToggle(data.name);
+                                }}
+                                className="p-1 rounded bg-bg-tertiary border border-border-primary hover:bg-accent-1/20 text-accent-1"
+                                title={isInactive ? "Activate Agent" : "Deactivate Agent"}
+                            >
+                                <Power size={12} />
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(data.name);
+                                }}
+                                className="p-1 rounded bg-bg-tertiary border border-border-primary hover:bg-status-error/20 text-status-error"
+                                title="Remove Agent"
+                            >
+                                <X size={12} />
+                            </button>
+                        </div>
+                    )}
                     <div className="flex items-center justify-center gap-2 w-full">
                         {iconElement}
                         <span className="truncate max-w-[150px]" title={data.name}>
@@ -77,7 +108,11 @@ const createNode = (data: AgentNode, x: number, y: number): Node => {
 };
 
 // Helper to calculate tree layout
-const getLayout = (nodesData: AgentNode[]): Node[] => {
+const getLayout = (
+    nodesData: AgentNode[],
+    onDelete: (name: string) => void,
+    onToggle: (name: string) => void
+): Node[] => {
     if (!nodesData.length) return [];
 
     const parentMap: Record<string, string[]> = {};
@@ -135,17 +170,52 @@ const getLayout = (nodesData: AgentNode[]): Node[] => {
         nodesInLevel.forEach((nodeId, index) => {
              const x = startX + (index * SIBLING_SPACING);
              const y = 50 + (lvl * LEVEL_HEIGHT);
-             layoutNodes.push(createNode(nodesData.find(n => n.id === nodeId)!, x, y));
+             layoutNodes.push(createNode(nodesData.find(n => n.id === nodeId)!, x, y, onDelete, onToggle));
         });
     });
 
     return layoutNodes;
 };
 
-export default function AgentGraph({ graphData }: { graphData: AgentGraphData }) {
+export default function AgentGraph({
+    graphData,
+    onRefresh
+}: {
+    graphData: AgentGraphData;
+    onRefresh?: () => void;
+}) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [now, setNow] = useState(Date.now());
+
+  const handleDelete = async (name: string) => {
+      if (!confirm(`Are you sure you want to remove agent '${name}'?`)) return;
+      try {
+          const res = await fetch(`/agents/${name}`, { method: 'DELETE' });
+          const data = await res.json();
+          if (data.status === 'success') {
+              if (onRefresh) onRefresh();
+          } else {
+              alert(data.message);
+          }
+      } catch (e) {
+          console.error("Failed to delete agent", e);
+      }
+  };
+
+  const handleToggle = async (name: string) => {
+      try {
+          const res = await fetch(`/agents/${name}/toggle`, { method: 'POST' });
+          const data = await res.json();
+          if (data.status === 'success') {
+              if (onRefresh) onRefresh();
+          } else {
+              alert(data.message);
+          }
+      } catch (e) {
+          console.error("Failed to toggle agent", e);
+      }
+  };
 
   // Update time every second to prune old interactions
   useEffect(() => {
@@ -157,7 +227,7 @@ export default function AgentGraph({ graphData }: { graphData: AgentGraphData })
     if (!graphData?.nodes) return;
 
     // 1. Generate Nodes
-    const newNodes = getLayout(graphData.nodes);
+    const newNodes = getLayout(graphData.nodes, handleDelete, handleToggle);
     setNodes(newNodes);
 
     // 2. Generate Edges

@@ -62,6 +62,42 @@ class Swarm:
 
         return f"Agent '{name}' created successfully using model '{agent_model}'."
 
+    def remove_agent(self, name: str) -> str:
+        """Removes an agent from the swarm."""
+        if name not in self.agents:
+            return f"Error: Agent '{name}' not found."
+
+        if name == self.main_agent_name:
+            return "Error: Cannot remove the main manager agent."
+
+        del self.agents[name]
+
+        # Cleanup team references if this agent was a leader
+        teams_to_remove = []
+        for team_name, members in self.teams.items():
+            if name in members:
+                members.remove(name)
+            # If the removed agent was the leader (usually first in list or by name convention)
+            # For now, just removing from list is enough.
+
+        return f"Agent '{name}' removed."
+
+    def toggle_agent(self, name: str) -> str:
+        """Toggles an agent's active status."""
+        agent = self.get_agent(name)
+        if not agent:
+            return f"Error: Agent '{name}' not found."
+
+        if name == self.main_agent_name:
+             return "Error: Cannot toggle the main manager agent."
+
+        if agent.status == "active":
+            agent.status = "inactive"
+            return f"Agent '{name}' deactivated."
+        else:
+            agent.status = "active"
+            return f"Agent '{name}' activated."
+
     def create_team(self, name: str, goal: str, lead_role: str, lead_instructions: str) -> str:
         """
         Creates a new team with a designated leader.
@@ -170,6 +206,48 @@ class Swarm:
 
             agent.register_tool(create_team_wrapper, create_team_schema)
 
+            # Tool: Remove Agent (Main Agent Only)
+            remove_agent_schema = {
+                "type": "function",
+                "function": {
+                    "name": "remove_agent",
+                    "description": "Removes/dismisses a sub-agent from the swarm.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string", "description": "The name of the agent to remove."}
+                        },
+                        "required": ["name"]
+                    }
+                }
+            }
+
+            def remove_agent_wrapper(name: str):
+                return self.remove_agent(name)
+
+            agent.register_tool(remove_agent_wrapper, remove_agent_schema)
+
+            # Tool: Toggle Agent (Main Agent Only)
+            toggle_agent_schema = {
+                "type": "function",
+                "function": {
+                    "name": "toggle_agent",
+                    "description": "Activates or deactivates an agent.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string", "description": "The name of the agent."}
+                        },
+                        "required": ["name"]
+                    }
+                }
+            }
+
+            def toggle_agent_wrapper(name: str):
+                return self.toggle_agent(name)
+
+            agent.register_tool(toggle_agent_wrapper, toggle_agent_schema)
+
         # Tool: Delegate Task
         delegate_schema = {
             "type": "function",
@@ -272,6 +350,7 @@ class Swarm:
                 "id": name,
                 "name": name,
                 "parent": agent.created_by,
+                "status": getattr(agent, "status", "active"),
                 "last_thought": getattr(agent, "last_thought", "Idle")
             })
 

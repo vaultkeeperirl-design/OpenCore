@@ -14,7 +14,7 @@ class TestStaticServing(unittest.TestCase):
 
     def test_version(self):
         from opencore import __version__
-        self.assertEqual(__version__, "2.1.1")
+        self.assertEqual(__version__, "2.1.2")
 
 
 if __name__ == "__main__":
