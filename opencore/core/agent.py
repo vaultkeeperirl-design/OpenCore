@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from typing import List, Dict, Any, Callable
+from typing import List, Dict, Any, Callable, Optional, Union
 from litellm import completion
 
 
@@ -39,7 +39,7 @@ class Agent:
         self.tools[schema["function"]["name"]] = func
         self.tool_definitions.append(schema)
 
-    def add_message(self, role: str, content: str):
+    def add_message(self, role: str, content: Union[str, List[Dict[str, Any]]]):
         self.messages.append({"role": role, "content": content})
 
     def _execute_tool_calls(self, tool_calls: List[Any]):
@@ -153,6 +153,28 @@ class Agent:
             logger.exception(f"Error during thought process: {error_msg}")
             return f"Error during thought process: {error_msg}"
 
-    def chat(self, message: str) -> str:
-        self.add_message("user", message)
+    def chat(self, message: str, attachments: Optional[List[Dict[str, Any]]] = None) -> str:
+        if attachments:
+            content = []
+            text_content = message
+
+            # 1. Process Text/Code Attachments (append to text)
+            for att in attachments:
+                if not att["type"].startswith("image/"):
+                    text_content += f"\n\n[Attachment: {att['name']}]\n{att['content']}\n[End Attachment]"
+
+            content.append({"type": "text", "text": text_content})
+
+            # 2. Process Image Attachments
+            for att in attachments:
+                 if att["type"].startswith("image/"):
+                     content.append({
+                         "type": "image_url",
+                         "image_url": {"url": att["content"]}
+                     })
+
+            self.add_message("user", content)
+        else:
+            self.add_message("user", message)
+
         return self.think()
