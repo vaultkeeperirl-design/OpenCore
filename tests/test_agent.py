@@ -33,7 +33,7 @@ class TestAgent(unittest.TestCase):
         agent = Agent("TestBot", "Tester", "You test things.")
         response = agent.think()
 
-        expected_msg = "SYSTEM ALERT: LLM configuration invalid or missing. Please configure your provider in Settings."
+        expected_msg = "SYSTEM ALERT: LLM configuration invalid or missing (Incorrect API key provided). Please configure your provider in Settings."
         self.assertEqual(response, expected_msg)
 
     @patch("opencore.core.agent.get_llm_provider")
