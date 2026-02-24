@@ -151,7 +151,7 @@ export default function Home() {
               </h2>
             </div>
             <div className="flex-1 border border-border-primary rounded bg-bg-secondary relative overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)] transition-colors duration-300">
-               <AgentGraph graphData={graphData} />
+               <AgentGraph graphData={graphData} onRefresh={fetchAgents} />
             </div>
           </section>
        </div>

@@ -3,6 +3,7 @@ export interface AgentNode {
     name: string;
     parent: string | null;
     last_thought?: string;
+    status?: "active" | "inactive";
 }
 
 export interface AgentEdge {
