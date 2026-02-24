@@ -51,7 +51,7 @@ Configure the application using environment variables in your `.env` file or via
 | :--- | :--- | :--- |
 | `APP_ENV` | Application environment (`development` or `production`). | `production` |
 | `LLM_MODEL` | The LLM model to use (see Supported Models below). | `gpt-4o` |
-| `HOST` | The host to bind the server to. | `0.0.0.0` |
+| `HOST` | The host to bind the server to. | `127.0.0.1` |
 | `PORT` | The port to listen on. | `8000` |
 | `LOG_LEVEL` | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`). | `INFO` |
 

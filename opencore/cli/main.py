@@ -13,7 +13,7 @@ def main():
 
     # start command
     start_parser = subparsers.add_parser("start", help="Start the OpenCore server")
-    start_parser.add_argument("--host", default=None, help="Host to bind (default: 0.0.0.0 or from .env)")
+    start_parser.add_argument("--host", default=None, help="Host to bind (default: 127.0.0.1 or from .env)")
     start_parser.add_argument("--port", type=int, default=None, help="Port to listen (default: 8000 or from .env)")
     start_parser.add_argument("--reload", action="store_true", help="Enable auto-reload (default: from .env)")
 
@@ -43,7 +43,7 @@ def main():
             # Fallback if config fails to load due to missing env vars (though settings usually has defaults)
             print("Warning: Could not load settings from opencore.config. Using defaults.")
             class MockSettings:
-                host = "0.0.0.0"
+                host = "127.0.0.1"
                 port = 8000
                 is_dev = False
             settings = MockSettings()

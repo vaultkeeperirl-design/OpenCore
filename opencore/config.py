@@ -62,7 +62,7 @@ class Settings:
         raw_model = os.getenv("LLM_MODEL")
         self.llm_model = MODEL_CORRECTIONS.get(raw_model, raw_model)
 
-        self.host = os.getenv("HOST", "0.0.0.0")
+        self.host = os.getenv("HOST", "127.0.0.1")
         self.port = int(os.getenv("PORT", 8000))
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
         self.heartbeat_interval = int(os.getenv("HEARTBEAT_INTERVAL", 3600))
