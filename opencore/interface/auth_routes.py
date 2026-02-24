@@ -3,11 +3,16 @@ import logging
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import RedirectResponse
 import json
-from google_auth_oauthlib.flow import Flow
 from opencore.config import settings
 
 # Setup logger
 logger = logging.getLogger("opencore.auth")
+
+try:
+    from google_auth_oauthlib.flow import Flow
+except ImportError:
+    Flow = None
+    logger.warning("google-auth-oauthlib not installed. Google OAuth will be disabled.")
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -24,6 +29,9 @@ async def google_login(request: Request):
     """
     Initiates the Google OAuth flow.
     """
+    if Flow is None:
+        return {"status": "error", "message": "Google OAuth library not installed. Please install 'google-auth-oauthlib'."}
+
     client_id = os.getenv("GOOGLE_CLIENT_ID")
     client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
 
@@ -67,6 +75,9 @@ async def google_callback(request: Request):
     """
     Handles the Google OAuth callback.
     """
+    if Flow is None:
+        return {"status": "error", "message": "Google OAuth library not installed."}
+
     code = request.query_params.get("code")
     error = request.query_params.get("error")
 
