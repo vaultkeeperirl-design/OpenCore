@@ -11,6 +11,7 @@ class Swarm:
         self.agents: Dict[str, Agent] = {}
         self.teams: Dict[str, List[str]] = {}  # Map team_name -> list of agent_names
         self.interactions: List[Dict[str, str]] = []  # Track recent interactions
+        self.current_turn_activity: List[Dict[str, Any]] = []  # Track activity for the current request
         self.main_agent_name = main_agent_name
         # Allow env var to override default model
         self.default_model = settings.llm_model or default_model
@@ -60,6 +61,15 @@ class Swarm:
         # Register base tools (filesystem, command execution)
         register_base_tools(new_agent)
 
+        # Log creation activity
+        if name != self.main_agent_name:  # Don't log main agent creation during init
+            self.current_turn_activity.append({
+                "type": "lifecycle",
+                "subtype": "create",
+                "agent": name,
+                "timestamp": datetime.datetime.now().isoformat()
+            })
+
         return f"Agent '{name}' created successfully using model '{agent_model}'."
 
     def remove_agent(self, name: str) -> str:
@@ -71,6 +81,13 @@ class Swarm:
             return "Error: Cannot remove the main manager agent."
 
         del self.agents[name]
+
+        self.current_turn_activity.append({
+            "type": "lifecycle",
+            "subtype": "remove",
+            "agent": name,
+            "timestamp": datetime.datetime.now().isoformat()
+        })
 
         # Cleanup team references if this agent was a leader
         teams_to_remove = []
@@ -271,12 +288,24 @@ class Swarm:
                 return f"Error: Agent '{to_agent}' not found. Available agents: {list(self.agents.keys())}"
 
             # Record interaction
+            summary = task[:50] + "..." if len(task) > 50 else task
+            timestamp = datetime.datetime.now().isoformat()
+
             self.interactions.append({
                 "source": agent.name,
                 "target": to_agent,
-                "summary": task[:50] + "..." if len(task) > 50 else task,  # Brief summary
-                "timestamp": datetime.datetime.now().isoformat()
+                "summary": summary,  # Brief summary
+                "timestamp": timestamp
             })
+            # Activity Log
+            self.current_turn_activity.append({
+                "type": "interaction",
+                "source": agent.name,
+                "target": to_agent,
+                "summary": summary,
+                "timestamp": timestamp
+            })
+
             # Keep only last 20 interactions
             if len(self.interactions) > 20:
                 self.interactions.pop(0)
@@ -285,13 +314,25 @@ class Swarm:
             # In a more complex system, we'd pass the sender's name.
             response = target_agent.chat(f"Request from {agent.name}: {task}")
 
+            response_summary = "Response: " + (response[:50] + "..." if len(response) > 50 else response)
+            response_timestamp = datetime.datetime.now().isoformat()
+
             # Record response interaction
             self.interactions.append({
                 "source": to_agent,
                 "target": agent.name,
-                "summary": "Response: " + (response[:50] + "..." if len(response) > 50 else response),
-                "timestamp": datetime.datetime.now().isoformat()
+                "summary": response_summary,
+                "timestamp": response_timestamp
             })
+            # Activity Log
+            self.current_turn_activity.append({
+                "type": "interaction",
+                "source": to_agent,
+                "target": agent.name,
+                "summary": response_summary,
+                "timestamp": response_timestamp
+            })
+
             if len(self.interactions) > 20:
                 self.interactions.pop(0)
 
@@ -337,6 +378,7 @@ class Swarm:
         """
         Entry point for the user to chat with the main agent.
         """
+        self.current_turn_activity = []
         main_agent = self.agents[self.main_agent_name]
         return main_agent.chat(message, attachments=attachments)
 

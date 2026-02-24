@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Send, User, Sparkles, Image as ImageIcon, FileText, X, Paperclip, Loader2 } from "lucide-react";
+import { Send, User, Sparkles, Image as ImageIcon, FileText, X, Paperclip, Loader2, UserPlus, UserMinus, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import VoiceInput from "./VoiceInput";
 import { toast } from "sonner";
@@ -17,11 +17,22 @@ interface Attachment {
   content: string; // Base64 or text
 }
 
+interface ActivityItem {
+  type: "interaction" | "lifecycle";
+  subtype?: "create" | "remove";
+  source?: string;
+  target?: string;
+  summary?: string;
+  agent?: string;
+  timestamp: string;
+}
+
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   attachments?: Attachment[];
+  activities?: ActivityItem[];
   timestamp: number;
 }
 
@@ -198,6 +209,7 @@ export default function ChatInterface({
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: data.response,
+        activities: data.activity_log,
         timestamp: Date.now(),
       };
 
@@ -286,6 +298,38 @@ export default function ChatInterface({
               </div>
 
               <div className={`max-w-[80%] flex flex-col gap-2 ${msg.role === "user" ? "items-end" : "items-start"}`}>
+
+                {/* Activities / Thought Process */}
+                {msg.activities && msg.activities.length > 0 && (
+                  <div className="flex flex-col gap-1 mb-1 w-full">
+                    {msg.activities.map((activity, idx) => (
+                      <div key={idx} className="flex items-start gap-2 text-[10px] text-text-secondary/70 font-mono pl-1">
+                        {activity.type === "lifecycle" && activity.subtype === "create" && (
+                          <>
+                            <UserPlus size={12} className="shrink-0 text-accent-1/70 mt-0.5" />
+                            <span>Agent <span className="text-accent-1/90 font-bold">{activity.agent}</span> joined the chat.</span>
+                          </>
+                        )}
+                        {activity.type === "lifecycle" && activity.subtype === "remove" && (
+                          <>
+                            <UserMinus size={12} className="shrink-0 text-status-error/70 mt-0.5" />
+                            <span>Agent <span className="text-status-error/90 font-bold">{activity.agent}</span> left the chat.</span>
+                          </>
+                        )}
+                        {activity.type === "interaction" && (
+                           <>
+                             <ArrowRight size={12} className="shrink-0 text-text-secondary/50 mt-0.5" />
+                             <span className="break-words">
+                               <span className="text-accent-1/80">{activity.source}</span>
+                               <span className="mx-1 text-text-secondary/50">→</span>
+                               <span className="text-accent-1/80">{activity.target}</span>: {activity.summary}
+                             </span>
+                           </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Text Content */}
                 {msg.content && (
