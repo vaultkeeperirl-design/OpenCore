@@ -86,3 +86,27 @@ body::before {
     pointer-events: none;
     opacity: 0.4; /* Much subtler */
 }
+
+/* React Flow Controls Override */
+.react-flow__controls {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #333;
+}
+
+.react-flow__controls-button {
+  background: rgba(10, 10, 20, 0.9) !important;
+  border-bottom: 1px solid #333 !important;
+  fill: #00ffff !important;
+  transition: all 0.2s;
+}
+
+.react-flow__controls-button:hover {
+  background: rgba(0, 243, 255, 0.2) !important;
+  fill: #fff !important;
+}
+
+.react-flow__controls-button:last-child {
+  border-bottom: none !important;
+}

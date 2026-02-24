@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Mic, MicOff } from "lucide-react";
 import { toast } from "sonner";
 
@@ -11,55 +11,82 @@ interface VoiceInputProps {
 
 export default function VoiceInput({ onTranscript, disabled }: VoiceInputProps) {
   const [isListening, setIsListening] = useState(false);
-  const [recognition, setRecognition] = useState<any>(null);
+  const recognitionRef = useRef<any>(null);
+  const onTranscriptRef = useRef(onTranscript);
+
+  // Update the ref whenever onTranscript changes to ensure we use the latest callback
+  useEffect(() => {
+    onTranscriptRef.current = onTranscript;
+  }, [onTranscript]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const SpeechRecognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        const recognitionInstance = new SpeechRecognition();
-        recognitionInstance.continuous = false;
-        recognitionInstance.interimResults = false;
-        recognitionInstance.lang = "en-US";
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
-        recognitionInstance.onresult = (event: any) => {
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "en-US";
+
+        recognition.onresult = (event: any) => {
           const transcript = event.results[0][0].transcript;
-          onTranscript(transcript);
+          if (onTranscriptRef.current) {
+            onTranscriptRef.current(transcript);
+          }
           setIsListening(false);
         };
 
-        recognitionInstance.onerror = (event: any) => {
+        recognition.onerror = (event: any) => {
           console.error("Speech recognition error", event.error);
           setIsListening(false);
-          toast.error("Voice input error: " + event.error);
+
+          if (event.error === 'not-allowed') {
+             toast.error("Microphone access denied. Please allow permissions.");
+          } else if (event.error === 'no-speech') {
+             // customized handling could go here
+          } else {
+             toast.error("Voice input error: " + event.error);
+          }
         };
 
-        recognitionInstance.onend = () => {
+        recognition.onend = () => {
           setIsListening(false);
         };
 
-        setRecognition(recognitionInstance);
-      } else {
-        // Warning suppressed for cleaner console, can be logged if needed
+        recognitionRef.current = recognition;
       }
     }
-  }, [onTranscript]);
 
-  const toggleListening = () => {
-    if (!recognition) {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, []);
+
+  const toggleListening = useCallback(() => {
+    if (!recognitionRef.current) {
       toast.error("Speech recognition not supported in this browser.");
       return;
     }
 
     if (isListening) {
-      recognition.stop();
+      recognitionRef.current.stop();
+      // State will be updated in onend
     } else {
-      recognition.start();
-      setIsListening(true);
-      toast.info("Listening...");
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+        toast.info("Listening...");
+      } catch (error) {
+        console.error("Error starting speech recognition:", error);
+        // If it fails to start, reset state
+        setIsListening(false);
+      }
     }
-  };
+  }, [isListening]);
 
   return (
     <button
