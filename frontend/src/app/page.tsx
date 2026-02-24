@@ -12,6 +12,7 @@ export default function Home() {
   const [agents, setAgents] = useState<string[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [heartbeat, setHeartbeat] = useState<any>(null);
+  const [uptimeString, setUptimeString] = useState("00:00:00");
 
   useEffect(() => {
     fetchAgents();
@@ -19,6 +20,28 @@ export default function Home() {
     const interval = setInterval(fetchHeartbeat, HEARTBEAT_INTERVAL);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (!heartbeat?.start_time) return;
+
+    const updateUptime = () => {
+      const start = new Date(heartbeat.start_time);
+      const now = new Date();
+      const diff = Math.max(0, now.getTime() - start.getTime());
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setUptimeString(
+          `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+      );
+    };
+
+    updateUptime(); // Update immediately
+    const interval = setInterval(updateUptime, 1000);
+    return () => clearInterval(interval);
+  }, [heartbeat?.start_time]);
 
   const fetchAgents = async () => {
     try {
@@ -57,7 +80,7 @@ export default function Home() {
                OPENCORE
              </h1>
              <div className="flex items-center gap-2 text-[10px] text-[#888888] font-mono tracking-widest">
-               <span>V2.0.1</span>
+               <span>V{heartbeat?.version || "..."}</span>
                <span className="text-[#00ff41] drop-shadow-[0_0_5px_rgba(0,255,65,0.8)]">● SYSTEM ACTIVE</span>
              </div>
            </div>
@@ -68,7 +91,7 @@ export default function Home() {
            <div className="hidden md:flex gap-4">
              <div className="flex items-center gap-2 px-3 py-1 rounded border border-[#333] bg-[#111] backdrop-blur-sm">
                <Activity size={14} className="text-[#00ff41]" />
-               <span className="text-xs font-mono text-[#888]">UPTIME: {heartbeat?.uptime || "00:00:00"}</span>
+               <span className="text-xs font-mono text-[#888]">UPTIME: {uptimeString}</span>
              </div>
              <div className="flex items-center gap-2 px-3 py-1 rounded border border-[#333] bg-[#111] backdrop-blur-sm">
                <Shield size={14} className="text-[#ff00ff]" />
