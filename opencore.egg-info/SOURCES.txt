@@ -56,5 +56,4 @@ tests/test_provider_availability.py
 tests/test_scheduler_execution.py
 tests/test_security_tools.py
 tests/test_swarm.py
-tests/test_swarm_activity.py
 tests/test_tools.py
