@@ -114,6 +114,7 @@ export default function Home() {
 
            <button
              onClick={() => setSettingsOpen(true)}
+             aria-label="Settings"
              className="p-2 hover:bg-[#111] rounded-lg transition-all border border-transparent hover:border-[#333] text-[#00ffff] hover:text-white hover:shadow-[0_0_15px_rgba(0,255,255,0.3)] active:scale-95"
            >
              <Settings size={24} />

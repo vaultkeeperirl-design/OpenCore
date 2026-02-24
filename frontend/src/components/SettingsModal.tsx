@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Save, Key, Cpu, RefreshCw } from "lucide-react";
+import { X, Save, Key, Cpu, RefreshCw, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { API_CONFIG, API_AUTH_STATUS, API_AUTH_QWEN_LOGIN, API_AUTH_GOOGLE_LOGIN } from "@/constants";
@@ -99,6 +99,37 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                    <option value="dashscope/qwen-turbo">Qwen Turbo (Free Tier)</option>
                    <option value="ollama/llama3">Local Ollama (Llama 3)</option>
                  </select>
+               </div>
+
+               {/* System Security Configuration */}
+               <div className="space-y-4">
+                 <h3 className="text-lg font-semibold text-[#e0e0e0] border-b border-[#333] pb-2 mt-4 font-orbitron tracking-wide flex items-center gap-2">
+                   <ShieldAlert size={18} className="text-[#ff00ff]" /> SYSTEM SECURITY
+                 </h3>
+
+                 <div className="p-4 border border-[#ff00ff]/30 bg-[#ff00ff]/5 rounded flex flex-col gap-3">
+                   <div className="flex items-center justify-between">
+                     <label className="text-sm font-mono font-bold text-[#e0e0e0] tracking-wide">ALLOW UNSAFE SYSTEM ACCESS</label>
+                     <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                       <input
+                         type="checkbox"
+                         name="toggle"
+                         id="unsafe-toggle"
+                         className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer checked:right-0 checked:border-[#ff00ff]"
+                         style={{right: config.ALLOW_UNSAFE_SYSTEM_ACCESS === 'true' || config.ALLOW_UNSAFE_SYSTEM_ACCESS === true ? '0' : 'auto', left: config.ALLOW_UNSAFE_SYSTEM_ACCESS === 'true' || config.ALLOW_UNSAFE_SYSTEM_ACCESS === true ? 'auto' : '0'}}
+                         checked={config.ALLOW_UNSAFE_SYSTEM_ACCESS === 'true' || config.ALLOW_UNSAFE_SYSTEM_ACCESS === true}
+                         onChange={(e) => setConfig({...config, ALLOW_UNSAFE_SYSTEM_ACCESS: e.target.checked})}
+                       />
+                       <label htmlFor="unsafe-toggle" className={`toggle-label block overflow-hidden h-5 rounded-full cursor-pointer ${config.ALLOW_UNSAFE_SYSTEM_ACCESS === 'true' || config.ALLOW_UNSAFE_SYSTEM_ACCESS === true ? 'bg-[#ff00ff]' : 'bg-gray-700'}`}></label>
+                     </div>
+                   </div>
+
+                   <p className="text-xs text-[#888] font-mono leading-relaxed">
+                     <span className="text-[#ff00ff] font-bold">WARNING:</span> Enabling this grants the agent unrestricted access to your file system (outside the app directory) and allows execution of complex shell commands (pipes, redirects).
+                     <br/><br/>
+                     A safety guard is active to prevent catastrophic deletion (e.g., <code>rm -rf /</code>), but use with extreme caution.
+                   </p>
+                 </div>
                </div>
 
                {/* Vertex AI Configuration */}
