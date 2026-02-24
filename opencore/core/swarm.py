@@ -6,6 +6,7 @@ from opencore.config import settings
 class Swarm:
     def __init__(self, main_agent_name: str = "Manager", default_model: str = "gpt-4o"):
         self.agents: Dict[str, Agent] = {}
+        self.teams: Dict[str, List[str]] = {}  # Map team_name -> list of agent_names
         self.main_agent_name = main_agent_name
         # Allow env var to override default model
         self.default_model = settings.llm_model or default_model
@@ -36,6 +37,36 @@ class Swarm:
 
         return f"Agent '{name}' created successfully using model '{agent_model}'."
 
+    def create_team(self, name: str, goal: str, lead_role: str, lead_instructions: str) -> str:
+        """
+        Creates a new team with a designated leader.
+        The leader is instructed to achieve the goal by creating sub-agents if necessary.
+        """
+        if name in self.teams:
+            return f"Error: Team '{name}' already exists."
+
+        # Create Team Lead
+        lead_name = f"{name}_Lead"
+        if lead_name in self.agents:
+            return f"Error: Agent '{lead_name}' already exists. Cannot create team lead."
+
+        lead_system_prompt = (
+            f"You are the {lead_role} and leader of the '{name}' team. "
+            f"Your primary goal is: {goal}. "
+            f"Instructions: {lead_instructions} "
+            "You have the authority to create new agents (workers) using 'create_agent' to help you achieve this goal. "
+            "Delegate tasks effectively and report final results back."
+        )
+
+        # Create the lead agent
+        # We use the swarm's default model for the lead unless specified otherwise (could be added as param)
+        result = self.create_agent(lead_name, lead_role, lead_system_prompt)
+
+        # Register team
+        self.teams[name] = [lead_name]
+
+        return f"Team '{name}' created. Leader '{lead_name}' is ready. {result}"
+
     def get_agent(self, name: str) -> Optional[Agent]:
         return self.agents.get(name)
 
@@ -63,6 +94,31 @@ class Swarm:
             return self.create_agent(name, role, instructions, model)
 
         agent.register_tool(create_agent_wrapper, create_agent_schema)
+
+        # Tool: Create Team (Main Agent Only)
+        if agent.name == self.main_agent_name:
+            create_team_schema = {
+                "type": "function",
+                "function": {
+                    "name": "create_team",
+                    "description": "Creates a new team of agents led by a specialized Team Lead.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string", "description": "The name of the team (e.g., 'Frontend', 'Research')."},
+                            "goal": {"type": "string", "description": "The primary goal of the team."},
+                            "lead_role": {"type": "string", "description": "The role of the team leader (e.g., 'Tech Lead', 'Project Manager')."},
+                            "lead_instructions": {"type": "string", "description": "Specific instructions for the team leader on how to manage the team."}
+                        },
+                        "required": ["name", "goal", "lead_role", "lead_instructions"]
+                    }
+                }
+            }
+
+            def create_team_wrapper(name: str, goal: str, lead_role: str, lead_instructions: str):
+                return self.create_team(name, goal, lead_role, lead_instructions)
+
+            agent.register_tool(create_team_wrapper, create_team_schema)
 
         # Tool: Delegate Task
         delegate_schema = {
@@ -98,7 +154,7 @@ class Swarm:
             "type": "function",
             "function": {
                 "name": "list_agents",
-                "description": "Lists all available agents in the swarm.",
+                "description": "Lists all available agents and teams in the swarm.",
                 "parameters": {
                     "type": "object",
                     "properties": {},
@@ -108,7 +164,9 @@ class Swarm:
         }
 
         def list_agents_wrapper():
-            return f"Available agents: {list(self.agents.keys())}"
+            agent_list = list(self.agents.keys())
+            team_list = list(self.teams.keys())
+            return f"Available agents: {agent_list}. Teams: {team_list}"
 
         agent.register_tool(list_agents_wrapper, list_agents_schema)
 
