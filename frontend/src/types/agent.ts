@@ -9,6 +9,7 @@ export interface AgentEdge {
     source: string;
     target: string;
     label: string;
+    timestamp?: string;
 }
 
 export interface AgentGraphData {

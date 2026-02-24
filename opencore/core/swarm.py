@@ -2,12 +2,14 @@ from typing import Dict, Optional, List, Any
 from opencore.core.agent import Agent
 from opencore.tools.base import register_base_tools
 from opencore.config import settings
+import datetime
+
 
 class Swarm:
     def __init__(self, main_agent_name: str = "Manager", default_model: str = "gpt-4o"):
         self.agents: Dict[str, Agent] = {}
         self.teams: Dict[str, List[str]] = {}  # Map team_name -> list of agent_names
-        self.interactions: List[Dict[str, str]] = [] # Track recent interactions
+        self.interactions: List[Dict[str, str]] = []  # Track recent interactions
         self.main_agent_name = main_agent_name
         # Allow env var to override default model
         self.default_model = settings.llm_model or default_model
@@ -16,10 +18,21 @@ class Swarm:
         self.create_agent(
             name=main_agent_name,
             role="Manager",
-            system_prompt="You are the central system manager. Your role is to orchestrate sub-agents and execute user directives efficiently. Respond with brevity and precision. Use system-style language (e.g., 'Acknowledged', 'Initiating')."
+            system_prompt=(
+                "You are the central system manager. Your role is to orchestrate sub-agents and execute user directives "
+                "efficiently. Respond with brevity and precision. Use system-style language (e.g., 'Acknowledged', "
+                "'Initiating')."
+            )
         )
 
-    def create_agent(self, name: str, role: str, system_prompt: str, model: Optional[str] = None, created_by: Optional[str] = None) -> str:
+    def create_agent(
+        self,
+        name: str,
+        role: str,
+        system_prompt: str,
+        model: Optional[str] = None,
+        created_by: Optional[str] = None
+    ) -> str:
         if name in self.agents:
             return f"Error: Agent '{name}' already exists."
 
@@ -27,7 +40,9 @@ class Swarm:
         is_custom = model is not None
         agent_model = model if model else self.default_model
 
-        new_agent = Agent(name, role, system_prompt, model=agent_model, is_custom_model=is_custom, created_by=created_by)
+        new_agent = Agent(
+            name, role, system_prompt, model=agent_model, is_custom_model=is_custom, created_by=created_by
+        )
         self.agents[name] = new_agent
 
         # Register swarm tools for the new agent
@@ -85,7 +100,13 @@ class Swarm:
                         "name": {"type": "string", "description": "The name of the new agent."},
                         "role": {"type": "string", "description": "The role of the new agent (e.g., 'Coder', 'Researcher')."},
                         "instructions": {"type": "string", "description": "Specific system instructions for the agent."},
-                        "model": {"type": "string", "description": "Optional model to use (e.g., 'gpt-4o', 'vertex_ai/gemini-pro', 'ollama/llama3'). Defaults to system default."}
+                        "model": {
+                            "type": "string",
+                            "description": (
+                                "Optional model to use (e.g., 'gpt-4o', 'vertex_ai/gemini-pro', 'ollama/llama3'). "
+                                "Defaults to system default."
+                            )
+                        }
                     },
                     "required": ["name", "role", "instructions"]
                 }
@@ -107,10 +128,19 @@ class Swarm:
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "name": {"type": "string", "description": "The name of the team (e.g., 'Frontend', 'Research')."},
+                            "name": {
+                                "type": "string",
+                                "description": "The name of the team (e.g., 'Frontend', 'Research')."
+                            },
                             "goal": {"type": "string", "description": "The primary goal of the team."},
-                            "lead_role": {"type": "string", "description": "The role of the team leader (e.g., 'Tech Lead', 'Project Manager')."},
-                            "lead_instructions": {"type": "string", "description": "Specific instructions for the team leader on how to manage the team."}
+                            "lead_role": {
+                                "type": "string",
+                                "description": "The role of the team leader (e.g., 'Tech Lead', 'Project Manager')."
+                            },
+                            "lead_instructions": {
+                                "type": "string",
+                                "description": "Specific instructions for the team leader on how to manage the team."
+                            }
                         },
                         "required": ["name", "goal", "lead_role", "lead_instructions"]
                     }
@@ -148,8 +178,8 @@ class Swarm:
             self.interactions.append({
                 "source": agent.name,
                 "target": to_agent,
-                "summary": task[:50] + "..." if len(task) > 50 else task, # Brief summary
-                "timestamp": "now" # Placeholder
+                "summary": task[:50] + "..." if len(task) > 50 else task,  # Brief summary
+                "timestamp": datetime.datetime.now().isoformat()
             })
             # Keep only last 20 interactions
             if len(self.interactions) > 20:
@@ -164,7 +194,7 @@ class Swarm:
                 "source": to_agent,
                 "target": agent.name,
                 "summary": "Response: " + (response[:50] + "..." if len(response) > 50 else response),
-                "timestamp": "now"
+                "timestamp": datetime.datetime.now().isoformat()
             })
             if len(self.interactions) > 20:
                 self.interactions.pop(0)
@@ -235,7 +265,8 @@ class Swarm:
             edges.append({
                 "source": interaction["source"],
                 "target": interaction["target"],
-                "label": interaction["summary"]
+                "label": interaction["summary"],
+                "timestamp": interaction.get("timestamp", "")
             })
 
         return {"nodes": nodes, "edges": edges}
