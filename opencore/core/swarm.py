@@ -7,6 +7,7 @@ class Swarm:
     def __init__(self, main_agent_name: str = "Manager", default_model: str = "gpt-4o"):
         self.agents: Dict[str, Agent] = {}
         self.teams: Dict[str, List[str]] = {}  # Map team_name -> list of agent_names
+        self.interactions: List[Dict[str, str]] = [] # Track recent interactions
         self.main_agent_name = main_agent_name
         # Allow env var to override default model
         self.default_model = settings.llm_model or default_model
@@ -18,7 +19,7 @@ class Swarm:
             system_prompt="You are the central system manager. Your role is to orchestrate sub-agents and execute user directives efficiently. Respond with brevity and precision. Use system-style language (e.g., 'Acknowledged', 'Initiating')."
         )
 
-    def create_agent(self, name: str, role: str, system_prompt: str, model: Optional[str] = None) -> str:
+    def create_agent(self, name: str, role: str, system_prompt: str, model: Optional[str] = None, created_by: Optional[str] = None) -> str:
         if name in self.agents:
             return f"Error: Agent '{name}' already exists."
 
@@ -26,7 +27,7 @@ class Swarm:
         is_custom = model is not None
         agent_model = model if model else self.default_model
 
-        new_agent = Agent(name, role, system_prompt, model=agent_model, is_custom_model=is_custom)
+        new_agent = Agent(name, role, system_prompt, model=agent_model, is_custom_model=is_custom, created_by=created_by)
         self.agents[name] = new_agent
 
         # Register swarm tools for the new agent
@@ -60,7 +61,8 @@ class Swarm:
 
         # Create the lead agent
         # We use the swarm's default model for the lead unless specified otherwise (could be added as param)
-        result = self.create_agent(lead_name, lead_role, lead_system_prompt)
+        # The lead is created by the main agent (Manager) usually
+        result = self.create_agent(lead_name, lead_role, lead_system_prompt, created_by=self.main_agent_name)
 
         # Register team
         self.teams[name] = [lead_name]
@@ -91,7 +93,7 @@ class Swarm:
         }
 
         def create_agent_wrapper(name: str, role: str, instructions: str, model: Optional[str] = None):
-            return self.create_agent(name, role, instructions, model)
+            return self.create_agent(name, role, instructions, model, created_by=agent.name)
 
         agent.register_tool(create_agent_wrapper, create_agent_schema)
 
@@ -142,6 +144,17 @@ class Swarm:
             if not target_agent:
                 return f"Error: Agent '{to_agent}' not found. Available agents: {list(self.agents.keys())}"
 
+            # Record interaction
+            self.interactions.append({
+                "source": agent.name,
+                "target": to_agent,
+                "summary": task[:50] + "..." if len(task) > 50 else task, # Brief summary
+                "timestamp": "now" # Placeholder
+            })
+            # Keep only last 20 interactions
+            if len(self.interactions) > 20:
+                self.interactions.pop(0)
+
             # We add the sender's context implicitly by just chatting with the target
             # In a more complex system, we'd pass the sender's name.
             response = target_agent.chat(f"Request from {agent.name}: {task}")
@@ -189,3 +202,29 @@ class Swarm:
         """
         main_agent = self.agents[self.main_agent_name]
         return main_agent.chat(message, attachments=attachments)
+
+    def get_graph_data(self) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        Returns the current swarm topology and interaction history.
+        """
+        nodes = []
+        for name, agent in self.agents.items():
+            nodes.append({
+                "id": name,
+                "name": name,
+                "parent": agent.created_by,
+                "last_thought": getattr(agent, "last_thought", "Idle")
+            })
+
+        # Format edges from interactions
+        # We could also add structural edges (parent-child) implicitly in frontend
+        # or explicitly here. Let's send interaction edges.
+        edges = []
+        for interaction in self.interactions:
+            edges.append({
+                "source": interaction["source"],
+                "target": interaction["target"],
+                "label": interaction["summary"]
+            })
+
+        return {"nodes": nodes, "edges": edges}
