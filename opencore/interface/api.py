@@ -76,6 +76,7 @@ class ChatResponse(BaseModel):
     response: str
     agents: list
     tool_logs: list = [] # Future: detailed logs
+    graph: Optional[Dict[str, Any]] = None
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
@@ -89,12 +90,16 @@ def chat(request: ChatRequest):
 
     return ChatResponse(
         response=response,
-        agents=list(swarm.agents.keys())
+        agents=list(swarm.agents.keys()),
+        graph=swarm.get_graph_data()
     )
 
 @app.get("/agents")
 async def get_agents():
-    return {"agents": list(swarm.agents.keys())}
+    return {
+        "agents": list(swarm.agents.keys()),
+        "graph": swarm.get_graph_data()
+    }
 
 @app.get("/heartbeat")
 async def get_heartbeat():

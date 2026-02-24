@@ -13,6 +13,7 @@ class TestIntegration(unittest.TestCase):
         with patch("opencore.interface.api.swarm") as mock_swarm:
             mock_swarm.chat.return_value = "Hello from Manager!"
             mock_swarm.agents = {"Manager": MagicMock()}
+            mock_swarm.get_graph_data.return_value = {"nodes": [], "edges": []}
 
             response = client.post("/chat", json={"message": "Hi"})
             self.assertEqual(response.status_code, 200)

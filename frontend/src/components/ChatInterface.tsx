@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import VoiceInput from "./VoiceInput";
 import { toast } from "sonner";
 import { API_CHAT, SUPPORTED_FILE_EXTENSIONS_REGEX } from "@/constants";
+import { AgentGraphData } from "@/types/agent";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -24,9 +25,9 @@ interface Message {
 }
 
 export default function ChatInterface({
-  onAgentsUpdate
+  onGraphUpdate
 }: {
-  onAgentsUpdate: (agents: string[]) => void
+  onGraphUpdate: (data: AgentGraphData) => void
 }) {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -197,8 +198,14 @@ export default function ChatInterface({
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      if (data.agents) {
-        onAgentsUpdate(data.agents);
+      if (data.graph) {
+        onGraphUpdate(data.graph);
+      } else if (data.agents) {
+          // Backward compatibility
+          onGraphUpdate({
+             nodes: data.agents.map((a: string) => ({ id: a, name: a, parent: null })),
+             edges: []
+          });
       }
     } catch (err) {
       const errorMessage: Message = {
