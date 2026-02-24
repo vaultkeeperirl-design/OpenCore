@@ -189,8 +189,8 @@ const getLayout = (nodesData: AgentNode[]): Node[] => {
 };
 
 export default function AgentGraph({ graphData }: { graphData: AgentGraphData }) {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
   useEffect(() => {
     if (!graphData?.nodes) return;
@@ -220,18 +220,25 @@ export default function AgentGraph({ graphData }: { graphData: AgentGraphData })
     // Interaction Edges
     if (graphData.edges) {
         graphData.edges.forEach((edge, i) => {
+             const isResponse = edge.label.startsWith("Response: ");
+             const color = isResponse ? '#ffffff' : '#00ffff';
+
              newEdges.push({
                 id: `interact-${edge.source}-${edge.target}-${i}`,
                 source: edge.source,
                 target: edge.target,
                 animated: true,
                 label: edge.label,
-                labelStyle: { fill: '#00ffff', fontSize: 10, fontFamily: 'monospace', fontWeight: 'bold' },
+                labelStyle: { fill: color, fontSize: 10, fontFamily: 'monospace', fontWeight: 'bold' },
                 labelBgStyle: { fill: '#000', fillOpacity: 0.8, rx: 4, ry: 4 },
                 labelBgPadding: [4, 2],
-                style: { stroke: '#00ffff', strokeWidth: 2 },
+                style: {
+                    stroke: color,
+                    strokeWidth: 2,
+                    strokeDasharray: isResponse ? '5,5' : undefined // Dashed for response
+                },
                 type: 'default',
-                markerEnd: { type: MarkerType.ArrowClosed, color: '#00ffff' },
+                markerEnd: { type: MarkerType.ArrowClosed, color: color },
              });
         });
     }
