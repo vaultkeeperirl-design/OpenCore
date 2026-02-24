@@ -12,6 +12,23 @@ MODEL_CORRECTIONS = {
     "openai/grok-2-1212": "xai/grok-2-vision-1212",
 }
 
+# Whitelist of allowed configuration keys to prevent arbitrary env injection
+ALLOWED_CONFIG_KEYS = {
+    "LLM_MODEL",
+    "HEARTBEAT_INTERVAL",
+    "VERTEX_PROJECT",
+    "VERTEX_LOCATION",
+    "OLLAMA_API_BASE",
+    "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "MISTRAL_API_KEY",
+    "XAI_API_KEY",
+    "DASHSCOPE_API_KEY",
+    "GEMINI_API_KEY",
+    "GROQ_API_KEY",
+    "LOG_LEVEL",
+}
+
 class Settings:
     def __init__(self):
         self.reload()
@@ -56,6 +73,11 @@ class Settings:
         if not os.path.exists(env_path):
             with open(env_path, "w") as f:
                 pass
+
+        # Validate keys against whitelist
+        for k in updates.keys():
+            if k not in ALLOWED_CONFIG_KEYS:
+                raise ValueError(f"Configuration key '{k}' is not allowed.")
 
         # Update with new values using set_key which preserves comments
         for k, v in updates.items():
