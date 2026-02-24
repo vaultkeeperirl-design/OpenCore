@@ -7,3 +7,4 @@ env/
 venv/
 *.swp
 .DS_Store
+opencore.egg-info/
