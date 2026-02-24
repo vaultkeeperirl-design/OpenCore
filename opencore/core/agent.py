@@ -99,6 +99,11 @@ class Agent:
             # Keep the last MAX_HISTORY messages
             recent_messages = self.messages[-MAX_HISTORY:]
             self.messages = [system_prompt] + recent_messages
+
+            # Ensure the first message after system prompt is not a 'tool' message (orphaned result)
+            while len(self.messages) > 1 and self.messages[1].get("role") == "tool":
+                self.messages.pop(1)
+
             logger.warning(
                 f"[{self.name}] Pruned history to {len(self.messages)} items."
             )

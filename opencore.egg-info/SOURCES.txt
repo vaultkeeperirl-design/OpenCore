@@ -46,7 +46,6 @@ tests/test_heartbeat.py
 tests/test_heartbeat_scheduler.py
 tests/test_integration.py
 tests/test_logging.py
-tests/test_onboard_sim.py
 tests/test_scheduler_execution.py
 tests/test_security_tools.py
 tests/test_swarm.py
