@@ -5,6 +5,7 @@ import { Send, User, Sparkles, Image as ImageIcon, FileText, X, Paperclip, Loade
 import { motion, AnimatePresence } from "framer-motion";
 import VoiceInput from "./VoiceInput";
 import { toast } from "sonner";
+import Image from "next/image";
 import { API_CHAT, SUPPORTED_FILE_EXTENSIONS_REGEX } from "@/constants";
 import { AgentGraphData } from "@/types/agent";
 
@@ -163,7 +164,7 @@ export default function ChatInterface({
             content: content
           });
         }
-    } catch (err) {
+    } catch {
         toast.error("Failed to read file attachments");
         return;
     }
@@ -211,7 +212,7 @@ export default function ChatInterface({
              edges: []
           });
       }
-    } catch (err) {
+    } catch {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -232,7 +233,7 @@ export default function ChatInterface({
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
-      className="flex flex-col h-full bg-black/20 backdrop-blur-md rounded-xl border border-white/10 overflow-hidden relative shadow-[0_0_20px_rgba(0,0,0,0.5)]"
+      className="flex flex-col h-full bg-bg-secondary/50 backdrop-blur-md rounded-xl border border-border-primary overflow-hidden relative shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-colors duration-300"
     >
       {/* Drag Overlay */}
       <AnimatePresence>
@@ -241,30 +242,30 @@ export default function ChatInterface({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-cyan-900/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center border-2 border-dashed border-cyan-400 m-4 rounded-xl"
+                className="absolute inset-0 bg-bg-secondary/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center border-2 border-dashed border-accent-1 m-4 rounded-xl"
             >
-                <Paperclip size={48} className="text-cyan-400 mb-4 animate-bounce" />
-                <h3 className="text-xl font-orbitron text-cyan-100">DROP FILES TO UPLOAD</h3>
-                <p className="text-cyan-400/70 font-mono mt-2">Images & Documents</p>
+                <Paperclip size={48} className="text-accent-1 mb-4 animate-bounce" />
+                <h3 className="text-xl font-orbitron text-text-primary">DROP FILES TO UPLOAD</h3>
+                <p className="text-accent-1/70 font-mono mt-2">Images & Documents</p>
             </motion.div>
         )}
       </AnimatePresence>
 
       {/* Header */}
-      <div className="p-4 border-b border-white/5 bg-white/5 flex items-center justify-between shrink-0">
+      <div className="p-4 border-b border-border-primary bg-bg-tertiary/50 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
-           <Sparkles className="text-cyan-400" size={18} />
-           <span className="font-orbitron text-cyan-400 tracking-wider text-sm">LIVE FEED</span>
+           <Sparkles className="text-accent-1" size={18} />
+           <span className="font-orbitron text-accent-1 tracking-wider text-sm">LIVE FEED</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${loading ? "bg-yellow-400 animate-pulse shadow-[0_0_10px_rgba(250,204,21,0.5)]" : "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"}`}></div>
-          <span className="text-xs text-gray-400 font-mono tracking-widest">{loading ? "PROCESSING" : "IDLE"}</span>
+          <div className={`w-2 h-2 rounded-full ${loading ? "bg-status-warning animate-pulse shadow-[0_0_10px_var(--status-warning)]" : "bg-status-active shadow-[0_0_10px_var(--status-active)]"}`}></div>
+          <span className="text-xs text-text-secondary font-mono tracking-widest">{loading ? "PROCESSING" : "IDLE"}</span>
         </div>
       </div>
 
       {/* Messages */}
       <div
-        className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-cyan-900/50 scrollbar-track-transparent"
+        className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-accent-1/20 scrollbar-track-transparent"
         role="log"
         aria-live="polite"
       >
@@ -278,10 +279,10 @@ export default function ChatInterface({
             >
               <div className={`w-10 h-10 rounded-lg border flex items-center justify-center shrink-0 shadow-lg ${
                 msg.role === "user"
-                  ? "bg-purple-500/10 border-purple-500/40 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.1)]"
-                  : "bg-cyan-500/10 border-cyan-500/40 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]"
+                  ? "bg-accent-2/10 border-accent-2/40 text-accent-2 shadow-[0_0_15px_color-mix(in_srgb,var(--accent-2),transparent_90%)]"
+                  : "bg-accent-1/10 border-accent-1/40 text-accent-1 shadow-[0_0_15px_color-mix(in_srgb,var(--accent-1),transparent_90%)]"
               }`}>
-                {msg.role === "user" ? <User size={20} /> : <img src="/logo.svg" alt="OpenCore" className="w-6 h-6" />}
+                {msg.role === "user" ? <User size={20} /> : <Image src="/logo.svg" alt="OpenCore" width={24} height={24} className="w-6 h-6" />}
               </div>
 
               <div className={`max-w-[80%] flex flex-col gap-2 ${msg.role === "user" ? "items-end" : "items-start"}`}>
@@ -290,8 +291,8 @@ export default function ChatInterface({
                 {msg.content && (
                     <div className={`p-4 rounded-xl border text-sm font-mono leading-relaxed shadow-md backdrop-blur-sm ${
                         msg.role === "user"
-                        ? "bg-purple-900/10 border-purple-500/20 text-purple-100 rounded-tr-none"
-                        : "bg-cyan-900/10 border-cyan-500/20 text-cyan-100 rounded-tl-none"
+                        ? "bg-accent-2/10 border-accent-2/20 text-text-primary rounded-tr-none"
+                        : "bg-accent-1/10 border-accent-1/20 text-text-primary rounded-tl-none"
                     }`}>
                         {msg.content}
                     </div>
@@ -301,15 +302,16 @@ export default function ChatInterface({
                 {msg.attachments && msg.attachments.length > 0 && (
                     <div className={`flex flex-wrap gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                         {msg.attachments.map((att, i) => (
-                            <div key={i} className="group relative rounded-lg overflow-hidden border border-white/10 bg-black/40 p-2 flex flex-col items-center gap-2 max-w-[200px]">
+                            <div key={i} className="group relative rounded-lg overflow-hidden border border-border-primary bg-bg-tertiary p-2 flex flex-col items-center gap-2 max-w-[200px]">
                                 {att.type.startsWith("image/") ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
                                     <img src={att.content} alt={att.name} className="max-h-32 object-contain rounded" />
                                 ) : (
-                                    <div className="w-16 h-16 bg-white/5 rounded flex items-center justify-center text-cyan-400">
+                                    <div className="w-16 h-16 bg-bg-primary/50 rounded flex items-center justify-center text-accent-1">
                                         <FileText size={24} />
                                     </div>
                                 )}
-                                <span className="text-[10px] text-gray-400 truncate w-full text-center">{att.name}</span>
+                                <span className="text-[10px] text-text-secondary truncate w-full text-center">{att.name}</span>
                             </div>
                         ))}
                     </div>
@@ -326,13 +328,13 @@ export default function ChatInterface({
             animate={{ opacity: 1 }}
             className="flex gap-4"
           >
-             <div className="w-10 h-10 rounded-lg border border-cyan-500/40 bg-cyan-500/10 flex items-center justify-center text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
-                <img src="/logo.svg" alt="Processing..." className="w-6 h-6 animate-pulse" />
+             <div className="w-10 h-10 rounded-lg border border-accent-1/40 bg-accent-1/10 flex items-center justify-center text-accent-1 shadow-[0_0_15px_color-mix(in_srgb,var(--accent-1),transparent_70%)]">
+                <Image src="/logo.svg" alt="Processing..." width={24} height={24} className="w-6 h-6 animate-pulse" />
              </div>
              <div className="flex items-center gap-1.5 h-10 px-2">
-               <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_5px_rgba(6,182,212,0.8)]"></span>
-               <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_5px_rgba(6,182,212,0.8)]"></span>
-               <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce shadow-[0_0_5px_rgba(6,182,212,0.8)]"></span>
+               <span className="w-2 h-2 bg-accent-1 rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_5px_color-mix(in_srgb,var(--accent-1),transparent_50%)]"></span>
+               <span className="w-2 h-2 bg-accent-1 rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_5px_color-mix(in_srgb,var(--accent-1),transparent_50%)]"></span>
+               <span className="w-2 h-2 bg-accent-1 rounded-full animate-bounce shadow-[0_0_5px_color-mix(in_srgb,var(--accent-1),transparent_50%)]"></span>
              </div>
           </motion.div>
         )}
@@ -340,26 +342,26 @@ export default function ChatInterface({
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-white/10 bg-black/40 backdrop-blur-md shrink-0 flex flex-col gap-2">
+      <div className="p-4 border-t border-border-primary bg-bg-tertiary/50 backdrop-blur-md shrink-0 flex flex-col gap-2">
 
         {/* Attachment Preview Area */}
         {attachments.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-cyan-900/50">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-accent-1/20">
                 {attachments.map((file, i) => (
-                    <div key={i} className="relative group shrink-0 w-16 h-16 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center">
+                    <div key={i} className="relative group shrink-0 w-16 h-16 bg-bg-primary/50 border border-border-primary rounded-lg flex items-center justify-center">
                         <button
                             onClick={() => removeAttachment(i)}
                             aria-label={`Remove attachment ${file.name}`}
-                            className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-red-600 transition-colors z-10"
+                            className="absolute -top-2 -right-2 w-5 h-5 bg-status-error text-white rounded-full flex items-center justify-center shadow-md hover:bg-red-600 transition-colors z-10"
                         >
                             <X size={12} aria-hidden="true" />
                         </button>
                         {file.type.startsWith("image/") ? (
-                             <ImageIcon size={20} className="text-cyan-400" />
+                             <ImageIcon size={20} className="text-accent-1" />
                         ) : (
-                             <FileText size={20} className="text-cyan-400" />
+                             <FileText size={20} className="text-accent-1" />
                         )}
-                        <span className="absolute bottom-1 text-[8px] text-gray-400 truncate max-w-full px-1">{file.name}</span>
+                        <span className="absolute bottom-1 text-[8px] text-text-secondary truncate max-w-full px-1">{file.name}</span>
                     </div>
                 ))}
             </div>
@@ -375,7 +377,7 @@ export default function ChatInterface({
              onChange={(e) => setInput(e.target.value)}
              placeholder={attachments.length > 0 ? "Add message to files..." : "Enter command directive..."}
              disabled={loading}
-             className="flex-1 bg-black/50 border border-white/10 rounded-xl px-5 py-3 text-white focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all font-mono text-sm placeholder-gray-600 shadow-inner"
+             className="flex-1 bg-bg-primary/50 border border-border-primary rounded-xl px-5 py-3 text-text-primary focus:outline-none focus:border-accent-1/50 focus:ring-1 focus:ring-accent-1/50 transition-all font-mono text-sm placeholder-text-secondary shadow-inner"
            />
 
            <button
@@ -383,7 +385,7 @@ export default function ChatInterface({
              disabled={(!input.trim() && attachments.length === 0) || loading}
              aria-label={loading ? "Sending message..." : "Send message"}
              aria-busy={loading}
-             className="p-3 bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-400 border border-cyan-500/50 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] active:scale-95 flex items-center justify-center min-w-[3rem]"
+             className="p-3 bg-accent-1/20 hover:bg-accent-1/40 text-accent-1 border border-accent-1/50 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_15px_color-mix(in_srgb,var(--accent-1),transparent_70%)] active:scale-95 flex items-center justify-center min-w-[3rem]"
            >
              {loading ? (
                <Loader2 size={20} className="animate-spin" aria-hidden="true" />
