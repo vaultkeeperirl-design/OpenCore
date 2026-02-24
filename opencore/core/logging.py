@@ -3,6 +3,16 @@ import json
 import sys
 from datetime import datetime, timezone
 from opencore.config import settings
+from opencore.core.context import request_id_ctx
+
+
+class RequestIdFilter(logging.Filter):
+    """
+    Filter that injects the current request ID into the log record.
+    """
+    def filter(self, record):
+        record.request_id = request_id_ctx.get()
+        return True
 
 
 class JSONFormatter(logging.Formatter):
@@ -52,6 +62,7 @@ def configure_logging():
 
     # Create handler (StreamHandler to stdout/stderr is standard)
     handler = logging.StreamHandler(sys.stdout)
+    handler.addFilter(RequestIdFilter())
 
     # Set formatter based on environment
     if settings.app_env == "production":
@@ -59,7 +70,7 @@ def configure_logging():
     else:
         # Human-readable format for development
         formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+            "%(asctime)s - %(name)s - [%(request_id)s] - %(levelname)s - %(message)s"
         )
 
     handler.setFormatter(formatter)

@@ -2,10 +2,27 @@ from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from opencore.config import settings
+from opencore.core.context import request_id_ctx
 import logging
+import uuid
 
 # Configure logging
 logger = logging.getLogger("opencore.api")
+
+
+async def request_id_middleware(request: Request, call_next):
+    """
+    Middleware to generate a unique request ID for every request,
+    store it in a context variable for logging, and return it in headers.
+    """
+    request_id = str(uuid.uuid4())
+    token = request_id_ctx.set(request_id)
+    try:
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = request_id
+        return response
+    finally:
+        request_id_ctx.reset(token)
 
 
 class ErrorDetails(BaseModel):
