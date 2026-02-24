@@ -1,5 +1,10 @@
 # Conductor Journal
 
+## 2026-02-24 - Project Version Synchronization (v2.0.4)
+
+**Observation:** Detected massive version discrepancy between documented history (v0.3.1) and actual codebase/package version (v2.0.4). No intermediate git tags or changelog entries were found for the gap between 0.3.1 and 2.0.4, indicating a breakdown in the release process.
+**Action:** Performed emergency synchronization. Validated system stability via test suite (all passed). Updated `CHANGELOG.md` to establish v2.0.4 as the new baseline. Synchronized `frontend/package.json` to match backend version.
+
 ## 2026-02-23 - Release v0.3.1 Critical Patch & Metadata Sync
 
 **Observation:** The v0.3.1 release process exposed a critical `NameError` in `opencore/tools/base.py` (`shlex` not imported) which would have caused runtime failures. Additionally, `pyproject.toml` version metadata (0.1.0) was severely outdated compared to `opencore/__init__.py` (0.3.1).
