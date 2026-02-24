@@ -1,6 +1,7 @@
 from typing import List, Dict, Any, Optional
 from google import genai
 from google.genai import types
+from google.oauth2.credentials import Credentials
 import os
 import json
 import uuid
@@ -20,7 +21,22 @@ class GeminiProvider(LLMProvider):
         if api_key:
             self.client = genai.Client(api_key=api_key)
         elif vertex_project and vertex_location:
-            self.client = genai.Client(vertexai=True, project=vertex_project, location=vertex_location)
+            # Check for OAuth credentials
+            refresh_token = os.getenv("GOOGLE_REFRESH_TOKEN")
+            client_id = os.getenv("GOOGLE_CLIENT_ID")
+            client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+
+            if refresh_token and client_id and client_secret:
+                creds = Credentials(
+                    None, # access_token (will be refreshed)
+                    refresh_token=refresh_token,
+                    token_uri="https://oauth2.googleapis.com/token",
+                    client_id=client_id,
+                    client_secret=client_secret
+                )
+                self.client = genai.Client(vertexai=True, project=vertex_project, location=vertex_location, credentials=creds)
+            else:
+                self.client = genai.Client(vertexai=True, project=vertex_project, location=vertex_location)
         else:
             raise ValueError("Gemini API Key or Vertex Project/Location is required.")
 
