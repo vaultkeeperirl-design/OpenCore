@@ -1,5 +1,5 @@
 import React from 'react';
-import { Handle, Position, NodeProps } from '@xyflow/react';
+import { Handle, Position, NodeProps, Node } from '@xyflow/react';
 import { Users, Bot } from 'lucide-react';
 import Image from 'next/image';
 import { AgentNode } from '@/types/agent';
@@ -9,9 +9,11 @@ export type CustomAgentNodeData = AgentNode & {
   label?: string; // Optional for compatibility if needed
 };
 
-const CustomAgentNode = ({ data }: NodeProps<CustomAgentNodeData>) => {
-  const isManager = data.id === "Manager";
-  const isTeamLead = data.parent === "Manager";
+// Use NodeProps without generic to avoid strict type checking issues, then cast data
+const CustomAgentNode = ({ data }: NodeProps) => {
+  const agentData = data as unknown as CustomAgentNodeData;
+  const isManager = agentData.id === "Manager";
+  const isTeamLead = agentData.parent === "Manager";
 
   let containerClassName = "";
   let iconElement = null;
@@ -45,11 +47,11 @@ const CustomAgentNode = ({ data }: NodeProps<CustomAgentNodeData>) => {
       <div className="flex flex-col items-center justify-center gap-2 pointer-events-none w-full h-full">
         <div className="flex items-center justify-center gap-2 w-full">
           {iconElement}
-          <span className="truncate max-w-[150px]" title={data.name}>
-            {data.name.replace(/_/g, ' ')}
+          <span className="truncate max-w-[150px]" title={agentData.name}>
+            {agentData.name.replace(/_/g, ' ')}
           </span>
         </div>
-        {data.last_thought && data.last_thought !== "Idle" && (
+        {agentData.last_thought && agentData.last_thought !== "Idle" && (
           <div
             className="text-[10px] font-mono mt-1 w-full truncate px-2 border-t pt-2 opacity-80"
             style={{
@@ -57,7 +59,7 @@ const CustomAgentNode = ({ data }: NodeProps<CustomAgentNodeData>) => {
               color: 'currentColor'
             }}
           >
-            {data.last_thought}
+            {agentData.last_thought}
           </div>
         )}
       </div>
