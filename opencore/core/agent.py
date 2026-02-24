@@ -1,22 +1,30 @@
 import json
 import logging
-import os
 from typing import List, Dict, Any, Callable, Optional, Union
 from opencore.llm import get_llm_provider
-from opencore.llm.base import ToolCall, ToolCallFunction, LLMResponse
+from opencore.llm.base import LLMResponse
 
 logger = logging.getLogger(__name__)
 
 
 class Agent:
-    def __init__(self, name: str, role: str, system_prompt: str, model: str = "gpt-4o", client: Any = None, is_custom_model: bool = False):
+    def __init__(
+        self,
+        name: str,
+        role: str,
+        system_prompt: str,
+        model: str = "gpt-4o",
+        client: Any = None,
+        is_custom_model: bool = False
+    ):
         self.name = name
         self.role = role
         self.system_prompt = system_prompt
         self.model = model
         self.is_custom_model = is_custom_model
+        sys_msg = f"You are {name}, a {role}. {system_prompt}"
         self.messages: List[Dict[str, Any]] = [
-            {"role": "system", "content": f"You are {name}, a {role}. {system_prompt}"}
+            {"role": "system", "content": sys_msg}
         ]
         self.tools: Dict[str, Callable] = {}
         self.tool_definitions: List[Dict[str, Any]] = []
@@ -27,31 +35,25 @@ class Agent:
     def register_tool(self, func: Callable, schema: Dict[str, Any]):
         """
         Registers a tool (function) to be used by the agent.
-        The schema must follow the OpenAI tool definition format:
-        {
-            "type": "function",
-            "function": {
-                "name": "function_name",
-                "description": "...",
-                "parameters": { ... }
-            }
-        }
+        The schema must follow the OpenAI tool definition format.
         """
         self.tools[schema["function"]["name"]] = func
         self.tool_definitions.append(schema)
 
-    def add_message(self, role: str, content: Union[str, List[Dict[str, Any]]]):
+    def add_message(
+        self, role: str, content: Union[str, List[Dict[str, Any]]]
+    ):
         self.messages.append({"role": role, "content": content})
 
     def _execute_tool_calls(self, tool_calls: List[Any]):
-        """Executes a list of tool calls (ToolCall objects) and appends results to messages."""
+        """Executes a list of tool calls and appends results."""
         for tool_call in tool_calls:
             result = ""
             tool_id = "unknown"
             func_name = "unknown"
 
             try:
-                # Support both object (dot notation) and dict access for robustness
+                # Support both object (dot notation) and dict access
                 if isinstance(tool_call, dict):
                     tool_id = tool_call.get("id")
                     func_name = tool_call["function"]["name"]
@@ -62,19 +64,23 @@ class Agent:
                     arguments = json.loads(tool_call.function.arguments)
 
                 if func_name in self.tools:
-                    logger.info(f"[{self.name}] Executing {func_name} with {arguments}")
+                    logger.info(
+                        f"[{self.name}] Executing {func_name} with {arguments}"
+                    )
                     try:
                         result = self.tools[func_name](**arguments)
                     except Exception as e:
-                        logger.exception(f"Error executing {func_name}: {str(e)}")
+                        logger.exception(f"Error {func_name}: {str(e)}")
                         result = f"Error executing {func_name}: {str(e)}"
                 else:
                     result = f"Error: Tool {func_name} not found."
 
             except json.JSONDecodeError as e:
-                result = f"Error: Invalid JSON arguments for tool {func_name}: {str(e)}"
+                result = (
+                    f"Error: Invalid JSON for {func_name}: {str(e)}"
+                )
             except Exception as e:
-                logger.exception(f"Error processing tool call {func_name}: {str(e)}")
+                logger.exception(f"Error call {func_name}: {str(e)}")
                 result = f"Error processing tool call {func_name}: {str(e)}"
 
             self.messages.append({
@@ -93,7 +99,9 @@ class Agent:
             # Keep the last MAX_HISTORY messages
             recent_messages = self.messages[-MAX_HISTORY:]
             self.messages = [system_prompt] + recent_messages
-            logger.warning(f"[{self.name}] Pruned message history to {len(self.messages)} items.")
+            logger.warning(
+                f"[{self.name}] Pruned history to {len(self.messages)} items."
+            )
 
     def think(self, max_turns: int = 5) -> str:
         if max_turns <= 0:
@@ -103,7 +111,10 @@ class Agent:
 
         try:
             # 1. Get Provider
-            provider = get_llm_provider(self.model, is_custom_model=self.is_custom_model)
+            provider = get_llm_provider(
+                self.model,
+                is_custom_model=self.is_custom_model
+            )
 
             # 2. Chat
             response: LLMResponse = provider.chat(
@@ -135,24 +146,36 @@ class Agent:
                 # Recursively think again to process the tool output
                 return self.think(max_turns=max_turns - 1)
             else:
-                return response.content if response.content else "Error: Empty response from model."
+                if response.content:
+                    return response.content
+                else:
+                    return "Error: Empty response from model."
 
         except Exception as e:
             error_msg = str(e)
             error_msg_lower = error_msg.lower()
 
             # User-friendly error for missing credentials
-            if "api_key" in error_msg_lower or "api key" in error_msg_lower or "credentials" in error_msg_lower:
-                 return "SYSTEM ALERT: LLM configuration invalid or missing. Please configure your provider in Settings."
+            if "api_key" in error_msg_lower or \
+               "api key" in error_msg_lower or \
+               "credentials" in error_msg_lower:
+                return (
+                    "SYSTEM ALERT: LLM configuration invalid or missing. "
+                    "Please configure your provider in Settings."
+                )
 
             logger.exception(f"Error during thought process: {error_msg}")
             return f"Error during thought process: {error_msg}"
 
-    def chat(self, message: str, attachments: Optional[List[Dict[str, Any]]] = None) -> str:
+    def chat(
+        self,
+        message: str,
+        attachments: Optional[List[Dict[str, Any]]] = None
+    ) -> str:
         if attachments:
             content = []
             text_parts = [message] + [
-                f"\n\n[Attachment: {att['name']}]\n{att['content']}\n[End Attachment]"
+                f"\n\n[Attachment: {att['name']}]\n{att['content']}\n[End]"
                 for att in attachments if not att["type"].startswith("image/")
             ]
             text_content = "".join(text_parts)
@@ -160,11 +183,11 @@ class Agent:
 
             # 2. Process Image Attachments
             for att in attachments:
-                 if att["type"].startswith("image/"):
-                     content.append({
-                         "type": "image_url",
-                         "image_url": {"url": att["content"]}
-                     })
+                if att["type"].startswith("image/"):
+                    content.append({
+                        "type": "image_url",
+                        "image_url": {"url": att["content"]}
+                    })
 
             self.add_message("user", content)
         else:

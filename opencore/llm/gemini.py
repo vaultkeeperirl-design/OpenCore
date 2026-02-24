@@ -6,6 +6,7 @@ import uuid
 from .base import LLMProvider, LLMResponse, ToolCall, ToolCallFunction
 from .schema import convert_to_gemini_tool
 
+
 class GeminiProvider(LLMProvider):
     def __init__(self, model_name: str, api_key: Optional[str] = None):
         if not api_key:
@@ -23,7 +24,11 @@ class GeminiProvider(LLMProvider):
         else:
             self.model_name = model_name
 
-    def chat(self, messages: List[Dict[str, Any]], tools: Optional[List[Dict[str, Any]]] = None) -> LLMResponse:
+    def chat(
+        self,
+        messages: List[Dict[str, Any]],
+        tools: Optional[List[Dict[str, Any]]] = None
+    ) -> LLMResponse:
         system_instruction = None
         contents = []
 
@@ -56,7 +61,7 @@ class GeminiProvider(LLMProvider):
                         # Args must be dict
                         try:
                             args = json.loads(tc.function.arguments)
-                        except:
+                        except Exception:
                             args = {}
 
                         parts.append({
@@ -81,12 +86,11 @@ class GeminiProvider(LLMProvider):
                         result_data = json.loads(content)
                         if not isinstance(result_data, dict):
                             result_data = {"result": result_data}
-                    except:
+                    except Exception:
                         result_data = {"result": content}
 
                     contents.append({
-                        "role": "function", # Wait, role should be 'function' or 'user'?
-                        # In the new API it's 'function'.
+                        "role": "function",
                         "parts": [{
                             "function_response": {
                                 "name": func_name,
@@ -95,18 +99,18 @@ class GeminiProvider(LLMProvider):
                         }]
                     })
                 else:
-                    # If we can't find the function name, skip or treat as user text?
-                    # Treat as user text to avoid crash
-                    contents.append({"role": "user", "parts": [f"Tool result: {content}"]})
+                    # If we can't find the function name, treat as user text
+                    contents.append(
+                        {"role": "user", "parts": [f"Tool result: {content}"]}
+                    )
 
         # Configure tools
         gemini_tools = None
         if tools:
-            # Convert list of OpenAI tools to list of Gemini FunctionDeclarations
+            # Convert list of OpenAI tools to Gemini FunctionDeclarations
             declarations = []
             for t in tools:
                 declarations.append(convert_to_gemini_tool(t))
-            # Wrap in tool config logic if needed, but SDK handles list of declarations directly usually
             gemini_tools = declarations
 
         # Initialize model
@@ -116,14 +120,10 @@ class GeminiProvider(LLMProvider):
             tools=gemini_tools
         )
 
-        # Generation config (json mode?)
-        # For now defaults.
-
         try:
             response = model.generate_content(contents)
 
             # Extract content and function calls
-            # Check candidates
             if not response.candidates:
                 return LLMResponse(content="Error: No candidates returned.")
 
@@ -136,11 +136,9 @@ class GeminiProvider(LLMProvider):
                     content_parts.append(part.text)
 
                 # Check for function_call attribute
-                # The SDK object has a `function_call` property if it's a function call part
                 if hasattr(part, 'function_call') and part.function_call:
                     fc = part.function_call
                     # Convert args (proto map) to dict then json string
-                    # Helper to convert MapComposite to dict
                     args_dict = {}
                     for k, v in fc.args.items():
                         args_dict[k] = v

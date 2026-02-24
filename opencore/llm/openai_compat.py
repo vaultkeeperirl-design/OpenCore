@@ -1,16 +1,23 @@
 from typing import List, Dict, Any, Optional
-import os
-import json
 from openai import OpenAI
 from .base import LLMProvider, LLMResponse, ToolCall, ToolCallFunction
 
+
 class OpenAICompatibleProvider(LLMProvider):
-    def __init__(self, model_name: str, api_key: Optional[str] = None, base_url: Optional[str] = None):
+    def __init__(
+        self,
+        model_name: str,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None
+    ):
         self.model_name = model_name
         self.client = OpenAI(api_key=api_key, base_url=base_url)
 
-    def chat(self, messages: List[Dict[str, Any]], tools: Optional[List[Dict[str, Any]]] = None) -> LLMResponse:
-        # Check if messages need any special handling (e.g. system message role)
+    def chat(
+        self,
+        messages: List[Dict[str, Any]],
+        tools: Optional[List[Dict[str, Any]]] = None
+    ) -> LLMResponse:
         # OpenAI supports "system" role natively.
 
         kwargs = {

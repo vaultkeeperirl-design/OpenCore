@@ -1,11 +1,17 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from opencore.core.agent import Agent
+from opencore.llm.base import LLMResponse
+
 
 class TestAgentMemoryLeak(unittest.TestCase):
     def test_message_history_unbounded(self):
         """Test that adding messages increases the history size."""
-        agent = Agent(name="TestAgent", role="Tester", system_prompt="System Prompt")
+        agent = Agent(
+            name="TestAgent",
+            role="Tester",
+            system_prompt="System Prompt"
+        )
 
         # Add 150 messages manually
         for i in range(150):
@@ -14,19 +20,22 @@ class TestAgentMemoryLeak(unittest.TestCase):
         # Verify it has 151 messages (1 system + 150 user)
         self.assertEqual(len(agent.messages), 151)
 
-    @patch("opencore.core.agent.completion")
-    def test_message_history_truncation(self, mock_completion):
+    @patch("opencore.core.agent.get_llm_provider")
+    def test_message_history_truncation(self, mock_get_provider):
         """Test that think() truncates the message history."""
-        # Mock completion to return a simple response
-        mock_response = MagicMock()
-        # Mocking message object attributes directly
-        mock_message = MagicMock()
-        mock_message.content = "I am thinking."
-        mock_message.tool_calls = None
-        mock_response.choices = [MagicMock(message=mock_message)]
-        mock_completion.return_value = mock_response
+        # Mock provider
+        mock_provider = MagicMock()
+        mock_provider.chat.return_value = LLMResponse(
+            content="I am thinking.",
+            tool_calls=None
+        )
+        mock_get_provider.return_value = mock_provider
 
-        agent = Agent(name="TestAgent", role="Tester", system_prompt="System Prompt")
+        agent = Agent(
+            name="TestAgent",
+            role="Tester",
+            system_prompt="System Prompt"
+        )
 
         # Add 150 messages manually (0 to 149)
         for i in range(150):
@@ -47,9 +56,11 @@ class TestAgentMemoryLeak(unittest.TestCase):
 
         # Check that the messages after system prompt are the most recent ones
         # The last user message added was "Message 149"
-        # Since 'assistant' response is last, the one before it is the last user message
+        # Since 'assistant' response is last,
+        # the one before it is the last user message
         self.assertEqual(agent.messages[-2]["content"], "Message 149")
 
-        # The first retained user message should be Message 50 (since we keep last 100 from 0..149, i.e., 50..149)
+        # The first retained user message should be Message 50
+        # (since we keep last 100 from 0..149, i.e., 50..149)
         # Message at index 1 should be "Message 50"
         self.assertEqual(agent.messages[1]["content"], "Message 50")

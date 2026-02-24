@@ -1,13 +1,13 @@
 import os
-from typing import Optional
 from .base import LLMProvider
 from .openai_compat import OpenAICompatibleProvider
 from .anthropic import AnthropicProvider
 from .gemini import GeminiProvider
 
+
 def get_llm_provider(model: str, is_custom_model: bool = False) -> LLMProvider:
     """
-    Factory function to get the appropriate LLM provider based on the model string.
+    Factory function to get the appropriate LLM provider.
     """
 
     # Handle prefixes
@@ -23,9 +23,6 @@ def get_llm_provider(model: str, is_custom_model: bool = False) -> LLMProvider:
 
     elif model.startswith("gemini/") or model.startswith("google/"):
         api_key = os.getenv("GEMINI_API_KEY")
-        # Strip prefix handled in provider or here? Provider handles 'gemini/'.
-        # But let's be safe and strip here to pass clean name.
-        # Actually GeminiProvider handles prefixes well.
         return GeminiProvider(model_name=model, api_key=api_key)
 
     elif model.startswith("groq/"):
@@ -49,21 +46,21 @@ def get_llm_provider(model: str, is_custom_model: bool = False) -> LLMProvider:
     elif model.startswith("dashscope/") or model.startswith("qwen/"):
         # Check for OAuth token first (legacy Qwen logic support)
         oauth_token = os.getenv("QWEN_ACCESS_TOKEN")
-        api_key = oauth_token if oauth_token else os.getenv("DASHSCOPE_API_KEY")
+        key = oauth_token if oauth_token else os.getenv("DASHSCOPE_API_KEY")
 
         if model.startswith("dashscope/"):
-             model_name = model.replace("dashscope/", "")
+            model_name = model.replace("dashscope/", "")
         else:
-             model_name = model.replace("qwen/", "")
+            model_name = model.replace("qwen/", "")
 
         # Use Portal API for OAuth, or DashScope compatible mode for Key
         base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
         if oauth_token:
-             base_url = "https://portal.qwen.ai/v1"
+            base_url = "https://portal.qwen.ai/v1"
 
         return OpenAICompatibleProvider(
             model_name=model_name,
-            api_key=api_key,
+            api_key=key,
             base_url=base_url
         )
 
@@ -81,7 +78,7 @@ def get_llm_provider(model: str, is_custom_model: bool = False) -> LLMProvider:
         model_name = model.replace("ollama/", "")
         return OpenAICompatibleProvider(
             model_name=model_name,
-            api_key="ollama", # Dummy key required by some clients
+            api_key="ollama",  # Dummy key required by some clients
             base_url=api_base
         )
 
