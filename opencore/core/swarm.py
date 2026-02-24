@@ -2,6 +2,7 @@ from typing import Dict, Optional, List, Any
 from opencore.core.agent import Agent
 from opencore.tools.base import register_base_tools
 from opencore.config import settings
+from opencore.llm.factory import is_provider_available, get_available_model_list
 import datetime
 
 
@@ -35,6 +36,14 @@ class Swarm:
     ) -> str:
         if name in self.agents:
             return f"Error: Agent '{name}' already exists."
+
+        # Validate requested model availability if provided
+        if model and not is_provider_available(model):
+            available = ", ".join(get_available_model_list())
+            return (
+                f"Error: Provider for model '{model}' is not configured. "
+                f"Please configure the API key or choose from: {available}"
+            )
 
         # Use passed model, or swarm default
         is_custom = model is not None
@@ -88,6 +97,15 @@ class Swarm:
         return self.agents.get(name)
 
     def _register_swarm_tools(self, agent: Agent):
+        # Dynamically build model description
+        available_models = get_available_model_list()
+        # Ensure system default is visible if valid and available
+        if self.default_model and self.default_model not in available_models:
+            if is_provider_available(self.default_model):
+                available_models.insert(0, self.default_model)
+
+        models_str = ", ".join(available_models) if available_models else "No external models configured"
+
         # Tool: Create Agent
         create_agent_schema = {
             "type": "function",
@@ -103,8 +121,8 @@ class Swarm:
                         "model": {
                             "type": "string",
                             "description": (
-                                "Optional model to use (e.g., 'gpt-4o', 'vertex_ai/gemini-pro', 'ollama/llama3'). "
-                                "Defaults to system default."
+                                f"Optional model to use. Available options: {models_str}. "
+                                f"Defaults to system default ({self.default_model})."
                             )
                         }
                     },
