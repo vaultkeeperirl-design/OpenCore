@@ -14,3 +14,9 @@
 **Vulnerability:** The `execute_command` tool in `opencore/tools/base.py` used `shell=True`, allowing command injection (e.g., `echo test > injected.txt`).
 **Learning:** `shell=True` is fundamentally insecure for agent tools that accept arbitrary strings from an LLM. Agents often output unexpected characters or can be prompt-injected to run malicious commands.
 **Prevention:** Replaced `shell=True` with `shell=False` and used `shlex.split(command)` to parse arguments securely. Updated tool description to explicitly disallow shell features.
+
+## 2026-02-24 - Unrestricted Environment Configuration
+
+**Vulnerability:** The `POST /config` endpoint allowed unauthenticated users to inject arbitrary keys into the `.env` file via `Settings.update_env`, potentially leading to RCE or system compromise.
+**Learning:** Never trust input for configuration updates. Configuration endpoints are high-value targets and must be strictly validated. Whitelisting is the only safe approach for runtime configuration updates.
+**Prevention:** Implemented a strict whitelist `ALLOWED_CONFIG_KEYS` in `opencore/config.py` and enforced validation in `Settings.update_env`.
