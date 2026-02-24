@@ -2,9 +2,11 @@ import unittest
 from unittest.mock import MagicMock, patch
 from opencore.core.swarm import Swarm
 from opencore.interface.api import app
+from opencore.llm.base import LLMResponse, ToolCall, ToolCallFunction
 from fastapi.testclient import TestClient
 
 client = TestClient(app)
+
 
 class TestIntegration(unittest.TestCase):
     def test_api_chat_flow(self):
@@ -14,64 +16,68 @@ class TestIntegration(unittest.TestCase):
 
             response = client.post("/chat", json={"message": "Hi"})
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json()["response"], "Hello from Manager!")
+            self.assertEqual(
+                response.json()["response"],
+                "Hello from Manager!"
+            )
 
-    @patch("opencore.core.agent.completion")
-    def test_swarm_delegation_flow(self, mock_completion):
-        swarm = Swarm("Manager")
-        swarm.create_agent("Coder", "Developer", "Code stuff")
+    @patch("opencore.core.agent.get_llm_provider")
+    def test_swarm_delegation_flow(self, mock_get_provider):
+        # We need distinct mock providers for each agent if we want state?
+        # Or just simulate behavior based on inputs.
+
+        # Swarm setup
+        # Note: Swarm calls settings.llm_model during init
+        with patch("opencore.config.settings.llm_model", "gpt-4o"):
+            swarm = Swarm("Manager")
+            swarm.create_agent("Coder", "Developer", "Code stuff")
+
+        # Mock provider instance
+        mock_provider = MagicMock()
+        mock_get_provider.return_value = mock_provider
 
         # Define side effect function to simulate conversation flow
-        def completion_side_effect(*args, **kwargs):
-            messages = kwargs.get("messages")
+        def chat_side_effect(messages, tools=None):
             # Check who is calling based on system prompt in messages[0]
             system_content = messages[0]["content"]
 
+            # 1. Manager Logic
             if "Manager" in system_content:
                 last_msg = messages[-1]
 
-                # Check if this is the first user message or a tool response
+                # First call: User asks to code -> Manager delegates
                 if last_msg["role"] == "user":
-                    # First call: Manager decides to delegate
-                    msg = MagicMock()
-                    msg.content = None
-                    tc = MagicMock()
-                    tc.id = "call_1"
-                    tc.function.name = "delegate_task"
-                    tc.function.arguments = '{"to_agent": "Coder", "task": "Code X"}'
-                    msg.tool_calls = [tc]
+                    return LLMResponse(
+                        content=None,
+                        tool_calls=[
+                            ToolCall(
+                                id="call_1",
+                                function=ToolCallFunction(
+                                    name="delegate_task",
+                                    arguments='{"to_agent": "Coder", "task": "Code X"}'
+                                )
+                            )
+                        ]
+                    )
 
-                    resp = MagicMock()
-                    resp.choices = [MagicMock(message=msg)]
-                    return resp
-
+                # Second call: Tool output (from Coder) -> Manager finishes
                 elif last_msg["role"] == "tool":
-                    # Second call: Manager receives tool output and finishes
-                    msg = MagicMock()
-                    msg.content = "Done."
-                    msg.tool_calls = None
-                    resp = MagicMock()
-                    resp.choices = [MagicMock(message=msg)]
-                    return resp
+                    return LLMResponse(
+                        content="Done.",
+                        tool_calls=None
+                    )
 
+            # 2. Coder Logic
             elif "Coder" in system_content:
-                # Coder simply replies
-                msg = MagicMock()
-                msg.content = "Code written."
-                msg.tool_calls = None
-                resp = MagicMock()
-                resp.choices = [MagicMock(message=msg)]
-                return resp
+                return LLMResponse(
+                    content="Code written.",
+                    tool_calls=None
+                )
 
             # Fallback
-            msg = MagicMock()
-            msg.content = "Error."
-            msg.tool_calls = None
-            resp = MagicMock()
-            resp.choices = [MagicMock(message=msg)]
-            return resp
+            return LLMResponse(content="Error.", tool_calls=None)
 
-        mock_completion.side_effect = completion_side_effect
+        mock_provider.chat.side_effect = chat_side_effect
 
         print("Starting chat...")
         response = swarm.chat("Code X")
@@ -79,10 +85,11 @@ class TestIntegration(unittest.TestCase):
 
         # Verify calls were made
         # 1. Manager -> delegate
-        # 2. Coder -> responds
+        # 2. Coder -> responds (called via tool execution inside Manager)
         # 3. Manager -> final response
-        self.assertEqual(mock_completion.call_count, 3)
+        self.assertEqual(mock_provider.chat.call_count, 3)
         self.assertEqual(response, "Done.")
+
 
 if __name__ == "__main__":
     unittest.main()
