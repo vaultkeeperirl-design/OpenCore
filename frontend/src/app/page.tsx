@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import ChatInterface from "@/components/ChatInterface";
 import AgentGraph from "@/components/AgentGraph";
+import { HEARTBEAT_INTERVAL, API_AGENTS, API_HEARTBEAT } from "@/constants";
 import SettingsModal from "@/components/SettingsModal";
 import { Settings, Activity, Shield, Users, Command, Terminal } from "lucide-react";
 import Image from "next/image";
@@ -15,13 +16,13 @@ export default function Home() {
   useEffect(() => {
     fetchAgents();
     fetchHeartbeat();
-    const interval = setInterval(fetchHeartbeat, 30000);
+    const interval = setInterval(fetchHeartbeat, HEARTBEAT_INTERVAL);
     return () => clearInterval(interval);
   }, []);
 
   const fetchAgents = async () => {
     try {
-      const res = await fetch("/agents");
+      const res = await fetch(API_AGENTS);
       const data = await res.json();
       if (data.agents) setAgents(data.agents);
     } catch (e) {
@@ -31,7 +32,7 @@ export default function Home() {
 
   const fetchHeartbeat = async () => {
     try {
-      const res = await fetch("/heartbeat");
+      const res = await fetch(API_HEARTBEAT);
       if (res.ok) {
         const data = await res.json();
         setHeartbeat(data);

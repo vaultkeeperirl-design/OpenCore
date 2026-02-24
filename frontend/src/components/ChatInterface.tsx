@@ -5,6 +5,7 @@ import { Send, User, Sparkles, Image as ImageIcon, FileText, X, Paperclip } from
 import { motion, AnimatePresence } from "framer-motion";
 import VoiceInput from "./VoiceInput";
 import { toast } from "sonner";
+import { API_CHAT, SUPPORTED_FILE_EXTENSIONS_REGEX } from "@/constants";
 
 interface Attachment {
   name: string;
@@ -105,7 +106,7 @@ export default function ChatInterface({
       const validFiles = droppedFiles.filter(file => {
           // Allow images, text files, code files
           const isValid = file.type.startsWith("image/") || file.type.startsWith("text/") ||
-              /\.(json|js|ts|tsx|py|md|csv|html|css|txt)$/i.test(file.name);
+              SUPPORTED_FILE_EXTENSIONS_REGEX.test(file.name);
 
           if (!isValid) {
                toast.error(`File type not supported: ${file.name}`);
@@ -163,7 +164,7 @@ export default function ChatInterface({
     setLoading(true);
 
     try {
-      const res = await fetch("/chat", {
+      const res = await fetch(API_CHAT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
