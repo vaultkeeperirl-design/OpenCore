@@ -7,7 +7,7 @@ from opencore.core.swarm import Swarm
 from opencore.interface.middleware import global_exception_handler
 from opencore.core.scheduler import AsyncScheduler
 from opencore.interface.heartbeat import heartbeat_manager
-from opencore.config import settings
+from opencore.config import settings, ALLOWED_CONFIG_KEYS
 import logging
 import os
 from starlette.concurrency import run_in_threadpool
@@ -130,7 +130,10 @@ async def get_config():
 async def update_config(config: Dict[str, Any]):
     """Updates the .env file and reloads configuration."""
     try:
-        settings.update_env(config)
+        # Filter out keys not in the allowed list (e.g., read-only flags like HAS_OPENAI_KEY)
+        valid_config = {k: v for k, v in config.items() if k in ALLOWED_CONFIG_KEYS}
+
+        settings.update_env(valid_config)
         swarm.update_settings()
     except Exception as e:
         logger.error(f"Error updating configuration: {e}")
