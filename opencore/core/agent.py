@@ -156,13 +156,11 @@ class Agent:
     def chat(self, message: str, attachments: Optional[List[Dict[str, Any]]] = None) -> str:
         if attachments:
             content = []
-            text_content = message
-
-            # 1. Process Text/Code Attachments (append to text)
-            for att in attachments:
-                if not att["type"].startswith("image/"):
-                    text_content += f"\n\n[Attachment: {att['name']}]\n{att['content']}\n[End Attachment]"
-
+            text_parts = [message] + [
+                f"\n\n[Attachment: {att['name']}]\n{att['content']}\n[End Attachment]"
+                for att in attachments if not att["type"].startswith("image/")
+            ]
+            text_content = "".join(text_parts)
             content.append({"type": "text", "text": text_content})
 
             # 2. Process Image Attachments
