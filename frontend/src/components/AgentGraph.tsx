@@ -14,65 +14,22 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { AgentGraphData, AgentNode } from "@/types/agent";
-import { Users, Bot } from "lucide-react";
-import Image from "next/image";
+import CustomAgentNode from "./CustomAgentNode";
+
+// Define node types
+const nodeTypes = {
+  customAgent: CustomAgentNode,
+};
 
 // Helper to create a node object
 const createNode = (data: AgentNode, x: number, y: number): Node => {
-    const isManager = data.id === "Manager";
-    const isTeamLead = data.parent === "Manager";
-
-    let className = "";
-    let iconElement = null;
-    let borderColor = ""; // retained for last_thought inline style
-
-    if (isManager) {
-        borderColor = "var(--accent-2)";
-        className = "bg-accent-2/10 border border-accent-2 text-accent-2 shadow-[0_0_30px_color-mix(in_srgb,var(--accent-2),transparent_80%)] rounded-xl p-4 w-[240px] text-center font-orbitron text-sm font-bold backdrop-blur-md uppercase tracking-wider";
-        iconElement = <Image src="/logo.svg" width={32} height={32} className="w-8 h-8 drop-shadow-[0_0_10px_var(--accent-2)]" alt="" />;
-    } else if (isTeamLead) {
-        borderColor = "var(--accent-1)";
-        className = "bg-accent-1/10 border border-accent-1 text-accent-1 shadow-[0_0_20px_color-mix(in_srgb,var(--accent-1),transparent_80%)] rounded-xl p-3.5 w-[220px] text-center font-orbitron text-xs font-bold backdrop-blur-sm uppercase tracking-wide";
-        iconElement = <Users className="w-6 h-6 text-accent-1 drop-shadow-[0_0_8px_var(--accent-1)]" />;
-    } else {
-        // Worker
-        borderColor = "var(--accent-3)";
-        className = "bg-accent-3/10 border border-accent-3 text-accent-3 shadow-[0_0_15px_color-mix(in_srgb,var(--accent-3),transparent_85%)] rounded-lg p-3 w-[200px] text-center font-mono text-xs font-normal backdrop-blur-sm";
-        iconElement = <Bot className="w-5 h-5 text-accent-3 drop-shadow-[0_0_5px_var(--accent-3)]" />;
-    }
-
     return {
         id: data.id,
         position: { x, y },
         data: {
-            label: (
-                <div className="flex flex-col items-center justify-center gap-2 pointer-events-none w-full h-full">
-                    <div className="flex items-center justify-center gap-2 w-full">
-                        {iconElement}
-                        <span className="truncate max-w-[150px]" title={data.name}>
-                            {data.name.replace(/_/g, ' ')}
-                        </span>
-                    </div>
-                    {data.last_thought && data.last_thought !== "Idle" && (
-                        <div
-                            className="text-[10px] font-mono mt-1 w-full truncate px-2 border-t pt-2 opacity-80"
-                            style={{
-                                borderColor: `${borderColor}`, // Ideally color-mix but simple var works for border color
-                                // We need to match the text color slightly lighter.
-                                // Since we are using vars, we can just inherit or use specific mix
-                                color: 'currentColor'
-                            }}
-                        >
-                            {data.last_thought}
-                        </div>
-                    )}
-                </div>
-            )
+            ...data
         },
-        className: className,
-        type: 'default',
-        sourcePosition: Position.Bottom,
-        targetPosition: Position.Top,
+        type: 'customAgent',
     };
 };
 
@@ -170,6 +127,8 @@ export default function AgentGraph({ graphData }: { graphData: AgentGraphData })
                 id: `struct-${node.parent}-${node.id}`,
                 source: node.parent,
                 target: node.id,
+                sourceHandle: 'bottom',
+                targetHandle: 'top',
                 animated: false,
                 style: { stroke: '#333', strokeWidth: 1, strokeDasharray: '5,5' },
                 type: 'straight',
@@ -199,13 +158,15 @@ export default function AgentGraph({ graphData }: { graphData: AgentGraphData })
                      id: `sibling-${current.id}-${next.id}`,
                      source: current.id,
                      target: next.id,
+                     sourceHandle: 'right',
+                     targetHandle: 'left',
                      animated: false,
                      style: {
                          stroke: '#00f3ff',
                          strokeWidth: 2,
                          strokeOpacity: 0.3
                      },
-                     type: 'straight',
+                     type: 'smoothstep',
                      zIndex: -1 // Behind nodes
                  });
              }
@@ -265,6 +226,7 @@ export default function AgentGraph({ graphData }: { graphData: AgentGraphData })
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        nodeTypes={nodeTypes}
         fitView
         attributionPosition="bottom-right"
         className="transition-opacity duration-500"
