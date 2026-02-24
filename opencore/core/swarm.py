@@ -14,8 +14,7 @@ class Swarm:
         self.create_agent(
             name=main_agent_name,
             role="Manager",
-            system_prompt="You are the central system manager. Your role is to orchestrate sub-agents and execute user directives efficiently. Respond with brevity and precision. Use system-style language (e.g., 'Acknowledged', 'Initiating').",
-            model=self.default_model
+            system_prompt="You are the central system manager. Your role is to orchestrate sub-agents and execute user directives efficiently. Respond with brevity and precision. Use system-style language (e.g., 'Acknowledged', 'Initiating')."
         )
 
     def create_agent(self, name: str, role: str, system_prompt: str, model: Optional[str] = None) -> str:
@@ -23,9 +22,10 @@ class Swarm:
             return f"Error: Agent '{name}' already exists."
 
         # Use passed model, or swarm default
+        is_custom = model is not None
         agent_model = model if model else self.default_model
 
-        new_agent = Agent(name, role, system_prompt, model=agent_model)
+        new_agent = Agent(name, role, system_prompt, model=agent_model, is_custom_model=is_custom)
         self.agents[name] = new_agent
 
         # Register swarm tools for the new agent
@@ -117,11 +117,11 @@ class Swarm:
         # Allow env var to override default model
         self.default_model = settings.llm_model or "gpt-4o"
 
-        # Update existing agents to use the new default model
-        # Note: This updates all agents to the system default.
-        # If specific agents need specific models, this logic would need refinement.
+        # Update existing agents to use the new default model if they aren't custom
         for agent in self.agents.values():
-            agent.model = self.default_model
+            if not getattr(agent, "is_custom_model", False):
+                agent.model = self.default_model
+
             # Clear client to ensure new auth is picked up if needed
             agent.client = None
 
