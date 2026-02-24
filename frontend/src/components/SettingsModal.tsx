@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, Save, Key, Cpu, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
+import { API_CONFIG, API_AUTH_STATUS, API_AUTH_QWEN_LOGIN, API_AUTH_GOOGLE_LOGIN } from "@/constants";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -25,8 +26,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     setLoading(true);
     try {
       const [configRes, authRes] = await Promise.all([
-        fetch("/config"),
-        fetch("/auth/status")
+        fetch(API_CONFIG),
+        fetch(API_AUTH_STATUS)
       ]);
 
       const configData = await configRes.json();
@@ -43,7 +44,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
   const saveConfig = async () => {
     try {
-      const res = await fetch("/config", {
+      const res = await fetch(API_CONFIG, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(config),
@@ -148,7 +149,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                      {!item.isOAuth && item.key === "DASHSCOPE_API_KEY" && (
                         <div className="mt-2 flex items-center gap-2">
                            <a
-                             href="/auth/qwen/login"
+                             href={API_AUTH_QWEN_LOGIN}
                              target="_blank"
                              rel="noopener noreferrer"
                              className="px-3 py-1.5 bg-[#222] hover:bg-[#333] border border-[#333] hover:border-[#00ffff] rounded flex items-center gap-2 transition-all group/btn"
@@ -161,7 +162,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                      {!item.isOAuth && item.key === "GEMINI_API_KEY" && (
                         <div className="mt-2 flex items-center gap-2">
                            <a
-                             href="/auth/google/login"
+                             href={API_AUTH_GOOGLE_LOGIN}
                              target="_blank"
                              rel="noopener noreferrer"
                              className="px-3 py-1.5 bg-[#222] hover:bg-[#333] border border-[#333] hover:border-[#00ffff] rounded flex items-center gap-2 transition-all group/btn"
