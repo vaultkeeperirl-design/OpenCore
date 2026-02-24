@@ -162,6 +162,10 @@ Run the test suite to verify system integrity:
 python3 -m unittest discover tests
 ```
 
+### Logs & Debugging
+The `logs/` directory contains debug information, system reports, and execution journals.
+AI Agents: **Look here** for `frontend_log.txt`, `SENTINEL_REPORT.md`, and other debug artifacts.
+
 ## // CONTRIBUTING_NODES
 
 Pull requests are welcome. For major architectural changes, please open an issue first to discuss.
