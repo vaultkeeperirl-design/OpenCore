@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
 from contextlib import asynccontextmanager
 from opencore.core.swarm import Swarm
-from opencore.interface.middleware import global_exception_handler
+from opencore.interface.middleware import global_exception_handler, request_id_middleware
 from opencore.core.scheduler import AsyncScheduler
 from opencore.interface.heartbeat import heartbeat_manager
 from opencore.config import settings, ALLOWED_CONFIG_KEYS
@@ -66,6 +66,9 @@ app = FastAPI(lifespan=lifespan)
 
 # Register centralized error handler
 app.add_exception_handler(Exception, global_exception_handler)
+
+# Register request ID middleware
+app.middleware("http")(request_id_middleware)
 
 # Include Auth Router
 app.include_router(auth_router)
