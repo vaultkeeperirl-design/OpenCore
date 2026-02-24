@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from opencore import __version__
 
 logger = logging.getLogger("opencore.heartbeat")
 
@@ -24,7 +25,9 @@ class HeartbeatManager:
         return {
             "status": self.status,
             "last_heartbeat": self.last_heartbeat.isoformat() if self.last_heartbeat else None,
-            "uptime": uptime_str
+            "uptime": uptime_str,
+            "version": __version__,
+            "start_time": self.start_time.isoformat()
         }
 
 heartbeat_manager = HeartbeatManager()
