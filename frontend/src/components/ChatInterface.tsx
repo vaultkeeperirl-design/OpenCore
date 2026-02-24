@@ -10,6 +10,7 @@ import { API_CHAT, SUPPORTED_FILE_EXTENSIONS_REGEX } from "@/constants";
 import { AgentGraphData } from "@/types/agent";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_FILE_SIZE_TEXT = "10MB";
 
 interface Attachment {
   name: string;
@@ -132,7 +133,7 @@ export default function ChatInterface({
           }
 
           if (file.size > MAX_FILE_SIZE) {
-               toast.error(`File too large: ${file.name} (max 10MB)`);
+               toast.error(`File too large: ${file.name} (max ${MAX_FILE_SIZE_TEXT})`);
                return false;
           }
 
@@ -155,7 +156,7 @@ export default function ChatInterface({
     try {
         for (const file of attachments) {
           if (file.size > MAX_FILE_SIZE) {
-            toast.error(`File too large: ${file.name} (max 10MB)`);
+            toast.error(`File too large: ${file.name} (max ${MAX_FILE_SIZE_TEXT})`);
             return;
           }
 
