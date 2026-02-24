@@ -91,13 +91,41 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                  >
                    <option value="gpt-4o">OpenAI GPT-4o</option>
                    <option value="anthropic/claude-3-5-sonnet-20240620">Claude 3.5 Sonnet</option>
-                   <option value="dashscope/qwen-turbo">Qwen Turbo (Free Tier)</option>
-                   <option value="gemini/gemini-1.5-flash-001">Gemini Flash (Free Tier)</option>
-                   <option value="groq/llama3-8b-8192">Llama 3 (Groq/Free)</option>
+                   <option value="gemini/gemini-2.0-flash">Gemini 2.0 Flash (Google)</option>
+                   <option value="gemini/gemini-1.5-pro">Gemini 1.5 Pro (Google)</option>
+                   <option value="groq/llama-3.1-8b-instant">Llama 3.1 (Groq/Free)</option>
                    <option value="xai/grok-2-vision-1212">Grok 2 (xAI)</option>
                    <option value="mistral/mistral-large-latest">Mistral Large</option>
+                   <option value="dashscope/qwen-turbo">Qwen Turbo (Free Tier)</option>
                    <option value="ollama/llama3">Local Ollama (Llama 3)</option>
                  </select>
+               </div>
+
+               {/* Vertex AI Configuration */}
+               <div className="space-y-4">
+                 <h3 className="text-lg font-semibold text-[#e0e0e0] border-b border-[#333] pb-2 mt-4 font-orbitron tracking-wide">CLOUD INFRASTRUCTURE</h3>
+                 <div className="grid grid-cols-2 gap-4">
+                   <div className="space-y-1">
+                     <label className="text-xs text-[#888] font-mono uppercase">GCP PROJECT ID</label>
+                     <input
+                       type="text"
+                       placeholder="my-project-id"
+                       value={config.VERTEX_PROJECT || ""}
+                       onChange={(e) => setConfig({...config, VERTEX_PROJECT: e.target.value})}
+                       className="w-full bg-black border border-[#333] rounded p-2.5 text-sm focus:border-[#00ffff] focus:outline-none focus:ring-1 focus:ring-[#00ffff]/30 transition-all font-mono text-[#e0e0e0]"
+                     />
+                   </div>
+                   <div className="space-y-1">
+                     <label className="text-xs text-[#888] font-mono uppercase">GCP REGION</label>
+                     <input
+                       type="text"
+                       placeholder="us-central1"
+                       value={config.VERTEX_LOCATION || ""}
+                       onChange={(e) => setConfig({...config, VERTEX_LOCATION: e.target.value})}
+                       className="w-full bg-black border border-[#333] rounded p-2.5 text-sm focus:border-[#00ffff] focus:outline-none focus:ring-1 focus:ring-[#00ffff]/30 transition-all font-mono text-[#e0e0e0]"
+                     />
+                   </div>
+                 </div>
                </div>
 
                {/* API Keys Section */}

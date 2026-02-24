@@ -98,7 +98,7 @@ class TestOnboarding(unittest.TestCase):
 
         with open(".env", "r") as f:
             content = f.read()
-        self.assertIn("LLM_MODEL=gemini/gemini-1.5-flash-001", content)
+        self.assertIn("LLM_MODEL=gemini/gemini-2.0-flash", content)
         self.assertIn("GEMINI_API_KEY=gemini-key", content)
 
     @patch('opencore.cli.onboard.verify_connection')
@@ -111,7 +111,7 @@ class TestOnboarding(unittest.TestCase):
 
         with open(".env", "r") as f:
             content = f.read()
-        self.assertIn("LLM_MODEL=gemini/gemini-1.5-flash-001", content)
+        self.assertIn("LLM_MODEL=gemini/gemini-2.0-flash", content)
         self.assertIn("GEMINI_API_KEY=gemini-key", content)
 
 
