@@ -27,7 +27,7 @@ export default function ThemeSelector() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Theme Settings"
-        className="p-2 hover:bg-bg-tertiary rounded-lg transition-all border border-transparent hover:border-border-primary text-accent-1 hover:text-text-primary hover:shadow-[0_0_15px_var(--accent-1)] active:scale-95"
+        className="p-2 hover:bg-bg-tertiary rounded-lg transition-all border border-transparent hover:border-border-primary text-accent-1 hover:text-text-primary hover:shadow-[0_0_15px_color-mix(in_srgb,var(--accent-1),transparent_70%)] active:scale-95"
       >
         <Palette size={24} />
       </button>

@@ -13,6 +13,7 @@ import { AgentGraphData } from "@/types/agent";
 export default function Home() {
   const [graphData, setGraphData] = useState<AgentGraphData>({ nodes: [], edges: [] });
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [heartbeat, setHeartbeat] = useState<any>(null);
   const [uptimeString, setUptimeString] = useState("00:00:00");
 
@@ -47,6 +48,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAgents();
     fetchHeartbeat();
     const interval = setInterval(fetchHeartbeat, HEARTBEAT_INTERVAL);
@@ -81,7 +83,7 @@ export default function Home() {
        <header className="h-20 border-b border-border-primary bg-bg-secondary flex items-center justify-between px-6 shrink-0 z-10 relative shadow-md shadow-accent-3/5 transition-colors duration-300">
          <div className="flex items-center gap-4">
            {/* Legacy Logo */}
-           <div className="relative w-12 h-12 filter drop-shadow-[0_0_5px_var(--accent-2)] animate-[flicker_4s_infinite]">
+           <div className="relative w-12 h-12 filter drop-shadow-[0_0_5px_color-mix(in_srgb,var(--accent-2),transparent_30%)] animate-[flicker_4s_infinite]">
               <Image src="/logo.svg" alt="OpenCore Logo" fill className="object-contain" priority />
            </div>
 
@@ -91,7 +93,7 @@ export default function Home() {
              </h1>
              <div className="flex items-center gap-2 text-[10px] text-text-secondary font-mono tracking-widest">
                <span>V{heartbeat?.version || "..."}</span>
-               <span className="text-status-active drop-shadow-[0_0_5px_var(--status-active)]">● SYSTEM ACTIVE</span>
+               <span className="text-status-active drop-shadow-[0_0_5px_color-mix(in_srgb,var(--status-active),transparent_30%)]">● SYSTEM ACTIVE</span>
              </div>
            </div>
          </div>
@@ -119,7 +121,7 @@ export default function Home() {
              <button
                onClick={() => setSettingsOpen(true)}
                aria-label="Settings"
-               className="p-2 hover:bg-bg-tertiary rounded-lg transition-all border border-transparent hover:border-border-primary text-accent-1 hover:text-text-primary hover:shadow-[0_0_15px_var(--accent-1)] active:scale-95"
+               className="p-2 hover:bg-bg-tertiary rounded-lg transition-all border border-transparent hover:border-border-primary text-accent-1 hover:text-text-primary hover:shadow-[0_0_15px_color-mix(in_srgb,var(--accent-1),transparent_70%)] active:scale-95"
              >
                <Settings size={24} />
              </button>

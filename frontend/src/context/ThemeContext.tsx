@@ -35,6 +35,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Load from local storage
     const savedTheme = localStorage.getItem("opencore-theme") as Theme;
     if (savedTheme && availableThemes.some((t) => t.id === savedTheme)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setThemeState(savedTheme);
     }
     setMounted(true);

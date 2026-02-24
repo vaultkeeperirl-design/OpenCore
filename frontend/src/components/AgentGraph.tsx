@@ -15,6 +15,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { AgentGraphData, AgentNode } from "@/types/agent";
 import { Users, Bot } from "lucide-react";
+import Image from "next/image";
 
 // Helper to create a node object
 const createNode = (data: AgentNode, x: number, y: number): Node => {
@@ -27,16 +28,16 @@ const createNode = (data: AgentNode, x: number, y: number): Node => {
 
     if (isManager) {
         borderColor = "var(--accent-2)";
-        className = "bg-accent-2/10 border border-accent-2 text-accent-2 shadow-[0_0_30px_rgba(var(--accent-2),0.2)] rounded-xl p-4 w-[240px] text-center font-orbitron text-sm font-bold backdrop-blur-md uppercase tracking-wider";
-        iconElement = <img src="/logo.svg" className="w-8 h-8 drop-shadow-[0_0_10px_var(--accent-2)]" alt="" />;
+        className = "bg-accent-2/10 border border-accent-2 text-accent-2 shadow-[0_0_30px_color-mix(in_srgb,var(--accent-2),transparent_80%)] rounded-xl p-4 w-[240px] text-center font-orbitron text-sm font-bold backdrop-blur-md uppercase tracking-wider";
+        iconElement = <Image src="/logo.svg" width={32} height={32} className="w-8 h-8 drop-shadow-[0_0_10px_var(--accent-2)]" alt="" />;
     } else if (isTeamLead) {
         borderColor = "var(--accent-1)";
-        className = "bg-accent-1/10 border border-accent-1 text-accent-1 shadow-[0_0_20px_rgba(var(--accent-1),0.2)] rounded-xl p-3.5 w-[220px] text-center font-orbitron text-xs font-bold backdrop-blur-sm uppercase tracking-wide";
+        className = "bg-accent-1/10 border border-accent-1 text-accent-1 shadow-[0_0_20px_color-mix(in_srgb,var(--accent-1),transparent_80%)] rounded-xl p-3.5 w-[220px] text-center font-orbitron text-xs font-bold backdrop-blur-sm uppercase tracking-wide";
         iconElement = <Users className="w-6 h-6 text-accent-1 drop-shadow-[0_0_8px_var(--accent-1)]" />;
     } else {
         // Worker
         borderColor = "var(--accent-3)";
-        className = "bg-accent-3/10 border border-accent-3 text-accent-3 shadow-[0_0_15px_rgba(var(--accent-3),0.15)] rounded-lg p-3 w-[200px] text-center font-mono text-xs font-normal backdrop-blur-sm";
+        className = "bg-accent-3/10 border border-accent-3 text-accent-3 shadow-[0_0_15px_color-mix(in_srgb,var(--accent-3),transparent_85%)] rounded-lg p-3 w-[200px] text-center font-mono text-xs font-normal backdrop-blur-sm";
         iconElement = <Bot className="w-5 h-5 text-accent-3 drop-shadow-[0_0_5px_var(--accent-3)]" />;
     }
 

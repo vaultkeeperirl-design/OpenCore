@@ -148,9 +148,7 @@
 @layer utilities {
   .cyber-border {
     border: 1px solid var(--border-primary);
-    box-shadow: 0 0 10px rgba(var(--accent-1), 0.1); /* Note: rgba with var only works if var is r,g,b. For hex, use native tailwind opacity or define separate rgb vars. */
-    /* Since we use hex, let's use tailwind's opacity utility on the color if possible or just rely on simple shadow */
-    box-shadow: 0 0 10px var(--accent-1);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--accent-1), transparent 80%);
   }
 
   .neon-text-logo {

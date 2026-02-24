@@ -12,7 +12,9 @@ interface SettingsModalProps {
 }
 
 export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [config, setConfig] = useState<any>({});
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [authStatus, setAuthStatus] = useState<any>({ google: false, qwen: false });
   const [loading, setLoading] = useState(false);
 
@@ -35,7 +37,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
       setConfig(configData);
       setAuthStatus(authData);
-    } catch (err) {
+    } catch {
       toast.error("Failed to load configuration");
     } finally {
       setLoading(false);
@@ -56,7 +58,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       } else {
         toast.error("Error saving config: " + data.message);
       }
-    } catch (err) {
+    } catch {
       toast.error("Failed to save configuration");
     }
   };
@@ -65,7 +67,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-primary/85 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl bg-bg-secondary border border-accent-1 rounded shadow-[0_0_30px_rgba(var(--accent-1),0.1)] overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-2xl bg-bg-secondary border border-accent-1 rounded shadow-[0_0_30px_color-mix(in_srgb,var(--accent-1),transparent_90%)] overflow-hidden flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between p-4 border-b border-border-primary bg-bg-tertiary shrink-0">
           <h2 className="text-xl font-bold flex items-center gap-2 text-accent-1 font-orbitron tracking-[2px]">
             <Cpu size={24} /> SYSTEM CONFIGURATION
@@ -173,6 +175,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                      isOAuth: authStatus.qwen, oauthLabel: "QWEN OAUTH ACTIVE" },
                    { key: "XAI_API_KEY", label: "xAI (Grok) Key", hasKey: config.HAS_XAI_KEY },
                    { key: "MISTRAL_API_KEY", label: "Mistral Key", hasKey: config.HAS_MISTRAL_KEY },
+                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                  ].map((item: any) => (
                    <div key={item.key} className="flex flex-col gap-1 group">
                      <div className="flex justify-between items-center">
@@ -259,7 +262,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                           toast.error("Failed to save credentials before connecting.");
                                           setLoading(false);
                                       }
-                                 } catch (e) {
+                                 } catch {
                                      toast.error("Error saving config.");
                                      setLoading(false);
                                  }
@@ -288,7 +291,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           <button
             onClick={saveConfig}
             disabled={loading}
-            className="px-6 py-2 bg-accent-1 hover:bg-white text-bg-primary rounded font-bold shadow-[0_0_15px_rgba(var(--accent-1),0.4)] hover:shadow-[0_0_25px_rgba(var(--accent-1),0.6)] transition-all flex items-center gap-2 font-orbitron tracking-wider text-sm border border-transparent"
+            className="px-6 py-2 bg-accent-1 hover:bg-white text-bg-primary rounded font-bold shadow-[0_0_15px_color-mix(in_srgb,var(--accent-1),transparent_60%)] hover:shadow-[0_0_25px_color-mix(in_srgb,var(--accent-1),transparent_40%)] transition-all flex items-center gap-2 font-orbitron tracking-wider text-sm border border-transparent"
           >
             <Save size={16} /> SAVE CONFIG
           </button>

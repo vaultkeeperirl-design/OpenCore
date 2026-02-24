@@ -5,6 +5,7 @@ import { Send, User, Sparkles, Image as ImageIcon, FileText, X, Paperclip, Loade
 import { motion, AnimatePresence } from "framer-motion";
 import VoiceInput from "./VoiceInput";
 import { toast } from "sonner";
+import Image from "next/image";
 import { API_CHAT, SUPPORTED_FILE_EXTENSIONS_REGEX } from "@/constants";
 import { AgentGraphData } from "@/types/agent";
 
@@ -163,7 +164,7 @@ export default function ChatInterface({
             content: content
           });
         }
-    } catch (err) {
+    } catch {
         toast.error("Failed to read file attachments");
         return;
     }
@@ -211,7 +212,7 @@ export default function ChatInterface({
              edges: []
           });
       }
-    } catch (err) {
+    } catch {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -278,10 +279,10 @@ export default function ChatInterface({
             >
               <div className={`w-10 h-10 rounded-lg border flex items-center justify-center shrink-0 shadow-lg ${
                 msg.role === "user"
-                  ? "bg-accent-2/10 border-accent-2/40 text-accent-2 shadow-[0_0_15px_rgba(var(--accent-2),0.1)]"
-                  : "bg-accent-1/10 border-accent-1/40 text-accent-1 shadow-[0_0_15px_rgba(var(--accent-1),0.1)]"
+                  ? "bg-accent-2/10 border-accent-2/40 text-accent-2 shadow-[0_0_15px_color-mix(in_srgb,var(--accent-2),transparent_90%)]"
+                  : "bg-accent-1/10 border-accent-1/40 text-accent-1 shadow-[0_0_15px_color-mix(in_srgb,var(--accent-1),transparent_90%)]"
               }`}>
-                {msg.role === "user" ? <User size={20} /> : <img src="/logo.svg" alt="OpenCore" className="w-6 h-6" />}
+                {msg.role === "user" ? <User size={20} /> : <Image src="/logo.svg" alt="OpenCore" width={24} height={24} className="w-6 h-6" />}
               </div>
 
               <div className={`max-w-[80%] flex flex-col gap-2 ${msg.role === "user" ? "items-end" : "items-start"}`}>
@@ -303,6 +304,7 @@ export default function ChatInterface({
                         {msg.attachments.map((att, i) => (
                             <div key={i} className="group relative rounded-lg overflow-hidden border border-border-primary bg-bg-tertiary p-2 flex flex-col items-center gap-2 max-w-[200px]">
                                 {att.type.startsWith("image/") ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
                                     <img src={att.content} alt={att.name} className="max-h-32 object-contain rounded" />
                                 ) : (
                                     <div className="w-16 h-16 bg-bg-primary/50 rounded flex items-center justify-center text-accent-1">
@@ -326,13 +328,13 @@ export default function ChatInterface({
             animate={{ opacity: 1 }}
             className="flex gap-4"
           >
-             <div className="w-10 h-10 rounded-lg border border-accent-1/40 bg-accent-1/10 flex items-center justify-center text-accent-1 shadow-[0_0_15px_var(--accent-1)]">
-                <img src="/logo.svg" alt="Processing..." className="w-6 h-6 animate-pulse" />
+             <div className="w-10 h-10 rounded-lg border border-accent-1/40 bg-accent-1/10 flex items-center justify-center text-accent-1 shadow-[0_0_15px_color-mix(in_srgb,var(--accent-1),transparent_70%)]">
+                <Image src="/logo.svg" alt="Processing..." width={24} height={24} className="w-6 h-6 animate-pulse" />
              </div>
              <div className="flex items-center gap-1.5 h-10 px-2">
-               <span className="w-2 h-2 bg-accent-1 rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_5px_var(--accent-1)]"></span>
-               <span className="w-2 h-2 bg-accent-1 rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_5px_var(--accent-1)]"></span>
-               <span className="w-2 h-2 bg-accent-1 rounded-full animate-bounce shadow-[0_0_5px_var(--accent-1)]"></span>
+               <span className="w-2 h-2 bg-accent-1 rounded-full animate-bounce [animation-delay:-0.3s] shadow-[0_0_5px_color-mix(in_srgb,var(--accent-1),transparent_50%)]"></span>
+               <span className="w-2 h-2 bg-accent-1 rounded-full animate-bounce [animation-delay:-0.15s] shadow-[0_0_5px_color-mix(in_srgb,var(--accent-1),transparent_50%)]"></span>
+               <span className="w-2 h-2 bg-accent-1 rounded-full animate-bounce shadow-[0_0_5px_color-mix(in_srgb,var(--accent-1),transparent_50%)]"></span>
              </div>
           </motion.div>
         )}
@@ -383,7 +385,7 @@ export default function ChatInterface({
              disabled={(!input.trim() && attachments.length === 0) || loading}
              aria-label={loading ? "Sending message..." : "Send message"}
              aria-busy={loading}
-             className="p-3 bg-accent-1/20 hover:bg-accent-1/40 text-accent-1 border border-accent-1/50 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_15px_var(--accent-1)] active:scale-95 flex items-center justify-center min-w-[3rem]"
+             className="p-3 bg-accent-1/20 hover:bg-accent-1/40 text-accent-1 border border-accent-1/50 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_15px_color-mix(in_srgb,var(--accent-1),transparent_70%)] active:scale-95 flex items-center justify-center min-w-[3rem]"
            >
              {loading ? (
                <Loader2 size={20} className="animate-spin" aria-hidden="true" />
