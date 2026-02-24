@@ -10,8 +10,8 @@ Designed for dynamic collaboration, it orchestrates a network of specialized int
 -   **Swarm Intelligence**: A central "Manager" node spawns and orchestrates sub-agents ("Coder", "Researcher") in real-time.
 -   **Neural Link**: Agents communicate, delegate, and synthesize information hierarchically.
 -   **Hardline Access**: Direct file system manipulation and command execution capabilities.
--   **Multi-Model Matrix**: Seamless integration with OpenAI, Vertex AI, Bedrock, Anthropic, Mistral, Groq, and local Ollama nodes via `litellm`.
--   **Cyberdeck Interface**: A reactive, cyberpunk-themed command center built with Next.js 15 and React Flow.
+-   **Multi-Model Matrix**: Seamless integration with OpenAI, Gemini, Anthropic, Mistral, Groq, xAI, DashScope, and local Ollama nodes via a custom provider abstraction.
+-   **Cyberdeck Interface**: A reactive, cyberpunk-themed command center built with Next.js 16 and React Flow.
 -   **Accessibility Protocol**: Full screen reader support and keyboard navigation.
 
 ## // DEPLOYMENT_PROTOCOL
@@ -57,7 +57,7 @@ Configure the application using environment variables in your `.env` file or via
 
 ## // NEURAL_LINK_INTEGRATIONS (Supported Models)
 
-Control which model the swarm uses by setting the `LLM_MODEL` environment variable. Ensure relevant API keys or authentication are active.
+Control which model the swarm uses by setting the `LLM_MODEL` environment variable. Ensure relevant API keys are active.
 
 ### 1. OpenAI (Default)
 Standard usage with GPT models.
@@ -66,14 +66,12 @@ LLM_MODEL=gpt-4o
 OPENAI_API_KEY=sk-...
 ```
 
-### 2. Ollama (Local) - Recommended for Qwen, DeepSeek, Llama 3
-Run open-weights models locally without API keys.
-1.  Install [Ollama](https://ollama.com).
-2.  Pull the model (e.g., `ollama pull qwen2.5`).
-3.  Configure `.env`:
-    ```bash
-    LLM_MODEL=ollama/qwen2.5
-    ```
+### 2. Google Gemini
+Native integration via `google-genai` SDK.
+```bash
+LLM_MODEL=gemini/gemini-2.0-flash
+GEMINI_API_KEY=AIza...
+```
 
 ### 3. Anthropic
 Use Claude 3.5 Sonnet or Opus.
@@ -82,18 +80,18 @@ LLM_MODEL=anthropic/claude-3-5-sonnet-20240620
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-### 4. Google Vertex AI (Gemini)
-Use Google's Gemini models via Vertex AI (keyless auth via `gcloud`).
+### 4. xAI (Grok)
+Integration with Grok models.
 ```bash
-LLM_MODEL=vertex_ai/gemini-1.5-pro
-VERTEX_PROJECT=your-project-id
-VERTEX_LOCATION=us-central1
+LLM_MODEL=xai/grok-2-vision-1212
+XAI_API_KEY=...
 ```
 
-### 5. AWS Bedrock
-Use models hosted on AWS Bedrock.
+### 5. Groq
+Use Groq for ultra-fast inference.
 ```bash
-LLM_MODEL=bedrock/anthropic.claude-3-sonnet-20240229-v1:0
+LLM_MODEL=groq/llama3-70b-8192
+GROQ_API_KEY=gsk_...
 ```
 
 ### 6. Mistral AI
@@ -103,16 +101,27 @@ LLM_MODEL=mistral/mistral-large-latest
 MISTRAL_API_KEY=...
 ```
 
-### 7. Groq
-Use Groq for ultra-fast inference.
+### 7. DashScope / Qwen
+Integration with Alibaba Cloud's Qwen models.
 ```bash
-LLM_MODEL=groq/llama3-70b-8192
-GROQ_API_KEY=gsk_...
+LLM_MODEL=dashscope/qwen-turbo
+DASHSCOPE_API_KEY=...
+# Or use QWEN_ACCESS_TOKEN for OAuth
 ```
+
+### 8. Ollama (Local)
+Run open-weights models locally.
+1.  Install [Ollama](https://ollama.com).
+2.  Pull the model (e.g., `ollama pull qwen2.5`).
+3.  Configure `.env`:
+    ```bash
+    LLM_MODEL=ollama/qwen2.5
+    OLLAMA_API_BASE=http://localhost:11434/v1
+    ```
 
 ## // FRONTEND_DEVELOPMENT (Optional)
 
-The modern frontend is built with Next.js 15, React Flow, and Tailwind CSS.
+The modern frontend is built with Next.js 16, React Flow, and Tailwind CSS.
 Source code is located in `frontend/`.
 
 **Development Protocol:**
@@ -132,6 +141,7 @@ To update the static assets served by the Python backend:
     ```
 2.  Deploy artifacts (automatically handles static export):
     ```bash
+    # Ensure opencore/interface/static exists and is clean
     rm -rf ../opencore/interface/static/*
     cp -r out/* ../opencore/interface/static/
     ```
@@ -139,6 +149,7 @@ To update the static assets served by the Python backend:
 ## // SYSTEM_ARCHITECTURE
 
 -   `opencore/core/`: Core logic for `Agent` and `Swarm`.
+-   `opencore/llm/`: Custom LLM provider abstraction (OpenAI, Anthropic, Gemini, etc.).
 -   `opencore/tools/`: Standard tools (Filesystem, System).
 -   `opencore/interface/`: FastAPI backend.
 -   `frontend/`: Next.js source code.
