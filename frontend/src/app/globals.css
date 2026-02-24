@@ -4,12 +4,31 @@
   --font-orbitron: 'Orbitron', sans-serif;
   --font-share-tech-mono: 'Share Tech Mono', monospace;
 
-  --color-neon-blue: #00ffff;
-  --color-neon-purple: #ff00ff;
-  --color-neon-green: #00ff41;
-  --color-dark-bg: #050505;
-  --color-panel-bg: rgba(10, 10, 10, 0.95);
-  --color-border: #333;
+  /* Theme Semantic Colors */
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+
+  --color-border-primary: var(--border-primary);
+
+  --color-accent-1: var(--accent-1);
+  --color-accent-2: var(--accent-2);
+  --color-accent-3: var(--accent-3);
+
+  --color-status-active: var(--status-active);
+  --color-status-warning: var(--status-warning);
+  --color-status-error: var(--status-error);
+
+  /* Legacy Colors (mapped to new semantic vars where possible or kept for specific use) */
+  --color-neon-blue: var(--accent-1);
+  --color-neon-purple: var(--accent-2);
+  --color-neon-green: var(--accent-3);
+  --color-dark-bg: var(--bg-primary);
+  --color-panel-bg: var(--bg-secondary);
+  --color-border: var(--border-primary);
 
   --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-flicker: flicker 4s infinite;
@@ -17,7 +36,7 @@
   @keyframes flicker {
     0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
         opacity: 1;
-        filter: drop-shadow(0 0 5px var(--color-neon-purple));
+        filter: drop-shadow(0 0 5px var(--accent-2));
     }
     20%, 24%, 55% {
         opacity: 0.5;
@@ -26,20 +45,122 @@
   }
 }
 
+/* Base Theme Variables (Cyberpunk Default) */
+:root {
+  --bg-primary: #050505;
+  --bg-secondary: #0a0a0a;
+  --bg-tertiary: #111111;
+
+  --text-primary: #e0e0e0;
+  --text-secondary: #888888;
+
+  --border-primary: #333333;
+
+  --accent-1: #00ffff; /* Cyan */
+  --accent-2: #ff00ff; /* Magenta */
+  --accent-3: #00ff41; /* Green */
+
+  --status-active: #22c55e;
+  --status-warning: #eab308;
+  --status-error: #ef4444;
+}
+
+/* Dark Cool */
+[data-theme="dark-cool"] {
+  --bg-primary: #0b1120; /* Slate 950 */
+  --bg-secondary: #1e293b; /* Slate 800 */
+  --bg-tertiary: #334155; /* Slate 700 */
+
+  --text-primary: #f8fafc; /* Slate 50 */
+  --text-secondary: #94a3b8; /* Slate 400 */
+
+  --border-primary: #475569; /* Slate 600 */
+
+  --accent-1: #38bdf8; /* Sky 400 */
+  --accent-2: #818cf8; /* Indigo 400 */
+  --accent-3: #34d399; /* Emerald 400 */
+}
+
+/* Forest (Dark 2) */
+[data-theme="forest"] {
+  --bg-primary: #020617; /* Very dark slate/green tint base */
+  --bg-secondary: #064e3b; /* Emerald 900 */
+  --bg-tertiary: #065f46; /* Emerald 800 */
+
+  --text-primary: #ecfdf5; /* Emerald 50 */
+  --text-secondary: #a7f3d0; /* Emerald 200 */
+
+  --border-primary: #047857; /* Emerald 700 */
+
+  --accent-1: #34d399; /* Emerald 400 */
+  --accent-2: #fbbf24; /* Amber 400 */
+  --accent-3: #a3e635; /* Lime 400 */
+}
+
+/* Light Corporate (Light 1) */
+[data-theme="light-corporate"] {
+  --bg-primary: #f8fafc; /* Slate 50 */
+  --bg-secondary: #ffffff; /* White */
+  --bg-tertiary: #e2e8f0; /* Slate 200 */
+
+  --text-primary: #0f172a; /* Slate 900 */
+  --text-secondary: #64748b; /* Slate 500 */
+
+  --border-primary: #cbd5e1; /* Slate 300 */
+
+  --accent-1: #2563eb; /* Blue 600 */
+  --accent-2: #4f46e5; /* Indigo 600 */
+  --accent-3: #16a34a; /* Green 600 */
+}
+
+/* Light Warm (Light 2) */
+[data-theme="light-warm"] {
+  --bg-primary: #fff7ed; /* Orange 50 */
+  --bg-secondary: #ffffff; /* White */
+  --bg-tertiary: #ffedd5; /* Orange 100 */
+
+  --text-primary: #431407; /* Orange 950 */
+  --text-secondary: #9a3412; /* Orange 700 */
+
+  --border-primary: #fed7aa; /* Orange 200 */
+
+  --accent-1: #ea580c; /* Orange 600 */
+  --accent-2: #d97706; /* Amber 600 */
+  --accent-3: #65a30d; /* Lime 600 */
+}
+
+/* Light Lavender (Light 3) */
+[data-theme="light-lavender"] {
+  --bg-primary: #fdf4ff; /* Fuchsia 50 */
+  --bg-secondary: #ffffff; /* White */
+  --bg-tertiary: #fae8ff; /* Fuchsia 100 */
+
+  --text-primary: #4a044e; /* Fuchsia 950 */
+  --text-secondary: #86198f; /* Fuchsia 700 */
+
+  --border-primary: #f0abfc; /* Fuchsia 300 */
+
+  --accent-1: #c026d3; /* Fuchsia 600 */
+  --accent-2: #9333ea; /* Purple 600 */
+  --accent-3: #10b981; /* Emerald 500 */
+}
+
 @layer utilities {
   .cyber-border {
-    border: 1px solid var(--color-border);
-    box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
+    border: 1px solid var(--border-primary);
+    box-shadow: 0 0 10px rgba(var(--accent-1), 0.1); /* Note: rgba with var only works if var is r,g,b. For hex, use native tailwind opacity or define separate rgb vars. */
+    /* Since we use hex, let's use tailwind's opacity utility on the color if possible or just rely on simple shadow */
+    box-shadow: 0 0 10px var(--accent-1);
   }
 
   .neon-text-logo {
-    text-shadow: 2px 2px 0px var(--color-neon-purple), -2px -2px 0px var(--color-neon-blue);
+    text-shadow: 2px 2px 0px var(--accent-2), -2px -2px 0px var(--accent-1);
   }
 
   .glass-panel {
-    background-color: var(--color-panel-bg);
+    background-color: var(--bg-secondary);
     backdrop-filter: blur(12px);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--border-primary);
   }
 
   /* Scrollbar styling */
@@ -51,27 +172,29 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: var(--color-neon-blue);
+    background: var(--accent-1);
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-neon-purple);
+    background: var(--accent-2);
   }
 }
 
 :root {
-  --background: #050505;
-  --foreground: #e0e0e0;
+  --background: var(--bg-primary);
+  --foreground: var(--text-primary);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   font-family: var(--font-share-tech-mono);
   overflow: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* CRT Scanline Effect - REDUCED INTENSITY */
+/* Only apply CRT effect on dark themes if desired, or keep globally but make it subtle */
 body::before {
     content: " ";
     display: block;
@@ -84,7 +207,7 @@ body::before {
     z-index: 1000;
     background-size: 100% 2px, 3px 100%;
     pointer-events: none;
-    opacity: 0.4; /* Much subtler */
+    opacity: 0.2; /* Even subtler to work with light themes */
 }
 
 /* React Flow Controls Override */
@@ -92,19 +215,19 @@ body::before {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   border-radius: 4px;
   overflow: hidden;
-  border: 1px solid #333;
+  border: 1px solid var(--border-primary);
 }
 
 .react-flow__controls-button {
-  background: rgba(10, 10, 20, 0.9) !important;
-  border-bottom: 1px solid #333 !important;
-  fill: #00ffff !important;
+  background: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--border-primary) !important;
+  fill: var(--accent-1) !important;
   transition: all 0.2s;
 }
 
 .react-flow__controls-button:hover {
-  background: rgba(0, 243, 255, 0.2) !important;
-  fill: #fff !important;
+  background: var(--bg-tertiary) !important; /* Approximation */
+  fill: var(--text-primary) !important;
 }
 
 .react-flow__controls-button:last-child {

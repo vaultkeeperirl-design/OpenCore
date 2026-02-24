@@ -64,29 +64,29 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl bg-[#0a0a0a] border border-[#00ffff] rounded shadow-[0_0_30px_rgba(0,255,255,0.1)] overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="flex items-center justify-between p-4 border-b border-[#333] bg-[#111] shrink-0">
-          <h2 className="text-xl font-bold flex items-center gap-2 text-[#00ffff] font-orbitron tracking-[2px]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-primary/85 backdrop-blur-sm p-4">
+      <div className="w-full max-w-2xl bg-bg-secondary border border-accent-1 rounded shadow-[0_0_30px_rgba(var(--accent-1),0.1)] overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between p-4 border-b border-border-primary bg-bg-tertiary shrink-0">
+          <h2 className="text-xl font-bold flex items-center gap-2 text-accent-1 font-orbitron tracking-[2px]">
             <Cpu size={24} /> SYSTEM CONFIGURATION
           </h2>
-          <button onClick={onClose} className="p-1 hover:bg-[#333] rounded transition-colors text-[#888] hover:text-[#ff00ff]">
+          <button onClick={onClose} className="p-1 hover:bg-bg-primary rounded transition-colors text-text-secondary hover:text-accent-2">
             <X size={24} />
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto space-y-6 flex-1 scrollbar-thin scrollbar-thumb-[#00ffff] scrollbar-track-[#111]">
+        <div className="p-6 overflow-y-auto space-y-6 flex-1 scrollbar-thin scrollbar-thumb-accent-1 scrollbar-track-bg-tertiary">
            {loading ? (
-             <div className="flex justify-center p-8"><RefreshCw className="animate-spin text-[#00ffff]" /></div>
+             <div className="flex justify-center p-8"><RefreshCw className="animate-spin text-accent-1" /></div>
            ) : (
              <>
                {/* LLM Model Selection */}
                <div className="space-y-2">
-                 <label className="text-xs text-[#00ffff] font-mono tracking-widest uppercase mb-1 block">ACTIVE MODEL NODE</label>
+                 <label className="text-xs text-accent-1 font-mono tracking-widest uppercase mb-1 block">ACTIVE MODEL NODE</label>
                  <select
                    value={config.LLM_MODEL || "gpt-4o"}
                    onChange={(e) => setConfig({...config, LLM_MODEL: e.target.value})}
-                   className="w-full bg-black border border-[#333] rounded p-3 text-[#e0e0e0] focus:border-[#00ffff] focus:outline-none focus:ring-1 focus:ring-[#00ffff]/50 font-mono text-sm transition-all appearance-none"
+                   className="w-full bg-bg-primary border border-border-primary rounded p-3 text-text-primary focus:border-accent-1 focus:outline-none focus:ring-1 focus:ring-accent-1/50 font-mono text-sm transition-all appearance-none"
                    style={{backgroundImage: 'none'}}
                  >
                    <option value="gpt-4o">OpenAI GPT-4o</option>
@@ -103,29 +103,29 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
                {/* System Security Configuration */}
                <div className="space-y-4">
-                 <h3 className="text-lg font-semibold text-[#e0e0e0] border-b border-[#333] pb-2 mt-4 font-orbitron tracking-wide flex items-center gap-2">
-                   <ShieldAlert size={18} className="text-[#ff00ff]" /> SYSTEM SECURITY
+                 <h3 className="text-lg font-semibold text-text-primary border-b border-border-primary pb-2 mt-4 font-orbitron tracking-wide flex items-center gap-2">
+                   <ShieldAlert size={18} className="text-accent-2" /> SYSTEM SECURITY
                  </h3>
 
-                 <div className="p-4 border border-[#ff00ff]/30 bg-[#ff00ff]/5 rounded flex flex-col gap-3">
+                 <div className="p-4 border border-accent-2/30 bg-accent-2/5 rounded flex flex-col gap-3">
                    <div className="flex items-center justify-between">
-                     <label className="text-sm font-mono font-bold text-[#e0e0e0] tracking-wide">ALLOW UNSAFE SYSTEM ACCESS</label>
+                     <label className="text-sm font-mono font-bold text-text-primary tracking-wide">ALLOW UNSAFE SYSTEM ACCESS</label>
                      <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
                        <input
                          type="checkbox"
                          name="toggle"
                          id="unsafe-toggle"
-                         className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer checked:right-0 checked:border-[#ff00ff]"
+                         className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer checked:right-0 checked:border-accent-2"
                          style={{right: config.ALLOW_UNSAFE_SYSTEM_ACCESS === 'true' || config.ALLOW_UNSAFE_SYSTEM_ACCESS === true ? '0' : 'auto', left: config.ALLOW_UNSAFE_SYSTEM_ACCESS === 'true' || config.ALLOW_UNSAFE_SYSTEM_ACCESS === true ? 'auto' : '0'}}
                          checked={config.ALLOW_UNSAFE_SYSTEM_ACCESS === 'true' || config.ALLOW_UNSAFE_SYSTEM_ACCESS === true}
                          onChange={(e) => setConfig({...config, ALLOW_UNSAFE_SYSTEM_ACCESS: e.target.checked})}
                        />
-                       <label htmlFor="unsafe-toggle" className={`toggle-label block overflow-hidden h-5 rounded-full cursor-pointer ${config.ALLOW_UNSAFE_SYSTEM_ACCESS === 'true' || config.ALLOW_UNSAFE_SYSTEM_ACCESS === true ? 'bg-[#ff00ff]' : 'bg-gray-700'}`}></label>
+                       <label htmlFor="unsafe-toggle" className={`toggle-label block overflow-hidden h-5 rounded-full cursor-pointer ${config.ALLOW_UNSAFE_SYSTEM_ACCESS === 'true' || config.ALLOW_UNSAFE_SYSTEM_ACCESS === true ? 'bg-accent-2' : 'bg-border-primary'}`}></label>
                      </div>
                    </div>
 
-                   <p className="text-xs text-[#888] font-mono leading-relaxed">
-                     <span className="text-[#ff00ff] font-bold">WARNING:</span> Enabling this grants the agent unrestricted access to your file system (outside the app directory) and allows execution of complex shell commands (pipes, redirects).
+                   <p className="text-xs text-text-secondary font-mono leading-relaxed">
+                     <span className="text-accent-2 font-bold">WARNING:</span> Enabling this grants the agent unrestricted access to your file system (outside the app directory) and allows execution of complex shell commands (pipes, redirects).
                      <br/><br/>
                      A safety guard is active to prevent catastrophic deletion (e.g., <code>rm -rf /</code>), but use with extreme caution.
                    </p>
@@ -134,26 +134,26 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
                {/* Vertex AI Configuration */}
                <div className="space-y-4">
-                 <h3 className="text-lg font-semibold text-[#e0e0e0] border-b border-[#333] pb-2 mt-4 font-orbitron tracking-wide">CLOUD INFRASTRUCTURE</h3>
+                 <h3 className="text-lg font-semibold text-text-primary border-b border-border-primary pb-2 mt-4 font-orbitron tracking-wide">CLOUD INFRASTRUCTURE</h3>
                  <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-1">
-                     <label className="text-xs text-[#888] font-mono uppercase">GCP PROJECT ID</label>
+                     <label className="text-xs text-text-secondary font-mono uppercase">GCP PROJECT ID</label>
                      <input
                        type="text"
                        placeholder="my-project-id"
                        value={config.VERTEX_PROJECT || ""}
                        onChange={(e) => setConfig({...config, VERTEX_PROJECT: e.target.value})}
-                       className="w-full bg-black border border-[#333] rounded p-2.5 text-sm focus:border-[#00ffff] focus:outline-none focus:ring-1 focus:ring-[#00ffff]/30 transition-all font-mono text-[#e0e0e0]"
+                       className="w-full bg-bg-primary border border-border-primary rounded p-2.5 text-sm focus:border-accent-1 focus:outline-none focus:ring-1 focus:ring-accent-1/30 transition-all font-mono text-text-primary"
                      />
                    </div>
                    <div className="space-y-1">
-                     <label className="text-xs text-[#888] font-mono uppercase">GCP REGION</label>
+                     <label className="text-xs text-text-secondary font-mono uppercase">GCP REGION</label>
                      <input
                        type="text"
                        placeholder="us-central1"
                        value={config.VERTEX_LOCATION || ""}
                        onChange={(e) => setConfig({...config, VERTEX_LOCATION: e.target.value})}
-                       className="w-full bg-black border border-[#333] rounded p-2.5 text-sm focus:border-[#00ffff] focus:outline-none focus:ring-1 focus:ring-[#00ffff]/30 transition-all font-mono text-[#e0e0e0]"
+                       className="w-full bg-bg-primary border border-border-primary rounded p-2.5 text-sm focus:border-accent-1 focus:outline-none focus:ring-1 focus:ring-accent-1/30 transition-all font-mono text-text-primary"
                      />
                    </div>
                  </div>
@@ -161,7 +161,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
                {/* API Keys Section */}
                <div className="space-y-4">
-                 <h3 className="text-lg font-semibold text-[#e0e0e0] border-b border-[#333] pb-2 mt-4 font-orbitron tracking-wide">NEURAL CREDENTIALS</h3>
+                 <h3 className="text-lg font-semibold text-text-primary border-b border-border-primary pb-2 mt-4 font-orbitron tracking-wide">NEURAL CREDENTIALS</h3>
 
                  {[
                    { key: "OPENAI_API_KEY", label: "OpenAI Key", hasKey: config.HAS_OPENAI_KEY },
@@ -176,31 +176,31 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                  ].map((item: any) => (
                    <div key={item.key} className="flex flex-col gap-1 group">
                      <div className="flex justify-between items-center">
-                        <label className="text-xs text-[#888] font-mono uppercase group-hover:text-[#00ffff]/70 transition-colors">{item.label}</label>
+                        <label className="text-xs text-text-secondary font-mono uppercase group-hover:text-accent-1/70 transition-colors">{item.label}</label>
                         {item.isOAuth && (
-                           <span className="text-[10px] text-[#00ff41] font-mono animate-pulse">{item.oauthLabel}</span>
+                           <span className="text-[10px] text-status-active font-mono animate-pulse">{item.oauthLabel}</span>
                         )}
                      </div>
 
                      {item.isOAuth ? (
-                        <div className="flex items-center gap-3 p-2.5 border border-[#00ff41]/30 bg-[#00ff41]/5 rounded">
-                           <Key size={14} className="text-[#00ff41]" />
-                           <span className="text-xs text-[#e0e0e0] font-mono">Authenticated via System Credentials</span>
-                           <div className="ml-auto px-2 py-0.5 text-[10px] bg-[#00ff41]/20 text-[#00ff41] rounded border border-[#00ff41]/30">SECURE</div>
+                        <div className="flex items-center gap-3 p-2.5 border border-status-active/30 bg-status-active/5 rounded">
+                           <Key size={14} className="text-status-active" />
+                           <span className="text-xs text-text-primary font-mono">Authenticated via System Credentials</span>
+                           <div className="ml-auto px-2 py-0.5 text-[10px] bg-status-active/20 text-status-active rounded border border-status-active/30">SECURE</div>
                         </div>
                      ) : (
                         <div className="flex gap-2">
                           <div className="relative flex-1">
-                            <Key size={14} className="absolute left-3 top-3.5 text-[#666] group-focus-within:text-[#00ffff] transition-colors" />
+                            <Key size={14} className="absolute left-3 top-3.5 text-text-secondary group-focus-within:text-accent-1 transition-colors" />
                             <input
                               type="password"
                               placeholder={item.hasKey ? "•••••••••••••••• (Set)" : "Enter API Key"}
                               value={config[item.key] || ""}
                               onChange={(e) => setConfig({...config, [item.key]: e.target.value})}
-                              className="w-full bg-black border border-[#333] rounded pl-9 p-2.5 text-sm focus:border-[#00ffff] focus:outline-none focus:ring-1 focus:ring-[#00ffff]/30 transition-all font-mono placeholder-[#444] text-[#e0e0e0]"
+                              className="w-full bg-bg-primary border border-border-primary rounded pl-9 p-2.5 text-sm focus:border-accent-1 focus:outline-none focus:ring-1 focus:ring-accent-1/30 transition-all font-mono placeholder-text-secondary text-text-primary"
                             />
                           </div>
-                          {item.hasKey && <div className="px-3 py-1 text-[10px] font-mono tracking-wider bg-[#00ff41]/10 text-[#00ff41] border border-[#00ff41]/20 rounded flex items-center shadow-[0_0_10px_rgba(0,255,65,0.1)]">LINKED</div>}
+                          {item.hasKey && <div className="px-3 py-1 text-[10px] font-mono tracking-wider bg-status-active/10 text-status-active border border-status-active/20 rounded flex items-center shadow-[0_0_10px_var(--status-active)]">LINKED</div>}
                         </div>
                      )}
 
@@ -211,35 +211,35 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                              href={API_AUTH_QWEN_LOGIN}
                              target="_blank"
                              rel="noopener noreferrer"
-                             className="px-3 py-1.5 bg-[#222] hover:bg-[#333] border border-[#333] hover:border-[#00ffff] rounded flex items-center gap-2 transition-all group/btn"
+                             className="px-3 py-1.5 bg-bg-tertiary hover:bg-bg-primary border border-border-primary hover:border-accent-1 rounded flex items-center gap-2 transition-all group/btn"
                            >
-                              <span className="text-[10px] text-[#00ffff] font-mono font-bold tracking-wide group-hover/btn:text-white">CONNECT VIA ALIBABA CLOUD</span>
+                              <span className="text-[10px] text-accent-1 font-mono font-bold tracking-wide group-hover/btn:text-text-primary">CONNECT VIA ALIBABA CLOUD</span>
                            </a>
-                           <span className="text-[10px] text-[#444] font-mono">(Get API Key)</span>
+                           <span className="text-[10px] text-text-secondary font-mono">(Get API Key)</span>
                         </div>
                      )}
                      {!item.isOAuth && item.key === "GEMINI_API_KEY" && (
-                        <div className="mt-2 flex flex-col gap-2 p-3 border border-[#333] rounded bg-[#111]">
-                           <span className="text-[10px] text-[#00ffff] font-mono uppercase mb-1">Google Cloud OAuth (Recommended)</span>
+                        <div className="mt-2 flex flex-col gap-2 p-3 border border-border-primary rounded bg-bg-tertiary">
+                           <span className="text-[10px] text-accent-1 font-mono uppercase mb-1">Google Cloud OAuth (Recommended)</span>
 
                            <div className="flex flex-col gap-1">
-                               <label className="text-[10px] text-[#888] font-mono">Client ID</label>
+                               <label className="text-[10px] text-text-secondary font-mono">Client ID</label>
                                <input
                                    type="text"
                                    value={config.GOOGLE_CLIENT_ID || ""}
                                    onChange={(e) => setConfig({...config, GOOGLE_CLIENT_ID: e.target.value})}
-                                   className="w-full bg-black border border-[#333] rounded p-1.5 text-xs font-mono text-[#e0e0e0] focus:border-[#00ffff] focus:outline-none"
+                                   className="w-full bg-bg-primary border border-border-primary rounded p-1.5 text-xs font-mono text-text-primary focus:border-accent-1 focus:outline-none"
                                    placeholder="...apps.googleusercontent.com"
                                />
                            </div>
 
                            <div className="flex flex-col gap-1">
-                               <label className="text-[10px] text-[#888] font-mono">Client Secret</label>
+                               <label className="text-[10px] text-text-secondary font-mono">Client Secret</label>
                                <input
                                    type="password"
                                    value={config.GOOGLE_CLIENT_SECRET || ""}
                                    onChange={(e) => setConfig({...config, GOOGLE_CLIENT_SECRET: e.target.value})}
-                                   className="w-full bg-black border border-[#333] rounded p-1.5 text-xs font-mono text-[#e0e0e0] focus:border-[#00ffff] focus:outline-none"
+                                   className="w-full bg-bg-primary border border-border-primary rounded p-1.5 text-xs font-mono text-text-primary focus:border-accent-1 focus:outline-none"
                                    placeholder="GOCSPX-..."
                                />
                            </div>
@@ -264,10 +264,10 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                      setLoading(false);
                                  }
                              }}
-                             className="mt-2 w-full py-1.5 bg-[#222] hover:bg-[#333] border border-[#333] hover:border-[#00ffff] rounded flex items-center justify-center gap-2 transition-all group/btn"
+                             className="mt-2 w-full py-1.5 bg-bg-tertiary hover:bg-bg-primary border border-border-primary hover:border-accent-1 rounded flex items-center justify-center gap-2 transition-all group/btn"
                            >
                               <Image src="/globe.svg" alt="Google" width={12} height={12} className="opacity-70 group-hover/btn:opacity-100" />
-                              <span className="text-[10px] text-[#00ffff] font-mono font-bold tracking-wide group-hover/btn:text-white">CONNECT WITH GOOGLE CLOUD</span>
+                              <span className="text-[10px] text-accent-1 font-mono font-bold tracking-wide group-hover/btn:text-text-primary">CONNECT WITH GOOGLE CLOUD</span>
                            </button>
                         </div>
                      )}
@@ -278,17 +278,17 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
            )}
         </div>
 
-        <div className="p-4 border-t border-[#333] bg-[#111] flex justify-end gap-3 shrink-0">
+        <div className="p-4 border-t border-border-primary bg-bg-tertiary flex justify-end gap-3 shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded border border-[#333] hover:bg-[#333] transition-colors text-sm font-mono text-[#888] hover:text-[#fff]"
+            className="px-4 py-2 rounded border border-border-primary hover:bg-bg-primary transition-colors text-sm font-mono text-text-secondary hover:text-text-primary"
           >
             CANCEL
           </button>
           <button
             onClick={saveConfig}
             disabled={loading}
-            className="px-6 py-2 bg-[#00ffff] hover:bg-[#fff] text-black rounded font-bold shadow-[0_0_15px_rgba(0,255,255,0.4)] hover:shadow-[0_0_25px_rgba(0,255,255,0.6)] transition-all flex items-center gap-2 font-orbitron tracking-wider text-sm border border-transparent"
+            className="px-6 py-2 bg-accent-1 hover:bg-white text-bg-primary rounded font-bold shadow-[0_0_15px_rgba(var(--accent-1),0.4)] hover:shadow-[0_0_25px_rgba(var(--accent-1),0.6)] transition-all flex items-center gap-2 font-orbitron tracking-wider text-sm border border-transparent"
           >
             <Save size={16} /> SAVE CONFIG
           </button>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Orbitron, Share_Tech_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 const orbitron = Orbitron({
   variable: "--font-orbitron",
@@ -30,9 +31,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${orbitron.variable} ${shareTechMono.variable}`}>
-      <body className="antialiased bg-[#050510] text-white font-mono">
-        {children}
-        <Toaster theme="dark" position="top-right" />
+      <body className="antialiased bg-primary text-primary font-mono transition-colors duration-300">
+        <ThemeProvider>
+          {children}
+          <Toaster position="top-right" />
+        </ThemeProvider>
       </body>
     </html>
   );

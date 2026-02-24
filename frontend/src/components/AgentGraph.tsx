@@ -21,72 +21,23 @@ const createNode = (data: AgentNode, x: number, y: number): Node => {
     const isManager = data.id === "Manager";
     const isTeamLead = data.parent === "Manager";
 
-    // Define styles based on role
-    let nodeStyle = {};
+    let className = "";
     let iconElement = null;
-    let borderColor = "";
-    let textColor = "";
+    let borderColor = ""; // retained for last_thought inline style
 
     if (isManager) {
-        borderColor = "#bc13fe";
-        textColor = "#bc13fe";
-        nodeStyle = {
-            background: 'rgba(188, 19, 254, 0.08)',
-            color: textColor,
-            border: `1px solid ${borderColor}`,
-            boxShadow: `0 0 30px rgba(188, 19, 254, 0.2)`,
-            borderRadius: '12px',
-            padding: '16px',
-            width: 240,
-            textAlign: 'center' as const,
-            fontFamily: 'var(--font-orbitron)',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            backdropFilter: 'blur(10px)',
-            textTransform: 'uppercase' as const,
-            letterSpacing: '1px'
-        };
-        iconElement = <img src="/logo.svg" className="w-8 h-8 drop-shadow-[0_0_10px_#ff00ff]" alt="" />;
+        borderColor = "var(--accent-2)";
+        className = "bg-accent-2/10 border border-accent-2 text-accent-2 shadow-[0_0_30px_rgba(var(--accent-2),0.2)] rounded-xl p-4 w-[240px] text-center font-orbitron text-sm font-bold backdrop-blur-md uppercase tracking-wider";
+        iconElement = <img src="/logo.svg" className="w-8 h-8 drop-shadow-[0_0_10px_var(--accent-2)]" alt="" />;
     } else if (isTeamLead) {
-        borderColor = "#00f3ff"; // Cyan for Team Lead
-        textColor = "#00f3ff";
-        nodeStyle = {
-            background: 'rgba(0, 243, 255, 0.08)',
-            color: textColor,
-            border: `1px solid ${borderColor}`,
-            boxShadow: `0 0 20px rgba(0, 243, 255, 0.2)`,
-            borderRadius: '12px',
-            padding: '14px',
-            width: 220,
-            textAlign: 'center' as const,
-            fontFamily: 'var(--font-orbitron)',
-            fontSize: '12px',
-            fontWeight: 'bold',
-            backdropFilter: 'blur(8px)',
-            textTransform: 'uppercase' as const,
-            letterSpacing: '0.5px'
-        };
-        iconElement = <Users className="w-6 h-6 text-cyan-400 drop-shadow-[0_0_8px_rgba(0,243,255,0.8)]" />;
+        borderColor = "var(--accent-1)";
+        className = "bg-accent-1/10 border border-accent-1 text-accent-1 shadow-[0_0_20px_rgba(var(--accent-1),0.2)] rounded-xl p-3.5 w-[220px] text-center font-orbitron text-xs font-bold backdrop-blur-sm uppercase tracking-wide";
+        iconElement = <Users className="w-6 h-6 text-accent-1 drop-shadow-[0_0_8px_var(--accent-1)]" />;
     } else {
         // Worker
-        borderColor = "#22c55e"; // Green for Worker
-        textColor = "#4ade80";
-        nodeStyle = {
-            background: 'rgba(34, 197, 94, 0.08)',
-            color: textColor,
-            border: `1px solid ${borderColor}`,
-            boxShadow: `0 0 15px rgba(34, 197, 94, 0.15)`,
-            borderRadius: '10px',
-            padding: '12px',
-            width: 200,
-            textAlign: 'center' as const,
-            fontFamily: 'var(--font-share-tech-mono)',
-            fontSize: '12px',
-            fontWeight: 'normal',
-            backdropFilter: 'blur(5px)',
-            textTransform: 'none' as const
-        };
-        iconElement = <Bot className="w-5 h-5 text-green-400 drop-shadow-[0_0_5px_rgba(34,197,94,0.8)]" />;
+        borderColor = "var(--accent-3)";
+        className = "bg-accent-3/10 border border-accent-3 text-accent-3 shadow-[0_0_15px_rgba(var(--accent-3),0.15)] rounded-lg p-3 w-[200px] text-center font-mono text-xs font-normal backdrop-blur-sm";
+        iconElement = <Bot className="w-5 h-5 text-accent-3 drop-shadow-[0_0_5px_var(--accent-3)]" />;
     }
 
     return {
@@ -105,8 +56,10 @@ const createNode = (data: AgentNode, x: number, y: number): Node => {
                         <div
                             className="text-[10px] font-mono mt-1 w-full truncate px-2 border-t pt-2 opacity-80"
                             style={{
-                                borderColor: `${borderColor}40`,
-                                color: isManager ? '#f5d0fe' : (isTeamLead ? '#cffafe' : '#dcfce7')
+                                borderColor: `${borderColor}`, // Ideally color-mix but simple var works for border color
+                                // We need to match the text color slightly lighter.
+                                // Since we are using vars, we can just inherit or use specific mix
+                                color: 'currentColor'
                             }}
                         >
                             {data.last_thought}
@@ -115,7 +68,7 @@ const createNode = (data: AgentNode, x: number, y: number): Node => {
                 </div>
             )
         },
-        style: nodeStyle,
+        className: className,
         type: 'default',
         sourcePosition: Position.Bottom,
         targetPosition: Position.Top,
@@ -210,9 +163,9 @@ export default function AgentGraph({ graphData }: { graphData: AgentGraphData })
                 source: node.parent,
                 target: node.id,
                 animated: false,
-                style: { stroke: '#333', strokeWidth: 1, strokeDasharray: '5,5' },
+                style: { stroke: 'var(--border-primary)', strokeWidth: 1, strokeDasharray: '5,5' },
                 type: 'straight', // Straight or smoothstep
-                markerEnd: { type: MarkerType.ArrowClosed, color: '#333' },
+                markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--border-primary)' },
             });
         }
     });
@@ -221,7 +174,7 @@ export default function AgentGraph({ graphData }: { graphData: AgentGraphData })
     if (graphData.edges) {
         graphData.edges.forEach((edge, i) => {
              const isResponse = edge.label.startsWith("Response: ");
-             const color = isResponse ? '#ffffff' : '#00ffff';
+             const color = isResponse ? 'var(--text-primary)' : 'var(--accent-1)';
 
              newEdges.push({
                 id: `interact-${edge.source}-${edge.target}-${i}`,
@@ -230,7 +183,7 @@ export default function AgentGraph({ graphData }: { graphData: AgentGraphData })
                 animated: true,
                 label: edge.label,
                 labelStyle: { fill: color, fontSize: 10, fontFamily: 'monospace', fontWeight: 'bold' },
-                labelBgStyle: { fill: '#000', fillOpacity: 0.8, rx: 4, ry: 4 },
+                labelBgStyle: { fill: 'var(--bg-primary)', fillOpacity: 0.8, rx: 4, ry: 4 },
                 labelBgPadding: [4, 2],
                 style: {
                     stroke: color,
@@ -249,9 +202,9 @@ export default function AgentGraph({ graphData }: { graphData: AgentGraphData })
   }, [JSON.stringify(graphData), setNodes, setEdges]);
 
   return (
-    <div className="w-full h-full bg-[#050510] relative overflow-hidden">
+    <div className="w-full h-full bg-bg-primary relative overflow-hidden transition-colors duration-300">
       {/* Grid Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,243,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,243,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(color-mix(in_srgb,var(--accent-1),transparent_97%)_1px,transparent_1px),linear-gradient(90deg,color-mix(in_srgb,var(--accent-1),transparent_97%)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
 
       <ReactFlow
         nodes={nodes}
@@ -262,12 +215,12 @@ export default function AgentGraph({ graphData }: { graphData: AgentGraphData })
         attributionPosition="bottom-right"
         className="transition-opacity duration-500"
       >
-        <Background color="#1a1a2e" gap={40} size={1} />
-        <Controls className="bg-black/50 border border-white/10 text-white fill-white" />
+        <Background color="var(--border-primary)" gap={40} size={1} style={{ opacity: 0.2 }} />
+        <Controls className="bg-bg-secondary/80 border border-border-primary text-text-primary fill-text-primary" />
       </ReactFlow>
 
       <div className="absolute top-4 left-4 pointer-events-none z-10">
-         <h3 className="text-xs font-orbitron text-cyan-500/50 tracking-[0.2em] uppercase border-b border-cyan-500/20 pb-1">Neural Network Topology</h3>
+         <h3 className="text-xs font-orbitron text-accent-1/50 tracking-[0.2em] uppercase border-b border-accent-1/20 pb-1">Neural Network Topology</h3>
       </div>
     </div>
   );
