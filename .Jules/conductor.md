@@ -1,5 +1,10 @@
 # Conductor Journal
 
+## 2026-02-25 - Release v2.1.3 Security Patch & Sync
+
+**Observation:** Version 2.1.3 (Security Fix) was found in `opencore/__init__.py` but missing from `CHANGELOG.md`. Versions 2.1.1 and 2.1.2 were entirely missing from history.
+**Action:** Updated `CHANGELOG.md` to document v2.1.3 and marked v2.1.1/v2.1.2 as skipped/internal. Rebuilt frontend artifacts to ensure consistency. Verified backend stability.
+
 ## 2026-02-24 - Emergency Fix for Dependency Regression (v2.0.6)
 
 **Observation:** User reported `ModuleNotFoundError: No module named 'google_auth_oauthlib'` on `opencore start`. This dependency was missing in `pyproject.toml` despite being in `requirements.txt`. Additionally, `google-generativeai` was listed but deprecated.
