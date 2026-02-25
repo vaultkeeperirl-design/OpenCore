@@ -19,3 +19,7 @@
 ## 2026-02-24 - Orphaned Tool Messages in History Pruning
 **Learning:** The `Agent._prune_messages` method naively sliced the message history, which could split a `tool_calls` / `tool` message pair, leaving an orphaned `tool` message at the start of the conversation history. This causes schema validation errors in strict LLM APIs (like OpenAI).
 **Action:** Updated `_prune_messages` to recursively remove `tool` messages if they appear at the start of the pruned history (after the system prompt).
+
+## 2026-02-25 - Stale Frontend Artifacts
+**Learning:** The frontend source code contained a critical fix for file upload size limits, but the committed static assets in `opencore/interface/static` were outdated, leaving the bug active in production.
+**Action:** Always verify that `opencore/interface/static` matches the frontend source when diagnosing frontend bugs. Consider adding a CI check to ensure static assets are up-to-date with source.

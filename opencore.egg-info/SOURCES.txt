@@ -19,6 +19,7 @@ opencore/cli/main.py
 opencore/cli/onboard.py
 opencore/cli/update.py
 opencore/core/agent.py
+opencore/core/context.py
 opencore/core/logging.py
 opencore/core/scheduler.py
 opencore/core/swarm.py
@@ -36,9 +37,12 @@ opencore/llm/schema.py
 opencore/tools/base.py
 tests/test_agent.py
 tests/test_agent_management.py
+tests/test_agent_memory.py
 tests/test_agent_memory_leak.py
 tests/test_agent_providers.py
+tests/test_api_chat.py
 tests/test_api_config.py
+tests/test_api_validation.py
 tests/test_attachments.py
 tests/test_audio.py
 tests/test_auth_qwen.py
