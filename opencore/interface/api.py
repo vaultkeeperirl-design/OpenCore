@@ -10,17 +10,19 @@ from opencore.interface.heartbeat import heartbeat_manager
 from opencore.config import settings, ALLOWED_CONFIG_KEYS
 import logging
 import os
-import tempfile
 from starlette.concurrency import run_in_threadpool
 from opencore.auth import get_auth_status
 from opencore.interface.auth_routes import auth_router
-from opencore.audio.transcriber import transcribe_audio
+from opencore.audio.service import AudioService, AudioValidationError, AudioSizeError
 
 # Initialize Scheduler
 scheduler = AsyncScheduler()
 
 # Initialize Swarm
 swarm = Swarm()
+
+# Initialize AudioService
+audio_service = AudioService()
 
 logger = logging.getLogger("opencore.api")
 
@@ -117,58 +119,23 @@ def chat(request: ChatRequest):
         activity_log=swarm.current_turn_activity
     )
 
-MAX_AUDIO_SIZE = 25 * 1024 * 1024  # 25MB
-ALLOWED_AUDIO_EXTENSIONS = {".wav", ".mp3", ".ogg", ".webm", ".m4a", ".flac", ".mpga"}
-
 @app.post("/transcribe")
 async def transcribe(file: UploadFile = File(...)):
     """
     Accepts an audio file upload and returns the transcription.
     Enforces file size limit (25MB) and extension validation.
     """
-    tmp_path = None
     try:
-        # Validate file extension
-        filename = file.filename or "audio.tmp"
-        ext = os.path.splitext(filename)[1].lower()
-        if ext not in ALLOWED_AUDIO_EXTENSIONS:
-            # Return 200 with error to maintain API contract
-            return {"error": f"Invalid file type. Allowed extensions: {', '.join(ALLOWED_AUDIO_EXTENSIONS)}", "text": ""}
-
-        # Create a temporary file to save the upload
-        # We read in chunks to avoid loading the entire file into memory and check size limit
-        with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
-            tmp_path = tmp.name
-            total_size = 0
-            CHUNK_SIZE = 1024 * 1024  # 1MB
-
-            while True:
-                chunk = await file.read(CHUNK_SIZE)
-                if not chunk:
-                    break
-                total_size += len(chunk)
-                if total_size > MAX_AUDIO_SIZE:
-                    # Return 200 with error to maintain API contract
-                    return {"error": f"File too large. Maximum size is {MAX_AUDIO_SIZE // (1024 * 1024)}MB.", "text": ""}
-                tmp.write(chunk)
-
-        # Run transcription in a threadpool to avoid blocking event loop
-        # This will lazy-load the model on first request
-        text = await run_in_threadpool(transcribe_audio, tmp_path)
-
+        text = await audio_service.process_upload(file)
         return {"text": text}
 
+    except (AudioValidationError, AudioSizeError) as e:
+        # Return 200 with error to maintain API contract
+        return {"error": str(e), "text": ""}
     except Exception as e:
         logger.error(f"Transcription failed: {e}")
         # Return a generic error message to prevent information leakage
         return {"error": "Transcription failed due to an internal error.", "text": ""}
-    finally:
-        # Ensure cleanup happens even if exceptions occur
-        if tmp_path and os.path.exists(tmp_path):
-            try:
-                os.remove(tmp_path)
-            except Exception as cleanup_error:
-                logger.warning(f"Failed to cleanup temp file {tmp_path}: {cleanup_error}")
 
 @app.get("/agents")
 async def get_agents():

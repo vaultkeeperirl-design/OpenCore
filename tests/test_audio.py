@@ -10,7 +10,8 @@ sys.modules["whisper"] = mock_whisper
 
 from fastapi.testclient import TestClient
 from opencore.interface.api import app
-from opencore.audio.transcriber import transcribe_audio, get_whisper_model, _WHISPER_MODEL
+from opencore.audio.transcriber import transcribe_audio
+from opencore.audio.service import AudioValidationError, AudioSizeError
 
 class TestAudioTranscription(unittest.TestCase):
 
@@ -47,9 +48,9 @@ class TestTranscribeEndpoint(unittest.TestCase):
     def setUp(self):
         self.client = TestClient(app)
 
-    @patch("opencore.interface.api.transcribe_audio")
-    def test_transcribe_endpoint_success(self, mock_transcribe):
-        mock_transcribe.return_value = "Test transcription"
+    @patch("opencore.audio.service.AudioService.process_upload")
+    def test_transcribe_endpoint_success(self, mock_process):
+        mock_process.return_value = "Test transcription"
 
         # Simulate file upload
         files = {"file": ("test.webm", b"dummy audio content", "audio/webm")}
@@ -59,11 +60,11 @@ class TestTranscribeEndpoint(unittest.TestCase):
         self.assertEqual(response.json(), {"text": "Test transcription"})
 
         # Verify mock was called
-        mock_transcribe.assert_called_once()
+        mock_process.assert_called_once()
 
-    @patch("opencore.interface.api.transcribe_audio")
-    def test_transcribe_endpoint_error(self, mock_transcribe):
-        mock_transcribe.side_effect = Exception("Transcription error")
+    @patch("opencore.audio.service.AudioService.process_upload")
+    def test_transcribe_endpoint_error(self, mock_process):
+        mock_process.side_effect = Exception("Transcription error")
 
         files = {"file": ("test.webm", b"dummy audio content", "audio/webm")}
         response = self.client.post("/transcribe", files=files)
@@ -72,7 +73,10 @@ class TestTranscribeEndpoint(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"error": "Transcription failed due to an internal error.", "text": ""})
 
-    def test_transcribe_endpoint_invalid_extension(self):
+    @patch("opencore.audio.service.AudioService.process_upload")
+    def test_transcribe_endpoint_invalid_extension(self, mock_process):
+        mock_process.side_effect = AudioValidationError("Invalid file type")
+
         files = {"file": ("test.txt", b"dummy content", "text/plain")}
         response = self.client.post("/transcribe", files=files)
 
@@ -80,12 +84,13 @@ class TestTranscribeEndpoint(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Invalid file type", response.json()["error"])
 
-    def test_transcribe_endpoint_too_large(self):
-        # We mock the constant in the api module for the test context.
-        with patch("opencore.interface.api.MAX_AUDIO_SIZE", 10): # Set limit to 10 bytes
-             files = {"file": ("test.webm", b"this is definitely more than 10 bytes", "audio/webm")}
-             response = self.client.post("/transcribe", files=files)
+    @patch("opencore.audio.service.AudioService.process_upload")
+    def test_transcribe_endpoint_too_large(self, mock_process):
+        mock_process.side_effect = AudioSizeError("File too large")
 
-             # Expect 200 OK with error message (API contract)
-             self.assertEqual(response.status_code, 200)
-             self.assertIn("File too large", response.json()["error"])
+        files = {"file": ("test.webm", b"too big", "audio/webm")}
+        response = self.client.post("/transcribe", files=files)
+
+        # Expect 200 OK with error message (API contract)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("File too large", response.json()["error"])
