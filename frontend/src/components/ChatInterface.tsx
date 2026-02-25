@@ -46,7 +46,7 @@ export default function ChatInterface({
     {
       id: "welcome",
       role: "assistant",
-      content: "System Online. Neural interface active. How can I assist you today?",
+      content: "System Online. Neural interface active. Awaiting directive.",
       timestamp: Date.now(),
     }
   ]);

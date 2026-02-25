@@ -34,3 +34,13 @@ Rewrote `opencore/cli/onboard.py` to use "System" persona copy.
 3.  **Visuals**: Added stylistic delimiters (e.g., `//`, `::`) to match the cyberpunk aesthetic.
 
 **Goal:** Ensure the first interaction with the codebase reinforces the "Neural Operating System" positioning.
+
+## 2026-02-25 - React Frontend Persona Alignment
+
+**Learning:**
+The React frontend (`ChatInterface.tsx`) had a generic "How can I assist you today?" welcome message, which was a regression from the "System" persona defined in `README.md` and backend prompts. This inconsistency weakened the immersive "Neural Operating System" experience.
+
+**Action:**
+Updated `frontend/src/components/ChatInterface.tsx` to set the initial assistant message to: "System Online. Neural interface active. Awaiting directive."
+
+**Goal:** Ensure the first user touchpoint in the UI is immediately recognizable as "OpenCore" and distinct from generic chat interfaces.
