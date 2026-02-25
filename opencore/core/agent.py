@@ -96,7 +96,7 @@ class Agent:
 
     def _prune_messages(self):
         """Prunes message history to prevent context window exhaustion."""
-        MAX_HISTORY = 100
+        MAX_HISTORY = settings.max_history
         # If history exceeds limit (plus system prompt)
         if len(self.messages) > (MAX_HISTORY + 1):
             # Preserve system prompt at index 0

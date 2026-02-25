@@ -34,6 +34,7 @@ ALLOWED_CONFIG_KEYS = {
     "GOOGLE_REFRESH_TOKEN",
     "ALLOW_UNSAFE_SYSTEM_ACCESS",
     "MAX_TURNS",
+    "MAX_HISTORY",
 }
 
 class Settings:
@@ -73,6 +74,7 @@ class Settings:
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
         self.heartbeat_interval = int(os.getenv("HEARTBEAT_INTERVAL", 3600))
         self.max_turns = int(os.getenv("MAX_TURNS", 10))
+        self.max_history = int(os.getenv("MAX_HISTORY", 100))
 
     def update_env(self, updates: Dict[str, Any]):
         """Updates the .env file and reloads configuration."""

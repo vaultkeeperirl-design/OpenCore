@@ -25,3 +25,8 @@
 
 **Observation:** The `ChatInterface` component allows users to drag and drop files of any size. The browser attempts to read the entire file into memory as a Base64 string via `FileReader`. Large files (e.g., >50MB) can cause the browser tab to freeze or crash due to memory exhaustion. Additionally, sending massive payloads to the backend without size validation can lead to server-side memory pressure or denial of service.
 **Action:** Recommended implementation of client-side file size check (e.g., 10MB limit) in the `onDrop` handler and `handleSubmit` function to prevent browser crashes and backend DOS.
+
+## 2026-03-05 - Configurable Agent Memory Limits
+
+**Observation:** The `MAX_HISTORY` constant was hardcoded to 100 in `opencore/core/agent.py`. This rigid limit prevented users from leveraging larger context windows (e.g., Gemini 1.5 Pro) or constraining memory for resource-constrained environments.
+**Action:** Replaced the hardcoded constant with a configurable `MAX_HISTORY` setting (defaulting to 100). This allows dynamic adjustment of agent memory capacity via environment variables, improving flexibility and scalability.
