@@ -111,7 +111,10 @@ class Agent:
             # Preserve system prompt at index 0
             system_prompt = self.messages[0]
             # Keep the last MAX_HISTORY messages
-            recent_messages = self.messages[-MAX_HISTORY:]
+            if MAX_HISTORY > 0:
+                recent_messages = self.messages[-MAX_HISTORY:]
+            else:
+                recent_messages = []
             self.messages = [system_prompt] + recent_messages
 
             # Ensure the first message after system prompt is not a 'tool' message (orphaned result)

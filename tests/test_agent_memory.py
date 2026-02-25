@@ -68,5 +68,15 @@ class TestAgentMemory(unittest.TestCase):
         self.assertEqual(len(self.agent.messages), 1)
         self.assertEqual(self.agent.messages[0]["role"], "system")
 
+    def test_max_history_zero_pruning(self):
+        settings.max_history = 0
+        self.agent.add_message("user", "Hello")
+        self.agent.add_message("assistant", "Hi there")
+
+        self.agent._prune_messages()
+
+        self.assertEqual(len(self.agent.messages), 1)
+        self.assertEqual(self.agent.messages[0]["role"], "system")
+
 if __name__ == '__main__':
     unittest.main()
