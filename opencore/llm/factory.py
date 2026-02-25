@@ -4,50 +4,51 @@ from .base import LLMProvider
 from .openai_compat import OpenAICompatibleProvider
 from .anthropic import AnthropicProvider
 from .gemini import GeminiProvider
+from opencore.config import settings
 
 
 def is_provider_available(model: str) -> bool:
     """Checks if the provider for the given model is configured."""
     if model.startswith("gpt-") or model.startswith("openai/"):
-        return bool(os.getenv("OPENAI_API_KEY"))
+        return settings.has_openai_key
     elif model.startswith("anthropic/"):
-        return bool(os.getenv("ANTHROPIC_API_KEY"))
+        return settings.has_anthropic_key
     elif model.startswith("gemini/") or model.startswith("google/"):
-        return bool(os.getenv("GEMINI_API_KEY"))
+        return settings.has_gemini_key
     elif model.startswith("groq/"):
-        return bool(os.getenv("GROQ_API_KEY"))
+        return settings.has_groq_key
     elif model.startswith("xai/"):
-        return bool(os.getenv("XAI_API_KEY"))
+        return settings.has_xai_key
     elif model.startswith("dashscope/") or model.startswith("qwen/"):
-        return bool(os.getenv("QWEN_ACCESS_TOKEN") or os.getenv("DASHSCOPE_API_KEY"))
+        return settings.has_dashscope_key
     elif model.startswith("mistral/"):
-        return bool(os.getenv("MISTRAL_API_KEY"))
+        return settings.has_mistral_key
     elif model.startswith("ollama/"):
         # Only considered available if explicitly configured
-        return bool(os.getenv("OLLAMA_API_BASE"))
+        return bool(settings.ollama_api_base)
 
     # Fallback assumes OpenAI compatible
-    return bool(os.getenv("OPENAI_API_KEY"))
+    return settings.has_openai_key
 
 
 def get_available_model_list() -> List[str]:
     """Returns a list of example models for configured providers."""
     models = []
-    if os.getenv("OPENAI_API_KEY"):
+    if settings.has_openai_key:
         models.extend(["openai/gpt-4o", "openai/gpt-3.5-turbo"])
-    if os.getenv("ANTHROPIC_API_KEY"):
+    if settings.has_anthropic_key:
         models.extend(["anthropic/claude-3-opus", "anthropic/claude-3-sonnet"])
-    if os.getenv("GEMINI_API_KEY"):
+    if settings.has_gemini_key:
         models.extend(["gemini/gemini-1.5-pro", "gemini/gemini-1.5-flash"])
-    if os.getenv("GROQ_API_KEY"):
+    if settings.has_groq_key:
         models.extend(["groq/llama3-8b-8192", "groq/mixtral-8x7b-32768"])
-    if os.getenv("XAI_API_KEY"):
+    if settings.has_xai_key:
         models.extend(["xai/grok-2-vision-1212"])
-    if os.getenv("QWEN_ACCESS_TOKEN") or os.getenv("DASHSCOPE_API_KEY"):
+    if settings.has_dashscope_key:
         models.extend(["dashscope/qwen-turbo", "dashscope/qwen-plus"])
-    if os.getenv("MISTRAL_API_KEY"):
+    if settings.has_mistral_key:
         models.extend(["mistral/mistral-large-latest"])
-    if os.getenv("OLLAMA_API_BASE"):
+    if settings.ollama_api_base:
         models.append("ollama/llama3")
     return models
 
@@ -59,21 +60,21 @@ def get_llm_provider(model: str, is_custom_model: bool = False) -> LLMProvider:
 
     # Handle prefixes
     if model.startswith("gpt-") or model.startswith("openai/"):
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = settings.openai_api_key
         model_name = model.replace("openai/", "")
         return OpenAICompatibleProvider(model_name=model_name, api_key=api_key)
 
     elif model.startswith("anthropic/"):
-        api_key = os.getenv("ANTHROPIC_API_KEY")
+        api_key = settings.anthropic_api_key
         model_name = model.replace("anthropic/", "")
         return AnthropicProvider(model_name=model_name, api_key=api_key)
 
     elif model.startswith("gemini/") or model.startswith("google/"):
-        api_key = os.getenv("GEMINI_API_KEY")
+        api_key = settings.gemini_api_key
         return GeminiProvider(model_name=model, api_key=api_key)
 
     elif model.startswith("groq/"):
-        api_key = os.getenv("GROQ_API_KEY")
+        api_key = settings.groq_api_key
         model_name = model.replace("groq/", "")
         return OpenAICompatibleProvider(
             model_name=model_name,
@@ -82,7 +83,7 @@ def get_llm_provider(model: str, is_custom_model: bool = False) -> LLMProvider:
         )
 
     elif model.startswith("xai/"):
-        api_key = os.getenv("XAI_API_KEY")
+        api_key = settings.xai_api_key
         model_name = model.replace("xai/", "")
         return OpenAICompatibleProvider(
             model_name=model_name,
@@ -92,8 +93,8 @@ def get_llm_provider(model: str, is_custom_model: bool = False) -> LLMProvider:
 
     elif model.startswith("dashscope/") or model.startswith("qwen/"):
         # Check for OAuth token first (legacy Qwen logic support)
-        oauth_token = os.getenv("QWEN_ACCESS_TOKEN")
-        key = oauth_token if oauth_token else os.getenv("DASHSCOPE_API_KEY")
+        oauth_token = settings.qwen_access_token
+        key = oauth_token if oauth_token else settings.dashscope_api_key
 
         if model.startswith("dashscope/"):
             model_name = model.replace("dashscope/", "")
@@ -112,7 +113,7 @@ def get_llm_provider(model: str, is_custom_model: bool = False) -> LLMProvider:
         )
 
     elif model.startswith("mistral/"):
-        api_key = os.getenv("MISTRAL_API_KEY")
+        api_key = settings.mistral_api_key
         model_name = model.replace("mistral/", "")
         return OpenAICompatibleProvider(
             model_name=model_name,
@@ -121,7 +122,7 @@ def get_llm_provider(model: str, is_custom_model: bool = False) -> LLMProvider:
         )
 
     elif model.startswith("ollama/"):
-        api_base = os.getenv("OLLAMA_API_BASE", "http://localhost:11434/v1")
+        api_base = settings.ollama_api_base or "http://localhost:11434/v1"
         model_name = model.replace("ollama/", "")
         return OpenAICompatibleProvider(
             model_name=model_name,
@@ -132,5 +133,5 @@ def get_llm_provider(model: str, is_custom_model: bool = False) -> LLMProvider:
     # Fallback to OpenAI if no prefix and looks like GPT
     # Or default to OpenAI compatible if unknown?
     # Let's assume OpenAI compatible for generic usage.
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = settings.openai_api_key
     return OpenAICompatibleProvider(model_name=model, api_key=api_key)

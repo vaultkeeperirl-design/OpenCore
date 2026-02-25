@@ -122,32 +122,64 @@ class Settings:
         return os.getenv("OLLAMA_API_BASE", "")
 
     @property
+    def openai_api_key(self) -> str:
+        return os.getenv("OPENAI_API_KEY", "")
+
+    @property
+    def anthropic_api_key(self) -> str:
+        return os.getenv("ANTHROPIC_API_KEY", "")
+
+    @property
+    def mistral_api_key(self) -> str:
+        return os.getenv("MISTRAL_API_KEY", "")
+
+    @property
+    def xai_api_key(self) -> str:
+        return os.getenv("XAI_API_KEY", "")
+
+    @property
+    def dashscope_api_key(self) -> str:
+        return os.getenv("DASHSCOPE_API_KEY", "")
+
+    @property
+    def qwen_access_token(self) -> str:
+        return os.getenv("QWEN_ACCESS_TOKEN", "")
+
+    @property
+    def gemini_api_key(self) -> str:
+        return os.getenv("GEMINI_API_KEY", "")
+
+    @property
+    def groq_api_key(self) -> str:
+        return os.getenv("GROQ_API_KEY", "")
+
+    @property
     def has_openai_key(self) -> bool:
-        return bool(os.getenv("OPENAI_API_KEY"))
+        return bool(self.openai_api_key)
 
     @property
     def has_anthropic_key(self) -> bool:
-        return bool(os.getenv("ANTHROPIC_API_KEY"))
+        return bool(self.anthropic_api_key)
 
     @property
     def has_mistral_key(self) -> bool:
-        return bool(os.getenv("MISTRAL_API_KEY"))
+        return bool(self.mistral_api_key)
 
     @property
     def has_xai_key(self) -> bool:
-        return bool(os.getenv("XAI_API_KEY"))
+        return bool(self.xai_api_key)
 
     @property
     def has_dashscope_key(self) -> bool:
-        return bool(os.getenv("DASHSCOPE_API_KEY"))
+        return bool(self.qwen_access_token or self.dashscope_api_key)
 
     @property
     def has_gemini_key(self) -> bool:
-        return bool(os.getenv("GEMINI_API_KEY"))
+        return bool(self.gemini_api_key)
 
     @property
     def has_groq_key(self) -> bool:
-        return bool(os.getenv("GROQ_API_KEY"))
+        return bool(self.groq_api_key)
 
     @property
     def allow_unsafe_system_access(self) -> bool:
