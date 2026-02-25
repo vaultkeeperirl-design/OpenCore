@@ -371,6 +371,9 @@ class Swarm:
             if not getattr(agent, "is_custom_model", False):
                 agent.model = self.default_model
 
+            # Re-register tools to update dynamic descriptions (like available models)
+            self._register_swarm_tools(agent)
+
             # Clear client to ensure new auth is picked up if needed
             agent.client = None
 

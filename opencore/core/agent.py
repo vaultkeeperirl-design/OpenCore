@@ -42,7 +42,16 @@ class Agent:
         Registers a tool (function) to be used by the agent.
         The schema must follow the OpenAI tool definition format.
         """
-        self.tools[schema["function"]["name"]] = func
+        tool_name = schema["function"]["name"]
+        self.tools[tool_name] = func
+
+        # Check if tool definition already exists and update it
+        for i, definition in enumerate(self.tool_definitions):
+            if definition["function"]["name"] == tool_name:
+                self.tool_definitions[i] = schema
+                return
+
+        # If not found, append new definition
         self.tool_definitions.append(schema)
 
     def add_message(
