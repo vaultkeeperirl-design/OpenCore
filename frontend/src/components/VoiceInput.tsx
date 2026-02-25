@@ -101,26 +101,34 @@ export default function VoiceInput({ onTranscript, disabled }: VoiceInputProps) 
 
   const isLoading = isTranscribing;
 
+  const label = isRecording
+    ? "Stop voice recording"
+    : isLoading
+    ? "Transcribing audio..."
+    : "Start voice input";
+
   return (
     <button
       type="button"
       onClick={handleClick}
       disabled={disabled || isLoading}
-      className={`p-2 rounded-lg transition-all duration-300 ${
+      aria-label={label}
+      aria-pressed={isRecording}
+      className={`p-2 rounded-lg transition-all duration-300 backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/50 ${
         isRecording
           ? "bg-red-500/20 text-red-400 border border-red-500/50 animate-pulse"
           : isLoading
             ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/50"
-            : "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/30"
-      } backdrop-blur-sm`}
-      title={isRecording ? "Stop recording" : isLoading ? "Transcribing..." : "Start voice input"}
+            : "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/30 active:scale-95"
+      }`}
+      title={label}
     >
       {isLoading ? (
-        <Loader2 size={20} className="animate-spin" />
+        <Loader2 size={20} className="animate-spin" aria-hidden="true" />
       ) : isRecording ? (
-        <MicOff size={20} />
+        <MicOff size={20} aria-hidden="true" />
       ) : (
-        <Mic size={20} />
+        <Mic size={20} aria-hidden="true" />
       )}
     </button>
   );
