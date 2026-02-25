@@ -23,3 +23,8 @@
 
 **Learning:** Chat interfaces need `role="log"` and `aria-live="polite"` on the container for automatic announcements. For submit buttons, combining `disabled`, `aria-busy="true"`, and a dynamic `aria-label` (e.g., "Sending...") provides robust feedback.
 **Action:** Apply `role="log"`/`aria-live="polite"` to all chat containers and the combined loading pattern to all async submit buttons.
+
+## 2026-02-25 - Accessible Toggle Buttons
+
+**Learning:** Static `title` attributes on icon-only toggle buttons (like voice input) are insufficient for screen readers. Users need to know the *current* state and the *action* that will happen on click.
+**Action:** Implement dynamic `aria-label`s for all toggle buttons (e.g., "Start recording" vs "Stop recording") and use `aria-pressed` to indicate the active state.
