@@ -42,6 +42,7 @@ tests/test_agent_memory_leak.py
 tests/test_agent_providers.py
 tests/test_api_chat.py
 tests/test_api_config.py
+tests/test_api_validation.py
 tests/test_attachments.py
 tests/test_audio.py
 tests/test_auth_qwen.py
