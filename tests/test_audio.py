@@ -68,5 +68,24 @@ class TestTranscribeEndpoint(unittest.TestCase):
         files = {"file": ("test.webm", b"dummy audio content", "audio/webm")}
         response = self.client.post("/transcribe", files=files)
 
+        # Expect 200 OK but with generic error message to prevent leakage
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"error": "Transcription error", "text": ""})
+        self.assertEqual(response.json(), {"error": "Transcription failed due to an internal error.", "text": ""})
+
+    def test_transcribe_endpoint_invalid_extension(self):
+        files = {"file": ("test.txt", b"dummy content", "text/plain")}
+        response = self.client.post("/transcribe", files=files)
+
+        # Expect 200 OK with error message (API contract)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Invalid file type", response.json()["error"])
+
+    def test_transcribe_endpoint_too_large(self):
+        # We mock the constant in the api module for the test context.
+        with patch("opencore.interface.api.MAX_AUDIO_SIZE", 10): # Set limit to 10 bytes
+             files = {"file": ("test.webm", b"this is definitely more than 10 bytes", "audio/webm")}
+             response = self.client.post("/transcribe", files=files)
+
+             # Expect 200 OK with error message (API contract)
+             self.assertEqual(response.status_code, 200)
+             self.assertIn("File too large", response.json()["error"])
