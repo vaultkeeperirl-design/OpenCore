@@ -58,12 +58,22 @@ def main():
         port = args.port if args.port else settings.port
         reload = args.reload or settings.is_dev
 
-        uvicorn.run(
-            "opencore.interface.api:app",
-            host=host,
-            port=port,
-            reload=reload
-        )
+        if getattr(sys, 'frozen', False):
+            # Frozen: cannot reload, import app directly
+            from opencore.interface.api import app
+            uvicorn.run(
+                app,
+                host=host,
+                port=port,
+                reload=False
+            )
+        else:
+            uvicorn.run(
+                "opencore.interface.api:app",
+                host=host,
+                port=port,
+                reload=reload
+            )
     else:
         parser.print_help()
 
