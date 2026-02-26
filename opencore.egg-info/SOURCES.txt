@@ -10,6 +10,7 @@ opencore.egg-info/entry_points.txt
 opencore.egg-info/requires.txt
 opencore.egg-info/top_level.txt
 opencore/audio/__init__.py
+opencore/audio/service.py
 opencore/audio/transcriber.py
 opencore/auth/__init__.py
 opencore/auth/google.py
@@ -42,13 +43,16 @@ tests/test_agent_memory_leak.py
 tests/test_agent_providers.py
 tests/test_api_chat.py
 tests/test_api_config.py
+tests/test_api_malformed_input.py
 tests/test_api_validation.py
 tests/test_attachments.py
 tests/test_audio.py
+tests/test_audio_service.py
 tests/test_auth_qwen.py
 tests/test_cli_onboard.py
 tests/test_cli_update.py
 tests/test_command_injection.py
+tests/test_command_path_traversal.py
 tests/test_config_refine.py
 tests/test_deployment.py
 tests/test_error_handling.py

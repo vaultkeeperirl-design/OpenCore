@@ -1,5 +1,10 @@
 # Conductor Journal
 
+## 2026-02-26 - Release v2.2.0 Feature Bump
+
+**Observation:** Version 2.1.3 was present in `opencore/__init__.py` but not tagged, and the codebase contained significant new features (Swarm Teams, stricter API validation) not reflected in the v2.1.3 changelog entry. This indicates a "shadow release" or a merge that included features intended for a minor version bump but was labeled as a patch.
+**Action:** Bumped version to 2.2.0 (Minor) to correctly reflect the new features. Updated `CHANGELOG.md` to include v2.2.0 and the new capabilities. Cleaned up temporary verification artifacts found in the repository root.
+
 ## 2026-02-25 - Release v2.1.3 Security Patch & Sync
 
 **Observation:** Version 2.1.3 (Security Fix) was found in `opencore/__init__.py` but missing from `CHANGELOG.md`. Versions 2.1.1 and 2.1.2 were entirely missing from history.
