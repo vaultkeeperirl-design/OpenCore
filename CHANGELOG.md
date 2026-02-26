@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-02-26
+
+### Added
+- **Swarm Teams**: New capability to create specialized teams with designated leaders via `create_team`.
+- **Team Leadership**: Team Leads can now create and manage their own sub-agents to achieve goals.
+- **Improved Delegation**: Enhanced `delegate_task` tool for better agent-to-agent communication.
+- **Strict Validation**: Enforced strict Pydantic validation for chat attachments (PR #136).
+
 ## [2.1.3] - 2026-02-25
 
 ### Fixed
