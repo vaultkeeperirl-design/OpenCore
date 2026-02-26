@@ -5,6 +5,7 @@ from opencore.core.swarm import Swarm
 from opencore.config import settings
 from fastapi.testclient import TestClient
 from opencore.interface.api import app, swarm
+from opencore.core.exceptions import AgentNotFoundError, AgentOperationError
 import os
 
 class TestAgentManagement(unittest.TestCase):
@@ -70,18 +71,18 @@ class TestAgentManagement(unittest.TestCase):
         self.swarm.create_agent("Worker2", "Worker", "Work harder")
         self.assertIn("Worker2", self.swarm.agents)
 
-        # Remove agent
+        # Remove agent - now returns None (void) instead of string
         result = self.swarm.remove_agent("Worker2")
-        self.assertIn("removed", result)
+        self.assertIsNone(result)
         self.assertNotIn("Worker2", self.swarm.agents)
 
-        # Try removing non-existent
-        result = self.swarm.remove_agent("Worker2")
-        self.assertIn("Error", result)
+        # Try removing non-existent - should raise AgentNotFoundError
+        with self.assertRaises(AgentNotFoundError):
+            self.swarm.remove_agent("Worker2")
 
-        # Try removing Manager
-        result = self.swarm.remove_agent("Manager")
-        self.assertIn("Error", result)
+        # Try removing Manager - should raise AgentOperationError
+        with self.assertRaises(AgentOperationError):
+            self.swarm.remove_agent("Manager")
 
     def test_remove_team_member(self):
         # Create team
