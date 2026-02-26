@@ -75,9 +75,14 @@ app.middleware("http")(request_id_middleware)
 # Include Auth Router
 app.include_router(auth_router)
 
+class Attachment(BaseModel):
+    name: str
+    type: str
+    content: str
+
 class ChatRequest(BaseModel):
     message: str
-    attachments: Optional[List[Dict[str, str]]] = None
+    attachments: Optional[List[Attachment]] = None
 
 class ActivityItem(BaseModel):
     type: str  # interaction, lifecycle
@@ -101,7 +106,7 @@ def chat(request: ChatRequest):
     if request.attachments:
         for attachment in request.attachments:
             # 15MB limit for Base64 (approx 11MB file size)
-            if len(attachment.get("content", "")) > 15 * 1024 * 1024:
+            if len(attachment.content) > 15 * 1024 * 1024:
                 raise HTTPException(status_code=413, detail="File too large")
 
     # In a real streaming scenario, we would use Server-Sent Events (SSE) or WebSockets.
@@ -110,7 +115,10 @@ def chat(request: ChatRequest):
     # We could potentially capture logs here by inspecting the agent's recent messages
     # but the current `think` method returns just the string.
 
-    response = swarm.chat(request.message, attachments=request.attachments)
+    # Convert Pydantic models to dicts for internal processing
+    attachments_dict = [a.model_dump() for a in request.attachments] if request.attachments else None
+
+    response = swarm.chat(request.message, attachments=attachments_dict)
 
     return ChatResponse(
         response=response,
