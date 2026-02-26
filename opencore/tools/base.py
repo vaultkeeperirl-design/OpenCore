@@ -55,6 +55,18 @@ def execute_command(command: str) -> str:
             # Security: Use shlex.split and shell=False to prevent injection
             # This prevents chaining commands with &&, |, ;, etc.
             args = shlex.split(command)
+
+            # Sentinel Security Patch: Validate arguments for path traversal
+            # Iterate over ALL arguments (including the command itself) to ensure no files outside CWD are accessed
+            # This prevents executing binaries by absolute path (e.g. /bin/ls) and path traversal in args
+            for arg in args:
+                # Check if argument resolves to an unsafe path
+                # Note: This might block some legitimate non-path arguments if they happen to look like paths
+                # but resolve to something outside CWD (e.g. absolute paths that exist).
+                # This is a necessary trade-off for security in restricted mode.
+                if not _is_safe_path(arg):
+                     return f"Error: Access denied - Path traversal detected in argument '{arg}'."
+
             result = subprocess.run(
                 args, shell=False, capture_output=True, text=True, timeout=30
             )
