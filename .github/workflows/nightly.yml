@@ -1,0 +1,129 @@
+name: Nightly Build
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+          pip install pyinstaller
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Copy Frontend Assets
+        run: |
+          # Ensure target directory exists and is clean
+          mkdir -p opencore/interface/static
+          rm -rf opencore/interface/static/*
+          cp -r frontend/out/* opencore/interface/static/
+
+      - name: Build Executable
+        run: python build_executable.py
+
+      - name: Rename Artifact
+        run: mv dist/opencore dist/opencore-linux
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: opencore-linux
+          path: dist/opencore-linux
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+          pip install pyinstaller
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Copy Frontend Assets
+        shell: bash
+        run: |
+          mkdir -p opencore/interface/static
+          rm -rf opencore/interface/static/*
+          cp -r frontend/out/* opencore/interface/static/
+
+      - name: Build Executable
+        run: python build_executable.py
+
+      - name: Rename Artifact
+        run: move dist\opencore.exe dist\opencore-windows.exe
+        shell: cmd
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: opencore-windows
+          path: dist/opencore-windows.exe
+
+  release:
+    needs: [build-linux, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Linux Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: opencore-linux
+          path: artifacts
+
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: opencore-windows
+          path: artifacts
+
+      - name: Update Nightly Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "artifacts/opencore-linux,artifacts/opencore-windows.exe"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: nightly
+          name: Nightly Build
+          prerelease: true
+          allowUpdates: true
+          removeArtifacts: true

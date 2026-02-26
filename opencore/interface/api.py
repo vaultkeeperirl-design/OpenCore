@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
+from pathlib import Path
 from contextlib import asynccontextmanager
 from opencore.core.swarm import Swarm
 from opencore.interface.middleware import global_exception_handler, request_id_middleware
@@ -212,4 +213,5 @@ async def update_config(config: Dict[str, Any]):
     return {"status": "success", "message": "Configuration updated."}
 
 # Mount static files
-app.mount("/", StaticFiles(directory="opencore/interface/static", html=True), name="static")
+static_dir = Path(__file__).parent / "static"
+app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")
