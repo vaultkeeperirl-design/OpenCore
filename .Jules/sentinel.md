@@ -30,3 +30,9 @@
 
 **Observation:** The `MAX_HISTORY` constant was hardcoded to 100 in `opencore/core/agent.py`. This rigid limit prevented users from leveraging larger context windows (e.g., Gemini 1.5 Pro) or constraining memory for resource-constrained environments.
 **Action:** Replaced the hardcoded constant with a configurable `MAX_HISTORY` setting (defaulting to 100). This allows dynamic adjustment of agent memory capacity via environment variables, improving flexibility and scalability.
+
+## 2026-03-08 - Strict API Payload Validation
+
+**Observation:** The `chat` endpoint accepted attachments as loose dictionaries without validating required fields (`name`, `type`). A malformed payload could cause a `KeyError` deep in the agent logic, resulting in a 500 Internal Server Error.
+**Action:** Implemented a strict Pydantic `Attachment` model in `ChatRequest` to enforce schema validation at the API boundary.
+**Future Benefit:** Prevents server crashes due to malformed client requests, providing clear 422 validation errors instead of opaque 500 system errors.
