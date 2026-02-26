@@ -76,7 +76,9 @@ class TestUnrestrictedAccess(unittest.TestCase):
         self.temp_dir = tempfile.gettempdir()
         self.test_file_path = os.path.join(self.temp_dir, "test_unrestricted.txt")
         self.outfile = os.path.join(self.temp_dir, "test_echo_shell.txt")
-        self.outfile_no_shell = os.path.join(self.temp_dir, "test_echo_no_shell.txt")
+        # Use a local file for the restricted test to pass the path traversal check
+        # but still fail shell redirection (which is what we want to test)
+        self.outfile_no_shell = "test_echo_no_shell.txt"
 
     @patch.dict(os.environ, {"ALLOW_UNSAFE_SYSTEM_ACCESS": "true"})
     def test_unrestricted_access(self):
