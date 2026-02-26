@@ -24,6 +24,17 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     }
   }, [isOpen]);
 
+  // Handle Escape key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    if (isOpen) {
+      window.addEventListener("keydown", handleEsc);
+    }
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isOpen, onClose]);
+
   const fetchConfig = async () => {
     setLoading(true);
     try {
@@ -66,13 +77,13 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-primary/85 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-primary/85 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="settings-title">
       <div className="w-full max-w-2xl bg-bg-secondary border border-accent-1 rounded shadow-[0_0_30px_color-mix(in_srgb,var(--accent-1),transparent_90%)] overflow-hidden flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between p-4 border-b border-border-primary bg-bg-tertiary shrink-0">
-          <h2 className="text-xl font-bold flex items-center gap-2 text-accent-1 font-orbitron tracking-[2px]">
+          <h2 id="settings-title" className="text-xl font-bold flex items-center gap-2 text-accent-1 font-orbitron tracking-[2px]">
             <Cpu size={24} /> SYSTEM_CONFIGURATION // ROOT ACCESS
           </h2>
-          <button onClick={onClose} className="p-1 hover:bg-bg-primary rounded transition-colors text-text-secondary hover:text-accent-2">
+          <button onClick={onClose} aria-label="Close settings" className="p-1 hover:bg-bg-primary rounded transition-colors text-text-secondary hover:text-accent-2">
             <X size={24} />
           </button>
         </div>
@@ -84,8 +95,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
              <>
                {/* LLM Model Selection */}
                <div className="space-y-2">
-                 <label className="text-xs text-accent-1 font-mono tracking-widest uppercase mb-1 block">NEURAL CORE SELECTION</label>
+                 <label htmlFor="llm-model" className="text-xs text-accent-1 font-mono tracking-widest uppercase mb-1 block">NEURAL CORE SELECTION</label>
                  <select
+                   id="llm-model"
                    value={config.LLM_MODEL || "gpt-4o"}
                    onChange={(e) => setConfig({...config, LLM_MODEL: e.target.value})}
                    className="w-full bg-bg-primary border border-border-primary rounded p-3 text-text-primary focus:border-accent-1 focus:outline-none focus:ring-1 focus:ring-accent-1/50 font-mono text-sm transition-all appearance-none"
@@ -111,7 +123,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
                  <div className="p-4 border border-accent-2/30 bg-accent-2/5 rounded flex flex-col gap-3">
                    <div className="flex items-center justify-between">
-                     <label className="text-sm font-mono font-bold text-text-primary tracking-wide">AUTHORIZE UNRESTRICTED KERNEL ACCESS</label>
+                     <label htmlFor="unsafe-toggle" className="text-sm font-mono font-bold text-text-primary tracking-wide">AUTHORIZE UNRESTRICTED KERNEL ACCESS</label>
                      <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
                        <input
                          type="checkbox"
@@ -139,8 +151,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                  <h3 className="text-lg font-semibold text-text-primary border-b border-border-primary pb-2 mt-4 font-orbitron tracking-wide">CLOUD COMPUTING MATRIX</h3>
                  <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-1">
-                     <label className="text-xs text-text-secondary font-mono uppercase">VERTEX PROJECT IDENTITY</label>
+                     <label htmlFor="vertex-project" className="text-xs text-text-secondary font-mono uppercase">VERTEX PROJECT IDENTITY</label>
                      <input
+                       id="vertex-project"
                        type="text"
                        placeholder="my-project-id"
                        value={config.VERTEX_PROJECT || ""}
@@ -149,8 +162,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                      />
                    </div>
                    <div className="space-y-1">
-                     <label className="text-xs text-text-secondary font-mono uppercase">COMPUTE REGION</label>
+                     <label htmlFor="vertex-region" className="text-xs text-text-secondary font-mono uppercase">COMPUTE REGION</label>
                      <input
+                       id="vertex-region"
                        type="text"
                        placeholder="us-central1"
                        value={config.VERTEX_LOCATION || ""}
@@ -179,7 +193,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                  ].map((item: any) => (
                    <div key={item.key} className="flex flex-col gap-1 group">
                      <div className="flex justify-between items-center">
-                        <label className="text-xs text-text-secondary font-mono uppercase group-hover:text-accent-1/70 transition-colors">{item.label}</label>
+                        <label htmlFor={item.isOAuth ? undefined : item.key} className="text-xs text-text-secondary font-mono uppercase group-hover:text-accent-1/70 transition-colors">{item.label}</label>
                         {item.isOAuth && (
                            <span className="text-[10px] text-status-active font-mono animate-pulse">{item.oauthLabel}</span>
                         )}
@@ -196,6 +210,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                           <div className="relative flex-1">
                             <Key size={14} className="absolute left-3 top-3.5 text-text-secondary group-focus-within:text-accent-1 transition-colors" />
                             <input
+                              id={item.key}
                               type="password"
                               placeholder={item.hasKey ? "•••••••••••••••• (Set)" : "Enter API Key"}
                               value={config[item.key] || ""}
@@ -226,8 +241,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                            <span className="text-[10px] text-accent-1 font-mono uppercase mb-1">Google Cloud OAuth (Recommended)</span>
 
                            <div className="flex flex-col gap-1">
-                               <label className="text-[10px] text-text-secondary font-mono">Client ID</label>
+                               <label htmlFor="google-client-id" className="text-[10px] text-text-secondary font-mono">Client ID</label>
                                <input
+                                   id="google-client-id"
                                    type="text"
                                    value={config.GOOGLE_CLIENT_ID || ""}
                                    onChange={(e) => setConfig({...config, GOOGLE_CLIENT_ID: e.target.value})}
@@ -237,8 +253,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                            </div>
 
                            <div className="flex flex-col gap-1">
-                               <label className="text-[10px] text-text-secondary font-mono">Client Secret</label>
+                               <label htmlFor="google-client-secret" className="text-[10px] text-text-secondary font-mono">Client Secret</label>
                                <input
+                                   id="google-client-secret"
                                    type="password"
                                    value={config.GOOGLE_CLIENT_SECRET || ""}
                                    onChange={(e) => setConfig({...config, GOOGLE_CLIENT_SECRET: e.target.value})}
