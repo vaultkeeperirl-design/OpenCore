@@ -28,3 +28,8 @@
 
 **Learning:** Static `title` attributes on icon-only toggle buttons (like voice input) are insufficient for screen readers. Users need to know the *current* state and the *action* that will happen on click.
 **Action:** Implement dynamic `aria-label`s for all toggle buttons (e.g., "Start recording" vs "Stop recording") and use `aria-pressed` to indicate the active state.
+
+## 2026-02-26 - Accessible Modal Pattern
+
+**Learning:** Custom modals often lack semantic roles and keyboard interactions, making them inaccessible. Adding `role="dialog"`, `aria-modal="true"`, and `Escape` key support significantly improves the experience with minimal code.
+**Action:** Apply the "Accessible Modal" pattern (role, aria-modal, aria-labelledby, Escape listener) to all custom dialog components.
