@@ -59,20 +59,6 @@ class Agent:
     ):
         self.messages.append({"role": role, "content": content})
 
-    def _normalize_tool_call(self, tool_call: Any) -> tuple:
-        """Normalizes a tool call object/dict into (id, name, args_dict)."""
-        if isinstance(tool_call, dict):
-            return (
-                tool_call.get("id"),
-                tool_call["function"]["name"],
-                json.loads(tool_call["function"]["arguments"])
-            )
-        return (
-            tool_call.id,
-            tool_call.function.name,
-            json.loads(tool_call.function.arguments)
-        )
-
     def _execute_tool_calls(self, tool_calls: List[Any]):
         """Executes a list of tool calls and appends results."""
         for tool_call in tool_calls:
@@ -81,27 +67,37 @@ class Agent:
             func_name = "unknown"
 
             try:
-                tool_id, func_name, arguments = self._normalize_tool_call(tool_call)
-
-                if func_name in self.tools:
-                    logger.info(
-                        f"[{self.name}] Executing {func_name} with {arguments}"
-                    )
-                    try:
-                        result = self.tools[func_name](**arguments)
-                    except Exception as e:
-                        logger.exception(f"Error {func_name}: {str(e)}")
-                        result = f"Error executing {func_name}: {str(e)}"
+                # 1. Safe Extraction of ID and Name
+                if isinstance(tool_call, dict):
+                    tool_id = tool_call.get("id", "unknown")
+                    func_name = tool_call["function"]["name"]
+                    arguments_str = tool_call["function"]["arguments"]
                 else:
-                    result = f"Error: Tool {func_name} not found."
+                    tool_id = getattr(tool_call, "id", "unknown")
+                    func_name = tool_call.function.name
+                    arguments_str = tool_call.function.arguments
 
-            except json.JSONDecodeError as e:
-                result = (
-                    f"Error: Invalid JSON for {func_name}: {str(e)}"
-                )
+                # 2. Argument Parsing and Execution
+                try:
+                    arguments = json.loads(arguments_str)
+
+                    if func_name in self.tools:
+                        logger.info(
+                            f"[{self.name}] Executing {func_name} with {arguments}"
+                        )
+                        result = self.tools[func_name](**arguments)
+                    else:
+                        result = f"Error: Tool {func_name} not found."
+
+                except json.JSONDecodeError as e:
+                    result = f"Error: Invalid JSON for {func_name}: {str(e)}"
+                except Exception as e:
+                    logger.exception(f"Error executing {func_name}: {str(e)}")
+                    result = f"Error executing {func_name}: {str(e)}"
+
             except Exception as e:
-                logger.exception(f"Error call {func_name}: {str(e)}")
-                result = f"Error processing tool call {func_name}: {str(e)}"
+                logger.exception(f"Error processing tool call metadata: {str(e)}")
+                result = f"Error processing tool call metadata: {str(e)}"
 
             self.messages.append({
                 "role": "tool",
