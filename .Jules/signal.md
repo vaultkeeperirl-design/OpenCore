@@ -44,3 +44,17 @@ The React frontend (`ChatInterface.tsx`) had a generic "How can I assist you tod
 Updated `frontend/src/components/ChatInterface.tsx` to set the initial assistant message to: "System Online. Neural interface active. Awaiting directive."
 
 **Goal:** Ensure the first user touchpoint in the UI is immediately recognizable as "OpenCore" and distinct from generic chat interfaces.
+
+## 2026-02-25 - Settings Modal Persona Alignment
+
+**Learning:**
+The `SettingsModal.tsx` used generic configuration language ("System Configuration", "Save Config", "Cancel"), which broke the immersion established by the "Cyberdeck" interface and the "System Online" welcome message. This critical touchpoint—where users grant "root access"—felt like a standard web form rather than a high-stakes system operation.
+
+**Action:**
+Refined `frontend/src/components/SettingsModal.tsx` to align with the "System/Cyberpunk" persona.
+1.  **Headers**: "SYSTEM_CONFIGURATION // ROOT ACCESS", "KERNEL SECURITY PROTOCOLS", "NEURAL CORE SELECTION".
+2.  **Warnings**: Replaced generic warnings with "SYSTEM ALERT: AUTHORIZING UNRESTRICTED KERNEL ACCESS".
+3.  **Actions**: Changed buttons to "ABORT SEQUENCE" and "COMMIT PROTOCOLS".
+4.  **Feedback**: Updated toasts to "SYSTEM CONFIGURATION UPDATED" and "CRITICAL ERROR".
+
+**Goal:** Ensure the configuration experience feels like a powerful, technical operation, reinforcing the "Neural Operating System" brand identity.

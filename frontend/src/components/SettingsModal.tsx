@@ -38,7 +38,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       setConfig(configData);
       setAuthStatus(authData);
     } catch {
-      toast.error("Failed to load configuration");
+      toast.error("ERROR: CONFIGURATION RETRIEVAL FAILED");
     } finally {
       setLoading(false);
     }
@@ -53,13 +53,13 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       });
       const data = await res.json();
       if (data.status === "success") {
-        toast.success("Configuration saved");
+        toast.success("SYSTEM CONFIGURATION UPDATED");
         onClose();
       } else {
-        toast.error("Error saving config: " + data.message);
+        toast.error("CRITICAL ERROR: CONFIGURATION WRITE FAILED: " + data.message);
       }
     } catch {
-      toast.error("Failed to save configuration");
+      toast.error("ERROR: CONFIGURATION SYNC FAILED");
     }
   };
 
@@ -70,7 +70,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       <div className="w-full max-w-2xl bg-bg-secondary border border-accent-1 rounded shadow-[0_0_30px_color-mix(in_srgb,var(--accent-1),transparent_90%)] overflow-hidden flex flex-col max-h-[90vh]">
         <div className="flex items-center justify-between p-4 border-b border-border-primary bg-bg-tertiary shrink-0">
           <h2 className="text-xl font-bold flex items-center gap-2 text-accent-1 font-orbitron tracking-[2px]">
-            <Cpu size={24} /> SYSTEM CONFIGURATION
+            <Cpu size={24} /> SYSTEM_CONFIGURATION // ROOT ACCESS
           </h2>
           <button onClick={onClose} className="p-1 hover:bg-bg-primary rounded transition-colors text-text-secondary hover:text-accent-2">
             <X size={24} />
@@ -84,7 +84,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
              <>
                {/* LLM Model Selection */}
                <div className="space-y-2">
-                 <label className="text-xs text-accent-1 font-mono tracking-widest uppercase mb-1 block">ACTIVE MODEL NODE</label>
+                 <label className="text-xs text-accent-1 font-mono tracking-widest uppercase mb-1 block">NEURAL CORE SELECTION</label>
                  <select
                    value={config.LLM_MODEL || "gpt-4o"}
                    onChange={(e) => setConfig({...config, LLM_MODEL: e.target.value})}
@@ -106,12 +106,12 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                {/* System Security Configuration */}
                <div className="space-y-4">
                  <h3 className="text-lg font-semibold text-text-primary border-b border-border-primary pb-2 mt-4 font-orbitron tracking-wide flex items-center gap-2">
-                   <ShieldAlert size={18} className="text-accent-2" /> SYSTEM SECURITY
+                   <ShieldAlert size={18} className="text-accent-2" /> KERNEL SECURITY PROTOCOLS
                  </h3>
 
                  <div className="p-4 border border-accent-2/30 bg-accent-2/5 rounded flex flex-col gap-3">
                    <div className="flex items-center justify-between">
-                     <label className="text-sm font-mono font-bold text-text-primary tracking-wide">ALLOW UNSAFE SYSTEM ACCESS</label>
+                     <label className="text-sm font-mono font-bold text-text-primary tracking-wide">AUTHORIZE UNRESTRICTED KERNEL ACCESS</label>
                      <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
                        <input
                          type="checkbox"
@@ -127,19 +127,19 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                    </div>
 
                    <p className="text-xs text-text-secondary font-mono leading-relaxed">
-                     <span className="text-accent-2 font-bold">WARNING:</span> Enabling this grants the agent unrestricted access to your file system (outside the app directory) and allows execution of complex shell commands (pipes, redirects).
+                     <span className="text-accent-2 font-bold">SYSTEM ALERT:</span> AUTHORIZING UNRESTRICTED KERNEL ACCESS. THIS BYPASSES ALL SAFETY PROTOCOLS, GRANTING FULL FILE SYSTEM CONTROL AND SHELL EXECUTION PRIVILEGES.
                      <br/><br/>
-                     A safety guard is active to prevent catastrophic deletion (e.g., <code>rm -rf /</code>), but use with extreme caution.
+                     AUTOMATED FAILSAFE ENGAGED TO PREVENT CATASTROPHIC DELETION. USE WITH EXTREME CAUTION.
                    </p>
                  </div>
                </div>
 
                {/* Vertex AI Configuration */}
                <div className="space-y-4">
-                 <h3 className="text-lg font-semibold text-text-primary border-b border-border-primary pb-2 mt-4 font-orbitron tracking-wide">CLOUD INFRASTRUCTURE</h3>
+                 <h3 className="text-lg font-semibold text-text-primary border-b border-border-primary pb-2 mt-4 font-orbitron tracking-wide">CLOUD COMPUTING MATRIX</h3>
                  <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-1">
-                     <label className="text-xs text-text-secondary font-mono uppercase">GCP PROJECT ID</label>
+                     <label className="text-xs text-text-secondary font-mono uppercase">VERTEX PROJECT IDENTITY</label>
                      <input
                        type="text"
                        placeholder="my-project-id"
@@ -149,7 +149,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                      />
                    </div>
                    <div className="space-y-1">
-                     <label className="text-xs text-text-secondary font-mono uppercase">GCP REGION</label>
+                     <label className="text-xs text-text-secondary font-mono uppercase">COMPUTE REGION</label>
                      <input
                        type="text"
                        placeholder="us-central1"
@@ -163,7 +163,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
                {/* API Keys Section */}
                <div className="space-y-4">
-                 <h3 className="text-lg font-semibold text-text-primary border-b border-border-primary pb-2 mt-4 font-orbitron tracking-wide">NEURAL CREDENTIALS</h3>
+                 <h3 className="text-lg font-semibold text-text-primary border-b border-border-primary pb-2 mt-4 font-orbitron tracking-wide">NEURAL ACCESS KEYS</h3>
 
                  {[
                    { key: "OPENAI_API_KEY", label: "OpenAI Key", hasKey: config.HAS_OPENAI_KEY },
@@ -286,14 +286,14 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             onClick={onClose}
             className="px-4 py-2 rounded border border-border-primary hover:bg-bg-primary transition-colors text-sm font-mono text-text-secondary hover:text-text-primary"
           >
-            CANCEL
+            ABORT SEQUENCE
           </button>
           <button
             onClick={saveConfig}
             disabled={loading}
             className="px-6 py-2 bg-accent-1 hover:bg-white text-bg-primary rounded font-bold shadow-[0_0_15px_color-mix(in_srgb,var(--accent-1),transparent_60%)] hover:shadow-[0_0_25px_color-mix(in_srgb,var(--accent-1),transparent_40%)] transition-all flex items-center gap-2 font-orbitron tracking-wider text-sm border border-transparent"
           >
-            <Save size={16} /> SAVE CONFIG
+            <Save size={16} /> COMMIT PROTOCOLS
           </button>
         </div>
       </div>
