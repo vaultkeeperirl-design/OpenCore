@@ -23,3 +23,13 @@
 1. Create a `context` module to hold thread-safe/task-safe global state.
 2. Implement an ASGI middleware to generate and inject Request IDs.
 3. Attach a logging filter to automatically tag all log records with the current Request ID.
+
+## 2026-02-25 - Fragile String-Based Control Flow
+
+**Learning:** The `Swarm` class methods (`remove_agent`, `toggle_agent`) return error strings (e.g., "Error: ...") instead of raising exceptions. The API layer (`api.py`) relies on parsing these strings (`if "Error" in result`) to determine success or failure. This "String Typing" anti-pattern is brittle, prevents proper HTTP status codes (everything returns 200 OK or generic errors), and tightly couples the business logic to the LLM's text-based interface.
+
+**Action:** Decouple the core logic from the tool interface.
+1.  Introduce standard exceptions (`AgentNotFoundError`, `AgentOperationError`).
+2.  Refactor `Swarm` methods to raise exceptions for logic errors.
+3.  Update API endpoints to catch these exceptions and return appropriate HTTP 404/403 responses.
+4.  Wrap `Swarm` methods in the tool registration layer to catch exceptions and return the descriptive strings the LLM expects.

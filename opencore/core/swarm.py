@@ -3,6 +3,7 @@ from opencore.core.agent import Agent
 from opencore.tools.base import register_base_tools
 from opencore.config import settings
 from opencore.llm.factory import is_provider_available, get_available_model_list
+from opencore.core.exceptions import AgentNotFoundError, AgentOperationError
 import datetime
 
 
@@ -72,13 +73,13 @@ class Swarm:
 
         return f"Agent '{name}' created successfully using model '{agent_model}'."
 
-    def remove_agent(self, name: str) -> str:
+    def remove_agent(self, name: str) -> Optional[str]:
         """Removes an agent from the swarm."""
         if name not in self.agents:
-            return f"Error: Agent '{name}' not found."
+            raise AgentNotFoundError(f"Agent '{name}' not found.")
 
         if name == self.main_agent_name:
-            return "Error: Cannot remove the main manager agent."
+            raise AgentOperationError("Cannot remove the main manager agent.")
 
         del self.agents[name]
 
@@ -97,16 +98,16 @@ class Swarm:
             # If the removed agent was the leader (usually first in list or by name convention)
             # For now, just removing from list is enough.
 
-        return f"Agent '{name}' removed."
+        return None
 
     def toggle_agent(self, name: str) -> str:
         """Toggles an agent's active status."""
         agent = self.get_agent(name)
         if not agent:
-            return f"Error: Agent '{name}' not found."
+            raise AgentNotFoundError(f"Agent '{name}' not found.")
 
         if name == self.main_agent_name:
-             return "Error: Cannot toggle the main manager agent."
+             raise AgentOperationError("Cannot toggle the main manager agent.")
 
         if agent.status == "active":
             agent.status = "inactive"
@@ -240,7 +241,11 @@ class Swarm:
             }
 
             def remove_agent_wrapper(name: str):
-                return self.remove_agent(name)
+                try:
+                    self.remove_agent(name)
+                    return f"Agent '{name}' removed."
+                except Exception as e:
+                    return f"Error: {str(e)}"
 
             agent.register_tool(remove_agent_wrapper, remove_agent_schema)
 
@@ -261,7 +266,10 @@ class Swarm:
             }
 
             def toggle_agent_wrapper(name: str):
-                return self.toggle_agent(name)
+                try:
+                    return self.toggle_agent(name)
+                except Exception as e:
+                    return f"Error: {str(e)}"
 
             agent.register_tool(toggle_agent_wrapper, toggle_agent_schema)
 
