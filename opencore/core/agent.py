@@ -59,6 +59,20 @@ class Agent:
     ):
         self.messages.append({"role": role, "content": content})
 
+    def _normalize_tool_call(self, tool_call: Any) -> tuple:
+        """Normalizes a tool call object/dict into (id, name, args_dict)."""
+        if isinstance(tool_call, dict):
+            return (
+                tool_call.get("id"),
+                tool_call["function"]["name"],
+                json.loads(tool_call["function"]["arguments"])
+            )
+        return (
+            tool_call.id,
+            tool_call.function.name,
+            json.loads(tool_call.function.arguments)
+        )
+
     def _execute_tool_calls(self, tool_calls: List[Any]):
         """Executes a list of tool calls and appends results."""
         for tool_call in tool_calls:
@@ -67,15 +81,7 @@ class Agent:
             func_name = "unknown"
 
             try:
-                # Support both object (dot notation) and dict access
-                if isinstance(tool_call, dict):
-                    tool_id = tool_call.get("id")
-                    func_name = tool_call["function"]["name"]
-                    arguments = json.loads(tool_call["function"]["arguments"])
-                else:
-                    tool_id = tool_call.id
-                    func_name = tool_call.function.name
-                    arguments = json.loads(tool_call.function.arguments)
+                tool_id, func_name, arguments = self._normalize_tool_call(tool_call)
 
                 if func_name in self.tools:
                     logger.info(
