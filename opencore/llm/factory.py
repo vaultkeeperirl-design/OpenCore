@@ -122,7 +122,18 @@ def get_llm_provider(model: str, is_custom_model: bool = False) -> LLMProvider:
         )
 
     elif model.startswith("ollama/"):
-        api_base = settings.ollama_api_base or "http://localhost:11434/v1"
+        api_base = settings.ollama_api_base
+        if api_base:
+            # Auto-append /v1 if missing
+            # First remove any trailing slash to avoid double slashes or logic errors
+            clean_base = api_base.rstrip("/")
+            if not clean_base.endswith("/v1"):
+                api_base = f"{clean_base}/v1"
+            else:
+                api_base = clean_base
+        else:
+            api_base = "http://localhost:11434/v1"
+
         model_name = model.replace("ollama/", "")
         return OpenAICompatibleProvider(
             model_name=model_name,
