@@ -36,3 +36,9 @@
 **Observation:** The `chat` endpoint accepted attachments as loose dictionaries without validating required fields (`name`, `type`). A malformed payload could cause a `KeyError` deep in the agent logic, resulting in a 500 Internal Server Error.
 **Action:** Implemented a strict Pydantic `Attachment` model in `ChatRequest` to enforce schema validation at the API boundary.
 **Future Benefit:** Prevents server crashes due to malformed client requests, providing clear 422 validation errors instead of opaque 500 system errors.
+
+## 2026-03-10 - Unlimited File Read Risk
+
+**Observation:** The `read_file` tool in `opencore/tools/base.py` read the entire file content into memory without any size limit. A malicious or accidental request to read a massive file (e.g., database dump or large log) could cause memory exhaustion and crash the worker process.
+**Action:** Implemented a strict 10MB limit (`MAX_READ_SIZE`) in `read_file`. Files exceeding this limit are now truncated, and a warning message `[...File truncated...]` is appended to the output to inform the agent.
+**Future Benefit:** Protects the system from Out-Of-Memory (OOM) crashes and denial-of-service scenarios caused by file system operations.
