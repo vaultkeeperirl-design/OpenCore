@@ -79,6 +79,8 @@ def execute_command(command: str) -> str:
         return f"Error executing command: {str(e)}"
 
 
+MAX_READ_SIZE = 10 * 1024 * 1024  # 10MB
+
 def read_file(filepath: str) -> str:
     """Reads the content of a file."""
     if not _is_safe_path(filepath):
@@ -86,7 +88,11 @@ def read_file(filepath: str) -> str:
 
     try:
         with open(filepath, "r") as f:
-            return f.read()
+            content = f.read(MAX_READ_SIZE)
+            # Check if there is more content
+            if f.read(1):
+                 content += f"\n[...File truncated. Size limit {MAX_READ_SIZE // (1024 * 1024)}MB reached...]"
+            return content
     except Exception as e:
         return f"Error reading file: {str(e)}"
 
@@ -142,7 +148,7 @@ read_file_schema = {
     "type": "function",
     "function": {
         "name": "read_file",
-        "description": "Reads a file from the filesystem.",
+        "description": f"Reads a file from the filesystem. Limited to {MAX_READ_SIZE // (1024 * 1024)}MB.",
         "parameters": {
             "type": "object",
             "properties": {
