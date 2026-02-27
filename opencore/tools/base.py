@@ -5,11 +5,15 @@ import subprocess
 from opencore.core.agent import Agent
 from opencore.config import settings
 
+# Sensitive files that should not be accessed, even if technically "safe" (in CWD)
+SENSITIVE_FILES = {".env", ".DS_Store"}
+
 
 def _is_safe_path(path: str) -> bool:
     """
     Checks if the path is within the current working directory.
     Prevents path traversal attacks by resolving symlinks and absolute paths.
+    Also blocks access to sensitive files defined in SENSITIVE_FILES and .git directories.
     """
     if settings.allow_unsafe_system_access:
         return True
@@ -18,8 +22,24 @@ def _is_safe_path(path: str) -> bool:
         base_dir = os.path.realpath(os.getcwd())
         # Resolve the target path, including symlinks
         target_path = os.path.realpath(path)
+
         # Check if the target path starts with the base directory
-        return os.path.commonpath([base_dir, target_path]) == base_dir
+        if os.path.commonpath([base_dir, target_path]) != base_dir:
+            return False
+
+        # --- SENSITIVE FILE CHECK ---
+        # Check if the file is sensitive
+        filename = os.path.basename(target_path)
+        if filename in SENSITIVE_FILES:
+            return False
+
+        # Check if any part of the path is a .git directory
+        # Split path into parts and check
+        path_parts = target_path.split(os.sep)
+        if ".git" in path_parts:
+            return False
+
+        return True
     except Exception:
         # If any error occurs (e.g. ValueError on Windows different drives),
         # assume unsafe
@@ -111,7 +131,13 @@ def list_files(directory: str = ".") -> str:
 
     try:
         files = os.listdir(directory)
-        return "\n".join(files)
+        # Filter out sensitive files and .git
+        # This prevents accidental exposure in list outputs
+        filtered_files = [
+            f for f in files
+            if f not in SENSITIVE_FILES and f != ".git"
+        ]
+        return "\n".join(filtered_files)
     except Exception as e:
         return f"Error listing files: {str(e)}"
 
