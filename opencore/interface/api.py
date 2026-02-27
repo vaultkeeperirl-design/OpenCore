@@ -70,6 +70,7 @@ app = FastAPI(lifespan=lifespan)
 
 # Register centralized error handler
 app.add_exception_handler(Exception, global_exception_handler)
+app.add_exception_handler(HTTPException, global_exception_handler)
 
 # Register request ID middleware
 app.middleware("http")(request_id_middleware)

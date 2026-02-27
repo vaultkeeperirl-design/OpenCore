@@ -26,7 +26,13 @@ class TestLargePayload(unittest.TestCase):
 
         response = self.client.post("/chat", json=payload)
         self.assertEqual(response.status_code, 413)
-        self.assertEqual(response.json(), {"detail": "File too large"})
+        self.assertEqual(response.json(), {
+            "error": {
+                "code": "HTTP_413",
+                "message": "File too large",
+                "details": None
+            }
+        })
 
 if __name__ == '__main__':
     unittest.main()
