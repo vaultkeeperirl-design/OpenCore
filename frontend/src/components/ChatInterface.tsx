@@ -57,6 +57,7 @@ export default function ChatInterface({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -65,6 +66,14 @@ export default function ChatInterface({
   const handleTranscript = useCallback((text: string) => {
     setInput(text);
   }, []);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files.length > 0) {
+          validateAndAddFiles(Array.from(e.target.files));
+          // Reset input so same file can be selected again if needed
+          e.target.value = '';
+      }
+  };
 
   useEffect(() => {
     scrollToBottom();
@@ -116,14 +125,8 @@ export default function ChatInterface({
     setIsDragging(false);
   };
 
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const droppedFiles = Array.from(e.dataTransfer.files);
-      const validFiles = droppedFiles.filter(file => {
+  const validateAndAddFiles = (fileList: File[]) => {
+      const validFiles = fileList.filter(file => {
           // Allow images, text files, code files
           const isValid = file.type.startsWith("image/") || file.type.startsWith("text/") ||
               SUPPORTED_FILE_EXTENSIONS_REGEX.test(file.name);
@@ -140,6 +143,16 @@ export default function ChatInterface({
           return isValid;
       });
       setAttachments(prev => [...prev, ...validFiles]);
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFiles = Array.from(e.dataTransfer.files);
+      validateAndAddFiles(droppedFiles);
     }
   };
 
@@ -414,6 +427,25 @@ export default function ChatInterface({
 
         <form onSubmit={handleSubmit} className="flex gap-3 relative items-center">
            <VoiceInput onTranscript={handleTranscript} disabled={loading} />
+
+           <input
+               type="file"
+               multiple
+               ref={fileInputRef}
+               className="hidden"
+               onChange={handleFileSelect}
+               aria-label="File upload"
+           />
+
+           <button
+             type="button"
+             onClick={() => fileInputRef.current?.click()}
+             disabled={loading}
+             aria-label="Attach files"
+             className="p-2 rounded-lg transition-all duration-300 backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/50 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/30 active:scale-95"
+           >
+              <Paperclip size={20} aria-hidden="true" />
+           </button>
 
            <input
              type="text"
