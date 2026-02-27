@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import List, Dict, Any, Callable, Optional, Union
+from typing import List, Dict, Any, Callable, Optional, Union, Tuple
 from opencore.llm import get_llm_provider
 from opencore.llm.base import LLMResponse
 from opencore.config import settings
@@ -59,6 +59,21 @@ class Agent:
     ):
         self.messages.append({"role": role, "content": content})
 
+    def _parse_tool_call(self, tool_call: Any) -> Tuple[str, str, str]:
+        """
+        Extracts tool_id, func_name, and arguments_str from a tool call object.
+        Supports both dict and object representations.
+        """
+        if isinstance(tool_call, dict):
+            tool_id = tool_call.get("id", "unknown")
+            func_name = tool_call["function"]["name"]
+            arguments_str = tool_call["function"]["arguments"]
+        else:
+            tool_id = getattr(tool_call, "id", "unknown")
+            func_name = tool_call.function.name
+            arguments_str = tool_call.function.arguments
+        return tool_id, func_name, arguments_str
+
     def _execute_tool_calls(self, tool_calls: List[Any]):
         """Executes a list of tool calls and appends results."""
         for tool_call in tool_calls:
@@ -68,14 +83,7 @@ class Agent:
 
             try:
                 # 1. Safe Extraction of ID and Name
-                if isinstance(tool_call, dict):
-                    tool_id = tool_call.get("id", "unknown")
-                    func_name = tool_call["function"]["name"]
-                    arguments_str = tool_call["function"]["arguments"]
-                else:
-                    tool_id = getattr(tool_call, "id", "unknown")
-                    func_name = tool_call.function.name
-                    arguments_str = tool_call.function.arguments
+                tool_id, func_name, arguments_str = self._parse_tool_call(tool_call)
 
                 # 2. Argument Parsing and Execution
                 try:
