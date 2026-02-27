@@ -58,3 +58,17 @@ Refined `frontend/src/components/SettingsModal.tsx` to align with the "System/Cy
 4.  **Feedback**: Updated toasts to "SYSTEM CONFIGURATION UPDATED" and "CRITICAL ERROR".
 
 **Goal:** Ensure the configuration experience feels like a powerful, technical operation, reinforcing the "Neural Operating System" brand identity.
+
+## 2026-02-25 - Update Protocol Persona Alignment
+
+**Learning:**
+The CLI update command (`opencore update`) used standard tooling language ("Updating OpenCore...", "Cleaning build artifacts..."), which contrasted sharply with the "System Online" aesthetic of the main application and onboarding wizard. This broke immersion during critical maintenance tasks.
+
+**Action:**
+Rewrote user-facing messages in `opencore/cli/update.py` to match the "System/Cyberpunk" persona.
+1.  **Header**: Added "--- OPENCORE // SYSTEM UPDATE SEQUENCE ---".
+2.  **Process Steps**: "PURGING CACHED ARTIFACTS", "SYNCING REPOSITORY DATA", "INSTALLING NEURAL DEPENDENCIES".
+3.  **Completion**: "SYSTEM REVISION APPLIED. ACTION REQUIRED: RESTART SYSTEM".
+4.  **Errors**: "CRITICAL ERROR: REPOSITORY INTEGRITY CHECK FAILED".
+
+**Goal:** Maintain the "Neural Operating System" illusion even during routine maintenance operations, reinforcing the brand's attention to detail.
