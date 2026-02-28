@@ -33,3 +33,8 @@
 2.  Refactor `Swarm` methods to raise exceptions for logic errors.
 3.  Update API endpoints to catch these exceptions and return appropriate HTTP 404/403 responses.
 4.  Wrap `Swarm` methods in the tool registration layer to catch exceptions and return the descriptive strings the LLM expects.
+
+## 2026-02-28 - Typed Request Validation
+
+**Learning:** The `/config` API endpoint accepted untyped dictionaries (`Dict[str, Any]`), bypassing FastAPI's Pydantic validation. This allowed invalid data types (e.g., strings instead of integers for `HEARTBEAT_INTERVAL`) to be written to the persistent `.env` file, causing catastrophic system crashes upon reloading the configuration singleton.
+**Action:** Introduced a `ConfigRequest` Pydantic model to enforce strict type boundaries at the API layer. This request validation middleware guarantees that environment variables are type-safe before persistence, eliminating a critical architectural blind spot.

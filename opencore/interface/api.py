@@ -103,6 +103,27 @@ class ChatResponse(BaseModel):
     graph: Optional[Dict[str, Any]] = None
     activity_log: List[ActivityItem] = []
 
+class ConfigRequest(BaseModel):
+    LLM_MODEL: Optional[str] = None
+    HEARTBEAT_INTERVAL: Optional[int] = None
+    VERTEX_PROJECT: Optional[str] = None
+    VERTEX_LOCATION: Optional[str] = None
+    OLLAMA_API_BASE: Optional[str] = None
+    OPENAI_API_KEY: Optional[str] = None
+    ANTHROPIC_API_KEY: Optional[str] = None
+    MISTRAL_API_KEY: Optional[str] = None
+    XAI_API_KEY: Optional[str] = None
+    DASHSCOPE_API_KEY: Optional[str] = None
+    GEMINI_API_KEY: Optional[str] = None
+    GROQ_API_KEY: Optional[str] = None
+    LOG_LEVEL: Optional[str] = None
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+    GOOGLE_REFRESH_TOKEN: Optional[str] = None
+    ALLOW_UNSAFE_SYSTEM_ACCESS: Optional[str] = None
+    MAX_TURNS: Optional[int] = None
+    MAX_HISTORY: Optional[int] = None
+
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
     # Check attachment size
@@ -220,11 +241,13 @@ async def get_config():
     }
 
 @app.post("/config")
-async def update_config(config: Dict[str, Any]):
+async def update_config(config: ConfigRequest):
     """Updates the .env file and reloads configuration."""
     try:
         # Filter out keys not in the allowed list (e.g., read-only flags like HAS_OPENAI_KEY)
-        valid_config = {k: v for k, v in config.items() if k in ALLOWED_CONFIG_KEYS}
+        # Now validated by ConfigRequest Pydantic model
+        config_dict = config.model_dump(exclude_unset=True)
+        valid_config = {k: v for k, v in config_dict.items() if k in ALLOWED_CONFIG_KEYS}
 
         settings.update_env(valid_config)
         swarm.update_settings()
