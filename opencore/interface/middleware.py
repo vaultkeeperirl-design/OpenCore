@@ -1,4 +1,5 @@
 from fastapi import Request, HTTPException
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from opencore.config import settings
@@ -40,6 +41,19 @@ async def global_exception_handler(request: Request, exc: Exception):
     Centralized exception handler for the API.
     Catches all exceptions and returns a consistent JSON error response.
     """
+
+    # Handle Request Validation Errors
+    if isinstance(exc, RequestValidationError):
+        return JSONResponse(
+            status_code=422,
+            content=ErrorResponse(
+                error=ErrorDetails(
+                    code="UNPROCESSABLE_ENTITY",
+                    message="Request validation failed.",
+                    details=str(exc.errors())
+                )
+            ).model_dump()
+        )
 
     # Handle specific HTTPExceptions
     if isinstance(exc, HTTPException):

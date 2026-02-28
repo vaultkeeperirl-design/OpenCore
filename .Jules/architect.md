@@ -38,3 +38,12 @@
 
 **Learning:** The `/config` API endpoint accepted untyped dictionaries (`Dict[str, Any]`), bypassing FastAPI's Pydantic validation. This allowed invalid data types (e.g., strings instead of integers for `HEARTBEAT_INTERVAL`) to be written to the persistent `.env` file, causing catastrophic system crashes upon reloading the configuration singleton.
 **Action:** Introduced a `ConfigRequest` Pydantic model to enforce strict type boundaries at the API layer. This request validation middleware guarantees that environment variables are type-safe before persistence, eliminating a critical architectural blind spot.
+
+## 2026-02-28 - Structured API Response Format for Validation Errors
+
+**Learning:** Pydantic validation errors (`fastapi.exceptions.RequestValidationError`) were not caught by the application's global exception handler and therefore returned the default FastAPI list-of-dictionaries format instead of the application's standardized JSON `ErrorResponse` schema. This forced clients to handle two entirely different error formats depending on whether a request failed business logic vs type validation.
+
+**Action:**
+1. Modified `opencore/interface/middleware.py`'s `global_exception_handler` to explicitly handle `RequestValidationError` exceptions.
+2. Mapped the exception to an HTTP 422 status code with an `ErrorResponse` where code is `"UNPROCESSABLE_ENTITY"` and the details contain the stringified validation errors.
+3. Registered the exception handler for `RequestValidationError` in `opencore/interface/api.py`.
