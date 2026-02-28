@@ -24,9 +24,14 @@ class TestMalformedAttachment(unittest.TestCase):
         response = self.client.post("/chat", json=payload)
         self.assertEqual(response.status_code, 422)
 
+        json_response = response.json()
+        self.assertIn("error", json_response)
+        self.assertEqual(json_response["error"]["code"], "UNPROCESSABLE_ENTITY")
+        self.assertEqual(json_response["error"]["message"], "Request validation failed.")
+
         # Verify that the error detail mentions the missing fields
         # Note: Pydantic v2 error format is slightly different but contains location info
-        self.assertIn("attachments", str(response.json()))
+        self.assertIn("attachments", json_response["error"]["details"])
 
 if __name__ == '__main__':
     unittest.main()

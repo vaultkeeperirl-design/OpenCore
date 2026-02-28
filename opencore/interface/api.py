@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
@@ -71,6 +72,7 @@ app = FastAPI(lifespan=lifespan)
 # Register centralized error handler
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_exception_handler(HTTPException, global_exception_handler)
+app.add_exception_handler(RequestValidationError, global_exception_handler)
 
 # Register request ID middleware
 app.middleware("http")(request_id_middleware)
