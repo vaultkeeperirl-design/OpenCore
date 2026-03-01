@@ -47,3 +47,8 @@
 1. Modified `opencore/interface/middleware.py`'s `global_exception_handler` to explicitly handle `RequestValidationError` exceptions.
 2. Mapped the exception to an HTTP 422 status code with an `ErrorResponse` where code is `"UNPROCESSABLE_ENTITY"` and the details contain the stringified validation errors.
 3. Registered the exception handler for `RequestValidationError` in `opencore/interface/api.py`.
+
+## 2026-03-01 - Missing CORS Configuration
+
+**Learning:** The FastAPI application processed all incoming requests without an explicit Cross-Origin Resource Sharing (CORS) policy. This structural omission prevented separated frontend clients (like web browsers on different origins) from securely accessing the API, making decoupled deployments impossible.
+**Action:** Introduced `CORSMiddleware` in `opencore/interface/api.py` to establish explicit boundaries and allow flexible integration across origins. This resolves a hidden architectural limitation related to frontend-backend decoupling.
