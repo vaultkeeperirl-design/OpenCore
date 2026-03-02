@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from opencore.config import settings
 from opencore.core.context import request_id_ctx
+from opencore.core.exceptions import AgentNotFoundError, AgentOperationError
 import logging
 import uuid
 
@@ -51,6 +52,29 @@ async def global_exception_handler(request: Request, exc: Exception):
                     code="UNPROCESSABLE_ENTITY",
                     message="Request validation failed.",
                     details=str(exc.errors())
+                )
+            ).model_dump()
+        )
+
+    # Handle domain exceptions
+    if isinstance(exc, AgentNotFoundError):
+        return JSONResponse(
+            status_code=404,
+            content=ErrorResponse(
+                error=ErrorDetails(
+                    code="HTTP_404",
+                    message=str(exc),
+                )
+            ).model_dump()
+        )
+
+    if isinstance(exc, AgentOperationError):
+        return JSONResponse(
+            status_code=403,
+            content=ErrorResponse(
+                error=ErrorDetails(
+                    code="HTTP_403",
+                    message=str(exc),
                 )
             ).model_dump()
         )

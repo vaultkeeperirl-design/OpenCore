@@ -11,9 +11,9 @@ from opencore.interface.middleware import global_exception_handler, request_id_m
 from opencore.core.scheduler import AsyncScheduler
 from opencore.interface.heartbeat import heartbeat_manager
 from opencore.config import settings, ALLOWED_CONFIG_KEYS
-from opencore.core.exceptions import AgentNotFoundError, AgentOperationError
+
 import logging
-import os
+
 from starlette.concurrency import run_in_threadpool
 from opencore.auth import get_auth_status
 from opencore.interface.auth_routes import auth_router
@@ -195,37 +195,21 @@ async def get_agents():
 
 @app.delete("/agents/{name}")
 async def delete_agent(name: str):
-    try:
-        swarm.remove_agent(name)
-        return {
-            "status": "success",
-            "message": f"Agent '{name}' removed.",
-            "graph": swarm.get_graph_data()
-        }
-    except AgentNotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except AgentOperationError as e:
-        raise HTTPException(status_code=403, detail=str(e))
-    except Exception as e:
-        logger.error(f"Error removing agent: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+    swarm.remove_agent(name)
+    return {
+        "status": "success",
+        "message": f"Agent '{name}' removed.",
+        "graph": swarm.get_graph_data()
+    }
 
 @app.post("/agents/{name}/toggle")
 async def toggle_agent(name: str):
-    try:
-        result = swarm.toggle_agent(name)
-        return {
-            "status": "success",
-            "message": result,
-            "graph": swarm.get_graph_data()
-        }
-    except AgentNotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except AgentOperationError as e:
-        raise HTTPException(status_code=403, detail=str(e))
-    except Exception as e:
-        logger.error(f"Error toggling agent: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+    result = swarm.toggle_agent(name)
+    return {
+        "status": "success",
+        "message": result,
+        "graph": swarm.get_graph_data()
+    }
 
 @app.get("/heartbeat")
 async def get_heartbeat():
