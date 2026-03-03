@@ -57,3 +57,8 @@
 
 **Learning:** The API controller routes (`delete_agent`, `toggle_agent` in `opencore/interface/api.py`) were manually catching domain exceptions (`AgentNotFoundError`, `AgentOperationError`) and raising `HTTPException`. This violates the principle of separation of concerns, cluttering the routing logic with error handling that should be globally managed, and risking inconsistent error response schemas.
 **Action:** Shifted to centralized domain exception handling. Added explicit handlers for `AgentNotFoundError` and `AgentOperationError` to the `global_exception_handler` in `opencore/interface/middleware.py`. Removed the redundant `try/except` blocks from the API routes, allowing domain exceptions to naturally bubble up to the centralized middleware where they are uniformly mapped to HTTP 404 and 403 responses with the standard `ErrorResponse` JSON schema.
+
+## 2026-03-15 - Thread Safety for Global Swarm Singleton
+
+**Learning:** The `Swarm` instance is a global singleton accessed concurrently by FastAPI threadpool threads (which execute synchronous routes and proactive heartbeat tasks). Modifying shared mutable state like `self.agents` and `self.interactions` directly without synchronization introduces race conditions, potentially leading to corrupted state or runtime exceptions under load.
+**Action:** Introduced a `threading.Lock` within the `Swarm` class. Wrapped critical dictionary and list mutations (e.g., in `create_agent`, `remove_agent`, `delegate_task_wrapper`) in `with self._lock:` blocks to ensure safe concurrent access across API request threads while being careful not to hold the lock during blocking LLM inference.
