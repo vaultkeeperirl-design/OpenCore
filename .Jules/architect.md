@@ -52,3 +52,8 @@
 
 **Learning:** The FastAPI application processed all incoming requests without an explicit Cross-Origin Resource Sharing (CORS) policy. This structural omission prevented separated frontend clients (like web browsers on different origins) from securely accessing the API, making decoupled deployments impossible.
 **Action:** Introduced `CORSMiddleware` in `opencore/interface/api.py` to establish explicit boundaries and allow flexible integration across origins. This resolves a hidden architectural limitation related to frontend-backend decoupling.
+
+## 2026-03-03 - Centralized Domain Exception Handling
+
+**Learning:** The API controller routes (`delete_agent`, `toggle_agent` in `opencore/interface/api.py`) were manually catching domain exceptions (`AgentNotFoundError`, `AgentOperationError`) and raising `HTTPException`. This violates the principle of separation of concerns, cluttering the routing logic with error handling that should be globally managed, and risking inconsistent error response schemas.
+**Action:** Shifted to centralized domain exception handling. Added explicit handlers for `AgentNotFoundError` and `AgentOperationError` to the `global_exception_handler` in `opencore/interface/middleware.py`. Removed the redundant `try/except` blocks from the API routes, allowing domain exceptions to naturally bubble up to the centralized middleware where they are uniformly mapped to HTTP 404 and 403 responses with the standard `ErrorResponse` JSON schema.
