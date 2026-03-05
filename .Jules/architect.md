@@ -62,3 +62,8 @@
 
 **Learning:** The `Swarm` instance is a global singleton accessed concurrently by FastAPI threadpool threads (which execute synchronous routes and proactive heartbeat tasks). Modifying shared mutable state like `self.agents` and `self.interactions` directly without synchronization introduces race conditions, potentially leading to corrupted state or runtime exceptions under load.
 **Action:** Introduced a `threading.Lock` within the `Swarm` class. Wrapped critical dictionary and list mutations (e.g., in `create_agent`, `remove_agent`, `delegate_task_wrapper`) in `with self._lock:` blocks to ensure safe concurrent access across API request threads while being careful not to hold the lock during blocking LLM inference.
+
+## 2026-03-20 - Decoupling Request Validation from Routing Logic
+
+**Learning:** The `/chat` endpoint manually validated the size of file attachments within its route handler (`if request.attachments: ... raise HTTPException()`). This mixes routing with business validation logic, violates separation of concerns, and bypassing the centralized `RequestValidationError` handler, leading to inconsistent error response schemas (HTTP 413 vs HTTP 422).
+**Action:** Shifted request validation closer to the data contract. Extracted the file size check from `opencore/interface/api.py`'s `chat` route and implemented it as a Pydantic `@field_validator('content')` on the `Attachment` model. This enforces type/size boundaries strictly at the model level and relies on the `global_exception_handler` to consistently map the error to an HTTP 422 standard `ErrorResponse`.
