@@ -2,7 +2,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 from contextlib import asynccontextmanager
@@ -100,6 +100,14 @@ class Attachment(BaseModel):
     type: str
     content: str
 
+    @field_validator('content')
+    @classmethod
+    def validate_content_size(cls, v: str) -> str:
+        # 15MB limit for Base64 (approx 11MB file size)
+        if len(v) > 15 * 1024 * 1024:
+            raise ValueError("File too large")
+        return v
+
 class ChatRequest(BaseModel):
     message: str
     attachments: Optional[List[Attachment]] = None
@@ -143,13 +151,6 @@ class ConfigRequest(BaseModel):
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
-    # Check attachment size
-    if request.attachments:
-        for attachment in request.attachments:
-            # 15MB limit for Base64 (approx 11MB file size)
-            if len(attachment.content) > 15 * 1024 * 1024:
-                raise HTTPException(status_code=413, detail="File too large")
-
     # In a real streaming scenario, we would use Server-Sent Events (SSE) or WebSockets.
     # For this MVP, we block and return the final response, but the frontend shows a loading state.
 

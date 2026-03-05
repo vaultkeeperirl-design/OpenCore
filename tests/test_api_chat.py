@@ -26,14 +26,10 @@ class TestApiChat(unittest.TestCase):
 
         response = client.post("/chat", json=payload)
 
-        self.assertEqual(response.status_code, 413)
-        self.assertEqual(response.json(), {
-            "error": {
-                "code": "HTTP_413",
-                "message": "File too large",
-                "details": None
-            }
-        })
+        self.assertEqual(response.status_code, 422)
+        response_json = response.json()
+        self.assertEqual(response_json["error"]["code"], "UNPROCESSABLE_ENTITY")
+        self.assertIn("File too large", response_json["error"]["details"])
 
         # Ensure swarm.chat was NOT called
         mock_chat.assert_not_called()
