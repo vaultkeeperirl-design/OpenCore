@@ -25,7 +25,7 @@ SCOPES = [
 ]
 
 @auth_router.get("/google/login")
-async def google_login(request: Request):
+def google_login(request: Request):
     """
     Initiates the Google OAuth flow.
     """
@@ -71,7 +71,7 @@ async def google_login(request: Request):
         return {"status": "error", "message": str(e)}
 
 @auth_router.get("/google/callback")
-async def google_callback(request: Request):
+def google_callback(request: Request):
     """
     Handles the Google OAuth callback.
     """
@@ -138,7 +138,7 @@ async def google_callback(request: Request):
         return {"status": "error", "message": f"Authentication failed: {str(e)}"}
 
 @auth_router.get("/qwen/login")
-async def qwen_login(request: Request):
+def qwen_login(request: Request):
     """
     Initiates the Qwen/DashScope authentication.
     DashScope uses API keys, so we can redirect them to the DashScope console to get a key.

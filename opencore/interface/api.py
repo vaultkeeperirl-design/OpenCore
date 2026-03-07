@@ -188,14 +188,14 @@ async def transcribe(file: UploadFile = File(...)):
         return {"error": "Transcription failed due to an internal error.", "text": ""}
 
 @app.get("/agents")
-async def get_agents():
+def get_agents():
     return {
         "agents": list(swarm.agents.keys()),
         "graph": swarm.get_graph_data()
     }
 
 @app.delete("/agents/{name}")
-async def delete_agent(name: str):
+def delete_agent(name: str):
     swarm.remove_agent(name)
     return {
         "status": "success",
@@ -204,7 +204,7 @@ async def delete_agent(name: str):
     }
 
 @app.post("/agents/{name}/toggle")
-async def toggle_agent(name: str):
+def toggle_agent(name: str):
     result = swarm.toggle_agent(name)
     return {
         "status": "success",
@@ -213,16 +213,16 @@ async def toggle_agent(name: str):
     }
 
 @app.get("/heartbeat")
-async def get_heartbeat():
+def get_heartbeat():
     return heartbeat_manager.get_status()
 
 @app.get("/auth/status")
-async def get_authentication_status():
+def get_authentication_status():
     """Returns the status of OAuth providers."""
     return get_auth_status()
 
 @app.get("/config")
-async def get_config():
+def get_config():
     """Returns the current configuration (masked)."""
     # Force reload to ensure we have the latest environment state
     settings.reload()
@@ -243,7 +243,7 @@ async def get_config():
     }
 
 @app.post("/config")
-async def update_config(config: ConfigRequest):
+def update_config(config: ConfigRequest):
     """Updates the .env file and reloads configuration."""
     try:
         # Filter out keys not in the allowed list (e.g., read-only flags like HAS_OPENAI_KEY)
