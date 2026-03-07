@@ -8,6 +8,7 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 from opencore.core.swarm import Swarm
 from opencore.interface.middleware import global_exception_handler, request_id_middleware
+from opencore.interface.rate_limit import RateLimitMiddleware
 from opencore.core.scheduler import AsyncScheduler
 from opencore.interface.heartbeat import heartbeat_manager
 from opencore.config import settings, ALLOWED_CONFIG_KEYS
@@ -91,6 +92,9 @@ app.add_exception_handler(RequestValidationError, global_exception_handler)
 
 # Register request ID middleware
 app.middleware("http")(request_id_middleware)
+
+# Register rate limit middleware (max 600 requests per minute to accommodate tests and normal usage)
+app.add_middleware(RateLimitMiddleware, max_requests=600, window_seconds=60)
 
 # Include Auth Router
 app.include_router(auth_router)
