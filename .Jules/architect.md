@@ -72,3 +72,8 @@
 
 **Learning:** The FastAPI application defines several asynchronous route handlers (`async def`) that internally perform synchronous, blocking I/O operations. Specifically, `get_config` and `update_config` synchronously read and write the `.env` file via `settings.reload()` and `settings.update_env()`. Furthermore, `google_callback` in `auth_routes.py` makes a blocking network request via `flow.fetch_token()`. Executing synchronous blocking operations inside an `async def` function blocks the main ASGI event loop, causing severe latency spikes, degrading overall system throughput, and preventing concurrent requests from being processed during configuration or authentication flows.
 **Action:** Refactored synchronous I/O routes to be standard `def` instead of `async def`. Modified `get_config` and `update_config` in `opencore/interface/api.py` and `google_login`, `google_callback`, and `qwen_login` in `opencore/interface/auth_routes.py`. By letting FastAPI inherently offload these synchronous `def` handlers to its own built-in thread pool, we achieve a much cleaner architectural fix without boilerplate, ensuring the ASGI event loop remains responsive.
+
+## 2026-03-30 - Basic Rate Limiting
+
+**Learning:** The application lacked any mechanism to limit the number of requests a single client IP could make, leaving it vulnerable to basic abuse, rapid token exhaustion, and potential denial-of-service against third-party LLM providers.
+**Action:** Introduced a basic in-memory `RateLimitMiddleware` in `opencore/interface/rate_limit.py`. This middleware implements a simple fixed-window counter per client IP, rejecting requests with HTTP 429 Too Many Requests once the limit is exceeded, and returning the standard `ErrorResponse` schema for consistency.
