@@ -77,3 +77,8 @@
 
 **Learning:** The application lacked any mechanism to limit the number of requests a single client IP could make, leaving it vulnerable to basic abuse, rapid token exhaustion, and potential denial-of-service against third-party LLM providers.
 **Action:** Introduced a basic in-memory `RateLimitMiddleware` in `opencore/interface/rate_limit.py`. This middleware implements a simple fixed-window counter per client IP, rejecting requests with HTTP 429 Too Many Requests once the limit is exceeded, and returning the standard `ErrorResponse` schema for consistency.
+
+## 2026-03-31 - Structured API Response Contracts
+
+**Learning:** Several endpoints in the FastAPI application (e.g., `/agents`, `/heartbeat`, `/config`, `/transcribe`) returned raw Python dictionaries instead of utilizing Pydantic models for responses. This violated the architectural goal of typed contracts, resulting in inconsistent data structures and missing/incomplete OpenAPI documentation, which weakened long-term maintainability.
+**Action:** Introduced typed Pydantic response models (`AgentListResponse`, `AgentActionResponse`, `HeartbeatResponse`, `AuthStatusResponse`, `ConfigResponse`, `ConfigUpdateResponse`, `TranscribeResponse`) and explicitly bound them to their respective routes via the `response_model` parameter in `opencore/interface/api.py`. This ensures runtime validation and creates strict, self-documenting API boundaries without adding unnecessary middleware.
