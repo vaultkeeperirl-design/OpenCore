@@ -153,6 +153,48 @@ class ConfigRequest(BaseModel):
     MAX_TURNS: Optional[int] = None
     MAX_HISTORY: Optional[int] = None
 
+class TranscribeResponse(BaseModel):
+    text: str
+    error: Optional[str] = None
+
+class AgentListResponse(BaseModel):
+    agents: List[str]
+    graph: Dict[str, Any]
+
+class AgentActionResponse(BaseModel):
+    status: str
+    message: str
+    graph: Optional[Dict[str, Any]] = None
+
+class HeartbeatResponse(BaseModel):
+    status: str
+    last_heartbeat: Optional[str] = None
+    uptime: str
+    version: str
+    start_time: str
+
+class AuthStatusResponse(BaseModel):
+    google: bool
+    qwen: bool
+
+class ConfigResponse(BaseModel):
+    LLM_MODEL: str
+    HEARTBEAT_INTERVAL: str
+    VERTEX_PROJECT: Optional[str] = None
+    VERTEX_LOCATION: Optional[str] = None
+    OLLAMA_API_BASE: Optional[str] = None
+    HAS_OPENAI_KEY: bool
+    HAS_ANTHROPIC_KEY: bool
+    HAS_MISTRAL_KEY: bool
+    HAS_XAI_KEY: bool
+    HAS_DASHSCOPE_KEY: bool
+    HAS_GEMINI_KEY: bool
+    HAS_GROQ_KEY: bool
+
+class ConfigUpdateResponse(BaseModel):
+    status: str
+    message: str
+
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
     # In a real streaming scenario, we would use Server-Sent Events (SSE) or WebSockets.
@@ -173,7 +215,7 @@ def chat(request: ChatRequest):
         activity_log=swarm.current_turn_activity
     )
 
-@app.post("/transcribe")
+@app.post("/transcribe", response_model=TranscribeResponse)
 async def transcribe(file: UploadFile = File(...)):
     """
     Accepts an audio file upload and returns the transcription.
@@ -181,72 +223,72 @@ async def transcribe(file: UploadFile = File(...)):
     """
     try:
         text = await audio_service.process_upload(file)
-        return {"text": text}
+        return TranscribeResponse(text=text)
 
     except (AudioValidationError, AudioSizeError) as e:
         # Return 200 with error to maintain API contract
-        return {"error": str(e), "text": ""}
+        return TranscribeResponse(error=str(e), text="")
     except Exception as e:
         logger.error(f"Transcription failed: {e}")
         # Return a generic error message to prevent information leakage
-        return {"error": "Transcription failed due to an internal error.", "text": ""}
+        return TranscribeResponse(error="Transcription failed due to an internal error.", text="")
 
-@app.get("/agents")
+@app.get("/agents", response_model=AgentListResponse)
 def get_agents():
-    return {
-        "agents": list(swarm.agents.keys()),
-        "graph": swarm.get_graph_data()
-    }
+    return AgentListResponse(
+        agents=list(swarm.agents.keys()),
+        graph=swarm.get_graph_data()
+    )
 
-@app.delete("/agents/{name}")
+@app.delete("/agents/{name}", response_model=AgentActionResponse)
 def delete_agent(name: str):
     swarm.remove_agent(name)
-    return {
-        "status": "success",
-        "message": f"Agent '{name}' removed.",
-        "graph": swarm.get_graph_data()
-    }
+    return AgentActionResponse(
+        status="success",
+        message=f"Agent '{name}' removed.",
+        graph=swarm.get_graph_data()
+    )
 
-@app.post("/agents/{name}/toggle")
+@app.post("/agents/{name}/toggle", response_model=AgentActionResponse)
 def toggle_agent(name: str):
     result = swarm.toggle_agent(name)
-    return {
-        "status": "success",
-        "message": result,
-        "graph": swarm.get_graph_data()
-    }
+    return AgentActionResponse(
+        status="success",
+        message=result,
+        graph=swarm.get_graph_data()
+    )
 
-@app.get("/heartbeat")
+@app.get("/heartbeat", response_model=HeartbeatResponse)
 def get_heartbeat():
-    return heartbeat_manager.get_status()
+    return HeartbeatResponse(**heartbeat_manager.get_status())
 
-@app.get("/auth/status")
+@app.get("/auth/status", response_model=AuthStatusResponse)
 def get_authentication_status():
     """Returns the status of OAuth providers."""
-    return get_auth_status()
+    return AuthStatusResponse(**get_auth_status())
 
-@app.get("/config")
+@app.get("/config", response_model=ConfigResponse)
 def get_config():
     """Returns the current configuration (masked)."""
     # Force reload to ensure we have the latest environment state
     settings.reload()
-    return {
-        "LLM_MODEL": settings.llm_model or "gpt-4o",
-        "HEARTBEAT_INTERVAL": str(settings.heartbeat_interval),
-        "VERTEX_PROJECT": settings.vertex_project,
-        "VERTEX_LOCATION": settings.vertex_location,
-        "OLLAMA_API_BASE": settings.ollama_api_base,
+    return ConfigResponse(
+        LLM_MODEL=settings.llm_model or "gpt-4o",
+        HEARTBEAT_INTERVAL=str(settings.heartbeat_interval),
+        VERTEX_PROJECT=settings.vertex_project,
+        VERTEX_LOCATION=settings.vertex_location,
+        OLLAMA_API_BASE=settings.ollama_api_base,
         # Boolean flags for sensitive keys
-        "HAS_OPENAI_KEY": settings.has_openai_key,
-        "HAS_ANTHROPIC_KEY": settings.has_anthropic_key,
-        "HAS_MISTRAL_KEY": settings.has_mistral_key,
-        "HAS_XAI_KEY": settings.has_xai_key,
-        "HAS_DASHSCOPE_KEY": settings.has_dashscope_key,
-        "HAS_GEMINI_KEY": settings.has_gemini_key,
-        "HAS_GROQ_KEY": settings.has_groq_key,
-    }
+        HAS_OPENAI_KEY=settings.has_openai_key,
+        HAS_ANTHROPIC_KEY=settings.has_anthropic_key,
+        HAS_MISTRAL_KEY=settings.has_mistral_key,
+        HAS_XAI_KEY=settings.has_xai_key,
+        HAS_DASHSCOPE_KEY=settings.has_dashscope_key,
+        HAS_GEMINI_KEY=settings.has_gemini_key,
+        HAS_GROQ_KEY=settings.has_groq_key,
+    )
 
-@app.post("/config")
+@app.post("/config", response_model=ConfigUpdateResponse)
 def update_config(config: ConfigRequest):
     """Updates the .env file and reloads configuration."""
     try:
@@ -259,9 +301,9 @@ def update_config(config: ConfigRequest):
         swarm.update_settings()
     except Exception as e:
         logger.error(f"Error updating configuration: {e}")
-        return {"status": "error", "message": str(e)}
+        return ConfigUpdateResponse(status="error", message=str(e))
 
-    return {"status": "success", "message": "Configuration updated."}
+    return ConfigUpdateResponse(status="success", message="Configuration updated.")
 
 # Mount static files
 static_dir = Path(__file__).parent / "static"

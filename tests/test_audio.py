@@ -57,7 +57,7 @@ class TestTranscribeEndpoint(unittest.TestCase):
         response = self.client.post("/transcribe", files=files)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"text": "Test transcription"})
+        self.assertEqual(response.json(), {"text": "Test transcription", "error": None})
 
         # Verify mock was called
         mock_process.assert_called_once()
