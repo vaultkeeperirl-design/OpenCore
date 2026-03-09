@@ -82,3 +82,8 @@
 
 **Learning:** Several endpoints in the FastAPI application (e.g., `/agents`, `/heartbeat`, `/config`, `/transcribe`) returned raw Python dictionaries instead of utilizing Pydantic models for responses. This violated the architectural goal of typed contracts, resulting in inconsistent data structures and missing/incomplete OpenAPI documentation, which weakened long-term maintainability.
 **Action:** Introduced typed Pydantic response models (`AgentListResponse`, `AgentActionResponse`, `HeartbeatResponse`, `AuthStatusResponse`, `ConfigResponse`, `ConfigUpdateResponse`, `TranscribeResponse`) and explicitly bound them to their respective routes via the `response_model` parameter in `opencore/interface/api.py`. This ensures runtime validation and creates strict, self-documenting API boundaries without adding unnecessary middleware.
+
+## 2026-04-05 - O(1) Tool Definition Management
+
+**Learning:** The `Agent` class in `opencore/core/agent.py` managed tool definitions using a list (`self.tool_definitions`). During tool registration (`register_tool`), it iterated over the entire list to check if a tool definition already existed before updating or appending it. This resulted in an $O(n)$ operation for each tool registration, which scales poorly as the number of available tools grows.
+**Action:** Refactored the internal data structure to use a dictionary (`self._tool_definitions`) keyed by tool name. This allows for $O(1)$ lookups and updates during registration. Exposed a public `tool_definitions` property that dynamically generates the list of definitions required for compatibility with LLM provider APIs.
