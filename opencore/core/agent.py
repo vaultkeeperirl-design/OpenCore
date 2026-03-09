@@ -32,10 +32,14 @@ class Agent:
             {"role": "system", "content": sys_msg}
         ]
         self.tools: Dict[str, Callable] = {}
-        self.tool_definitions: List[Dict[str, Any]] = []
+        self._tool_definitions: Dict[str, Dict[str, Any]] = {}
 
         # Client is unused now but kept for sig compatibility
         self.client = client
+
+    @property
+    def tool_definitions(self) -> List[Dict[str, Any]]:
+        return list(self._tool_definitions.values())
 
     def register_tool(self, func: Callable, schema: Dict[str, Any]):
         """
@@ -45,14 +49,8 @@ class Agent:
         tool_name = schema["function"]["name"]
         self.tools[tool_name] = func
 
-        # Check if tool definition already exists and update it
-        for i, definition in enumerate(self.tool_definitions):
-            if definition["function"]["name"] == tool_name:
-                self.tool_definitions[i] = schema
-                return
-
-        # If not found, append new definition
-        self.tool_definitions.append(schema)
+        # Check if tool definition already exists and update it, $O(1)$ updates
+        self._tool_definitions[tool_name] = schema
 
     def add_message(
         self, role: str, content: Union[str, List[Dict[str, Any]]]
