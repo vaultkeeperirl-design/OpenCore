@@ -5,6 +5,7 @@ from opencore.tools.base import register_base_tools
 from opencore.config import settings
 from opencore.llm.factory import is_provider_available, get_available_model_list
 from opencore.core.exceptions import AgentNotFoundError, AgentOperationError
+from opencore.core.context import activity_log_ctx
 import datetime
 
 
@@ -14,7 +15,6 @@ class Swarm:
         self.agents: Dict[str, Agent] = {}
         self.teams: Dict[str, List[str]] = {}  # Map team_name -> list of agent_names
         self.interactions: List[Dict[str, str]] = []  # Track recent interactions
-        self.current_turn_activity: List[Dict[str, Any]] = []  # Track activity for the current request
         self.main_agent_name = main_agent_name
         # Allow env var to override default model
         self.default_model = settings.llm_model or default_model
@@ -66,17 +66,24 @@ class Swarm:
         # Register base tools (filesystem, command execution)
         register_base_tools(new_agent)
 
-        # Log creation activity
-        with self._lock:
-            if name != self.main_agent_name:  # Don't log main agent creation during init
-                self.current_turn_activity.append({
-                    "type": "lifecycle",
-                    "subtype": "create",
-                    "agent": name,
-                    "timestamp": datetime.datetime.now().isoformat()
-                })
+        if name != self.main_agent_name:
+            self._log_activity({
+                "type": "lifecycle",
+                "subtype": "create",
+                "agent": name,
+                "timestamp": datetime.datetime.now().isoformat()
+            })
 
         return f"Agent '{name}' created successfully using model '{agent_model}'."
+
+    def _log_activity(self, activity: Dict[str, Any]):
+        """Helper to safely log request-scoped activity."""
+        try:
+            log = activity_log_ctx.get()
+            if log is not None:
+                log.append(activity)
+        except (LookupError, NameError):
+            pass
 
     def remove_agent(self, name: str) -> Optional[str]:
         """Removes an agent from the swarm."""
@@ -89,7 +96,7 @@ class Swarm:
 
             del self.agents[name]
 
-            self.current_turn_activity.append({
+            self._log_activity({
                 "type": "lifecycle",
                 "subtype": "remove",
                 "agent": name,
@@ -318,18 +325,19 @@ class Swarm:
                     "summary": summary,  # Brief summary
                     "timestamp": timestamp
                 })
-                # Activity Log
-                self.current_turn_activity.append({
-                    "type": "interaction",
-                    "source": agent.name,
-                    "target": to_agent,
-                    "summary": summary,
-                    "timestamp": timestamp
-                })
 
                 # Keep only last 20 interactions
                 if len(self.interactions) > 20:
                     self.interactions.pop(0)
+
+            # Activity Log - outside lock, request scoped
+            self._log_activity({
+                "type": "interaction",
+                "source": agent.name,
+                "target": to_agent,
+                "summary": summary,
+                "timestamp": timestamp
+            })
 
             # We add the sender's context implicitly by just chatting with the target
             # In a more complex system, we'd pass the sender's name.
@@ -346,17 +354,18 @@ class Swarm:
                     "summary": response_summary,
                     "timestamp": response_timestamp
                 })
-                # Activity Log
-                self.current_turn_activity.append({
-                    "type": "interaction",
-                    "source": to_agent,
-                    "target": agent.name,
-                    "summary": response_summary,
-                    "timestamp": response_timestamp
-                })
 
                 if len(self.interactions) > 20:
                     self.interactions.pop(0)
+
+            # Activity Log - outside lock, request scoped
+            self._log_activity({
+                "type": "interaction",
+                "source": to_agent,
+                "target": agent.name,
+                "summary": response_summary,
+                "timestamp": response_timestamp
+            })
 
             return f"Response from {to_agent}: {response}"
 
@@ -406,7 +415,6 @@ class Swarm:
         Entry point for the user to chat with the main agent.
         """
         with self._lock:
-            self.current_turn_activity = []
             main_agent = self.agents[self.main_agent_name]
 
         # Don't hold lock during LLM inference
