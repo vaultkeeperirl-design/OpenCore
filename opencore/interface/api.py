@@ -7,6 +7,7 @@ from typing import Dict, Any, List, Optional
 from pathlib import Path
 from contextlib import asynccontextmanager
 from opencore.core.swarm import Swarm
+from opencore.core.context import activity_log_ctx
 from opencore.interface.middleware import global_exception_handler, request_id_middleware
 from opencore.interface.rate_limit import RateLimitMiddleware
 from opencore.core.scheduler import AsyncScheduler
@@ -41,14 +42,19 @@ async def run_proactive_heartbeat():
     # Trigger proactive agent logic
     try:
         logger.info("Executing proactive heartbeat task...")
-        # Run blocking swarm.chat in a threadpool to avoid blocking the event loop
-        response = await run_in_threadpool(
-            swarm.chat,
-            "SYSTEM HEARTBEAT: Current time check. Review recent user requests and status. "
-            "If there are pending tasks or if you can proactively assist with the user's goals based on previous context, "
-            "please execute them or suggest the next step. If everything is idle, just acknowledge."
-        )
-        logger.info(f"Heartbeat Response: {response}")
+        # Isolate request-scoped activity context for proactive heartbeat thread
+        token = activity_log_ctx.set([])
+        try:
+            # Run blocking swarm.chat in a threadpool to avoid blocking the event loop
+            response = await run_in_threadpool(
+                swarm.chat,
+                "SYSTEM HEARTBEAT: Current time check. Review recent user requests and status. "
+                "If there are pending tasks or if you can proactively assist with the user's goals based on previous context, "
+                "please execute them or suggest the next step. If everything is idle, just acknowledge."
+            )
+            logger.info(f"Heartbeat Response: {response}")
+        finally:
+            activity_log_ctx.reset(token)
     except Exception as e:
         logger.error(f"Error during proactive heartbeat: {e}")
 
@@ -200,19 +206,22 @@ def chat(request: ChatRequest):
     # In a real streaming scenario, we would use Server-Sent Events (SSE) or WebSockets.
     # For this MVP, we block and return the final response, but the frontend shows a loading state.
 
-    # We could potentially capture logs here by inspecting the agent's recent messages
-    # but the current `think` method returns just the string.
-
     # Convert Pydantic models to dicts for internal processing
     attachments_dict = [a.model_dump() for a in request.attachments] if request.attachments else None
 
-    response = swarm.chat(request.message, attachments=attachments_dict)
+    # Isolate request-scoped activity log to prevent thread race conditions
+    token = activity_log_ctx.set([])
+    try:
+        response = swarm.chat(request.message, attachments=attachments_dict)
+        activity_log = activity_log_ctx.get()
+    finally:
+        activity_log_ctx.reset(token)
 
     return ChatResponse(
         response=response,
         agents=list(swarm.agents.keys()),
         graph=swarm.get_graph_data(),
-        activity_log=swarm.current_turn_activity
+        activity_log=activity_log or []
     )
 
 @app.post("/transcribe", response_model=TranscribeResponse)
