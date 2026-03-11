@@ -172,6 +172,9 @@ class AgentActionResponse(BaseModel):
     message: str
     graph: Optional[Dict[str, Any]] = None
 
+class HealthCheckResponse(BaseModel):
+    status: str
+
 class HeartbeatResponse(BaseModel):
     status: str
     last_heartbeat: Optional[str] = None
@@ -266,6 +269,11 @@ def toggle_agent(name: str):
         message=result,
         graph=swarm.get_graph_data()
     )
+
+@app.get("/health", response_model=HealthCheckResponse)
+def get_health():
+    """Simple health check endpoint for load balancers and container orchestration."""
+    return HealthCheckResponse(status="ok")
 
 @app.get("/heartbeat", response_model=HeartbeatResponse)
 def get_heartbeat():
