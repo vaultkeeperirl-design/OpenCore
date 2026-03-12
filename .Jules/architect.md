@@ -88,6 +88,11 @@
 **Learning:** The `Agent` class in `opencore/core/agent.py` managed tool definitions using a list (`self.tool_definitions`). During tool registration (`register_tool`), it iterated over the entire list to check if a tool definition already existed before updating or appending it. This resulted in an $O(n)$ operation for each tool registration, which scales poorly as the number of available tools grows.
 **Action:** Refactored the internal data structure to use a dictionary (`self._tool_definitions`) keyed by tool name. This allows for $O(1)$ lookups and updates during registration. Exposed a public `tool_definitions` property that dynamically generates the list of definitions required for compatibility with LLM provider APIs.
 
+## 2026-04-12 - Health Check Observability
+
+**Learning:** The application lacked a basic, fast `Liveness`/`Readiness` probe. While `/heartbeat` existed, it performed more complex checks and status accumulation. Load balancers, Kubernetes, and simple uptime monitors need a lightweight, unauthenticated endpoint that strictly verifies the HTTP server is accepting connections without any overhead.
+**Action:** Introduced a minimal `GET /health` endpoint returning `{"status": "ok"}` with a typed `HealthCheckResponse` model. This adheres to standard infrastructure patterns and provides a clear separation between a simple API liveness check and the more detailed system heartbeat.
+
 ## 2026-04-10 - Request-Scoped State Isolation
 
 **Learning:** Request-scoped state (`current_turn_activity`) was stored as a mutable instance variable on the global `Swarm` singleton. In a concurrent environment (like FastAPI with thread pools), multiple requests executing `/chat` simultaneously would interleave their activity logs, resulting in corrupted API responses and potential cross-session data leakage. This is a critical structural weakness of storing request lifecycle data on shared global singletons.
