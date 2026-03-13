@@ -97,3 +97,8 @@
 
 **Learning:** Request-scoped state (`current_turn_activity`) was stored as a mutable instance variable on the global `Swarm` singleton. In a concurrent environment (like FastAPI with thread pools), multiple requests executing `/chat` simultaneously would interleave their activity logs, resulting in corrupted API responses and potential cross-session data leakage. This is a critical structural weakness of storing request lifecycle data on shared global singletons.
 **Action:** Extracted `current_turn_activity` into a thread-safe `ContextVar` (`activity_log_ctx`) managed by the API layer. This ensures strict request-level boundary isolation, eliminating race conditions without introducing locking bottlenecks during I/O operations.
+
+## 2026-04-15 - Service Layer Extraction for Configuration
+
+**Learning:** The API routing layer (`opencore/interface/api.py`) was directly orchestrating configuration file updates, filtering allowed keys, and manually notifying the `Swarm` singleton. This tight coupling violated the Single Responsibility Principle, mixing HTTP transport logic with system configuration business logic, making it difficult to test or reuse configuration management independently.
+**Action:** Extracted configuration logic into a dedicated `ConfigService` (`opencore/core/config_service.py`). The API layer now simply delegates to this service, ensuring clear boundaries between transport, validation (via Pydantic), and business operations.
