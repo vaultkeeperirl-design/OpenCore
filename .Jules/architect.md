@@ -102,3 +102,8 @@
 
 **Learning:** The API routing layer (`opencore/interface/api.py`) was directly orchestrating configuration file updates, filtering allowed keys, and manually notifying the `Swarm` singleton. This tight coupling violated the Single Responsibility Principle, mixing HTTP transport logic with system configuration business logic, making it difficult to test or reuse configuration management independently.
 **Action:** Extracted configuration logic into a dedicated `ConfigService` (`opencore/core/config_service.py`). The API layer now simply delegates to this service, ensuring clear boundaries between transport, validation (via Pydantic), and business operations.
+
+## 2026-04-20 - Service Layer Extraction for Google Auth
+
+**Learning:** The Google OAuth routes (`google_login` and `google_callback`) in `opencore/interface/auth_routes.py` directly instantiated the OAuth `Flow`, managed local testing transport environment variables, updated the config environment variables, and defined API scopes. This tightly coupled HTTP transport routing with authorization domain logic and configuration management, violating separation of concerns and making the authorization business logic difficult to isolate or test.
+**Action:** Created `GoogleAuthService` inside `opencore/auth/google.py` that encapsulates all the OAuth domain logic. Refactored `auth_routes.py` to simply instantiate this service and call `get_login_url()` and `handle_callback()`. Deferred loading `from opencore.config import settings` within the service's methods to prevent circular dependency problems between the authentication domain and application configuration logic.
