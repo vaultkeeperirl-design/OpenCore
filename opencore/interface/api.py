@@ -12,7 +12,8 @@ from opencore.interface.middleware import global_exception_handler, request_id_m
 from opencore.interface.rate_limit import RateLimitMiddleware
 from opencore.core.scheduler import AsyncScheduler
 from opencore.interface.heartbeat import heartbeat_manager
-from opencore.config import settings, ALLOWED_CONFIG_KEYS
+from opencore.config import settings
+from opencore.core.config_service import ConfigService
 
 import logging
 
@@ -29,6 +30,9 @@ swarm = Swarm()
 
 # Initialize AudioService
 audio_service = AudioService()
+
+# Initialize ConfigService
+config_service = ConfigService(swarm=swarm)
 
 logger = logging.getLogger("opencore.api")
 
@@ -287,35 +291,14 @@ def get_authentication_status():
 @app.get("/config", response_model=ConfigResponse)
 def get_config():
     """Returns the current configuration (masked)."""
-    # Force reload to ensure we have the latest environment state
-    settings.reload()
-    return ConfigResponse(
-        LLM_MODEL=settings.llm_model or "gpt-4o",
-        HEARTBEAT_INTERVAL=str(settings.heartbeat_interval),
-        VERTEX_PROJECT=settings.vertex_project,
-        VERTEX_LOCATION=settings.vertex_location,
-        OLLAMA_API_BASE=settings.ollama_api_base,
-        # Boolean flags for sensitive keys
-        HAS_OPENAI_KEY=settings.has_openai_key,
-        HAS_ANTHROPIC_KEY=settings.has_anthropic_key,
-        HAS_MISTRAL_KEY=settings.has_mistral_key,
-        HAS_XAI_KEY=settings.has_xai_key,
-        HAS_DASHSCOPE_KEY=settings.has_dashscope_key,
-        HAS_GEMINI_KEY=settings.has_gemini_key,
-        HAS_GROQ_KEY=settings.has_groq_key,
-    )
+    return ConfigResponse(**config_service.get_masked_config())
 
 @app.post("/config", response_model=ConfigUpdateResponse)
 def update_config(config: ConfigRequest):
     """Updates the .env file and reloads configuration."""
     try:
-        # Filter out keys not in the allowed list (e.g., read-only flags like HAS_OPENAI_KEY)
-        # Now validated by ConfigRequest Pydantic model
         config_dict = config.model_dump(exclude_unset=True)
-        valid_config = {k: v for k, v in config_dict.items() if k in ALLOWED_CONFIG_KEYS}
-
-        settings.update_env(valid_config)
-        swarm.update_settings()
+        config_service.update_config(config_dict)
     except Exception as e:
         logger.error(f"Error updating configuration: {e}")
         return ConfigUpdateResponse(status="error", message=str(e))
