@@ -3,12 +3,20 @@ import logging
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import RedirectResponse
 import json
+from pydantic import BaseModel
 from opencore.config import settings
 
 from opencore.auth.google import GoogleAuthService
 
 # Setup logger
 logger = logging.getLogger("opencore.auth")
+
+class QwenCallbackRequest(BaseModel):
+    apiKey: str
+
+class AuthCallbackResponse(BaseModel):
+    status: str
+    message: str
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 google_auth_service = GoogleAuthService()
@@ -22,10 +30,10 @@ def google_login(request: Request):
         auth_url = google_auth_service.get_login_url()
         return RedirectResponse(url=auth_url)
     except (RuntimeError, ValueError) as e:
-        return {"status": "error", "message": str(e)}
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Error initiating Google Login: {e}")
-        return {"status": "error", "message": str(e)}
+        raise HTTPException(status_code=500, detail="An internal error occurred while initiating login")
 
 @auth_router.get("/google/callback")
 def google_callback(request: Request):
@@ -36,7 +44,7 @@ def google_callback(request: Request):
     error = request.query_params.get("error")
 
     if error:
-         return {"status": "error", "message": f"Google Auth Error: {error}"}
+        raise HTTPException(status_code=400, detail=f"Google Auth Error: {error}")
 
     if not code:
         raise HTTPException(status_code=400, detail="Missing authorization code")
@@ -45,10 +53,10 @@ def google_callback(request: Request):
         google_auth_service.handle_callback(code=code)
         return RedirectResponse(url="/?auth_success=true")
     except (RuntimeError, ValueError) as e:
-        return {"status": "error", "message": str(e)}
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"OAuth callback error: {e}")
-        return {"status": "error", "message": f"Authentication failed: {str(e)}"}
+        raise HTTPException(status_code=500, detail="An internal error occurred during authentication")
 
 @auth_router.get("/qwen/login")
 def qwen_login(request: Request):
@@ -58,15 +66,12 @@ def qwen_login(request: Request):
     """
     return RedirectResponse(url="https://dashscope.console.aliyun.com/apiKey")
 
-@auth_router.post("/qwen/callback")
-async def qwen_callback(request: Request):
+@auth_router.post("/qwen/callback", response_model=AuthCallbackResponse)
+async def qwen_callback(request_data: QwenCallbackRequest):
     """
     Receives the API key from the frontend and saves it.
     """
-    data = await request.json()
-    api_key = data.get("apiKey")
-
-    if not api_key:
-        raise HTTPException(status_code=400, detail="API Key is required")
-
-    return {"status": "success", "message": "Please copy your API key and paste it in the configuration."}
+    return AuthCallbackResponse(
+        status="success",
+        message="Please copy your API key and paste it in the configuration."
+    )
