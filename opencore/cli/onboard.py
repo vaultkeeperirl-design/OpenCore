@@ -180,6 +180,10 @@ def run_onboarding(interactive=True):
         for key, value in config.items():
             f.write(f"{key}={value}\n")
 
+    # Enforce restrictive file permissions (0o600)
+    if os.path.exists(".env"):
+        os.chmod(".env", 0o600)
+
     print(">> CONFIGURATION MATRIX UPDATED.")
     if not interactive:
         print("PLEASE CONFIGURE API KEYS IN SYSTEM SETTINGS.")
