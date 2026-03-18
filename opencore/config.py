@@ -83,6 +83,7 @@ class Settings:
         if not os.path.exists(env_path):
             with open(env_path, "w") as f:
                 pass
+            os.chmod(env_path, 0o600)
 
         # Validate keys against whitelist
         for k in updates.keys():
@@ -103,6 +104,10 @@ class Settings:
                 except Exception as e:
                     print(f"Error setting key {k}: {e}")
                     raise e
+
+        # Enforce restrictive permissions
+        if os.path.exists(env_path):
+            os.chmod(env_path, 0o600)
 
         # Reload runtime settings
         self.reload()
