@@ -70,11 +70,21 @@ class Settings:
         self.llm_model = MODEL_CORRECTIONS.get(raw_model, raw_model)
 
         self.host = os.getenv("HOST", "127.0.0.1")
-        self.port = int(os.getenv("PORT", 8000))
+        self.port = self._get_int_env("PORT", 8000)
         self.log_level = os.getenv("LOG_LEVEL", "INFO")
-        self.heartbeat_interval = int(os.getenv("HEARTBEAT_INTERVAL", 3600))
-        self.max_turns = int(os.getenv("MAX_TURNS", 10))
-        self.max_history = int(os.getenv("MAX_HISTORY", 100))
+        self.heartbeat_interval = self._get_int_env("HEARTBEAT_INTERVAL", 3600)
+        self.max_turns = self._get_int_env("MAX_TURNS", 10)
+        self.max_history = self._get_int_env("MAX_HISTORY", 100)
+
+    def _get_int_env(self, key: str, default: int) -> int:
+        val = os.getenv(key)
+        if val is None:
+            return default
+        try:
+            return int(val)
+        except ValueError:
+            print(f"Warning: Invalid integer value for {key} in environment. Falling back to default: {default}")
+            return default
 
     def update_env(self, updates: Dict[str, Any]):
         """Updates the .env file and reloads configuration."""

@@ -117,3 +117,8 @@
 
 **Learning:** The `.env` file, which stores sensitive API keys and configuration, was being created and updated by `opencore/config.py` and `opencore/cli/onboard.py` without explicitly restricting file permissions. Depending on the system's default `umask`, this could expose sensitive credentials to other users on the system (e.g., `0o644` read permissions for everyone). This is a hidden risk and violates the "Secure by default" principle.
 **Action:** Enforced restrictive file permissions (`0o600`, owner read/write only) on the `.env` file immediately upon creation or update. Added `os.chmod(env_path, 0o600)` to `Settings.update_env` and `run_onboarding` to guarantee that secrets are locked down at the OS level. Introduced `tests/test_env_permissions.py` as a regression test.
+
+## 2026-05-20 - Environment Schema Validation
+
+**Learning:** Environment variables loaded via `os.getenv` in `opencore/config.py` were directly cast to integers using `int()`. If a user manually edited the `.env` file and entered a non-integer value (e.g., `HEARTBEAT_INTERVAL="abc"`), the application would completely crash on startup or reload due to an unhandled `ValueError`. This violates "Environment schema validation" and makes the application brittle to manual configuration errors.
+**Action:** Introduced a safe integer parser helper `_get_int_env` in `Settings` that catches `ValueError`, logs a warning message, and gracefully falls back to a sensible default. This prevents catastrophic application failure from simple configuration typos and hardens the application's configuration boundaries.
