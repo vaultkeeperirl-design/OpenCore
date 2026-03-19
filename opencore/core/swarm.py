@@ -341,7 +341,10 @@ class Swarm:
 
             # We add the sender's context implicitly by just chatting with the target
             # In a more complex system, we'd pass the sender's name.
-            response = target_agent.chat(f"Request from {agent.name}: {task}")
+            try:
+                response = target_agent.chat(f"Request from {agent.name}: {task}")
+            except Exception as e:
+                response = f"Error: Delegation to '{to_agent}' failed: {str(e)}"
 
             response_summary = "Response: " + (response[:50] + "..." if len(response) > 50 else response)
             response_timestamp = datetime.datetime.now().isoformat()
