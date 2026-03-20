@@ -122,3 +122,8 @@
 
 **Learning:** Environment variables loaded via `os.getenv` in `opencore/config.py` were directly cast to integers using `int()`. If a user manually edited the `.env` file and entered a non-integer value (e.g., `HEARTBEAT_INTERVAL="abc"`), the application would completely crash on startup or reload due to an unhandled `ValueError`. This violates "Environment schema validation" and makes the application brittle to manual configuration errors.
 **Action:** Introduced a safe integer parser helper `_get_int_env` in `Settings` that catches `ValueError`, logs a warning message, and gracefully falls back to a sensible default. This prevents catastrophic application failure from simple configuration typos and hardens the application's configuration boundaries.
+
+## 2026-05-25 - Encapsulation of Shared Mutable State
+
+**Learning:** The API routing layer (`opencore/interface/api.py`) was directly accessing the `swarm.agents` dictionary to list available agents, bypassing the `Swarm` class's internal synchronization (`self._lock`). This direct state access not only violated encapsulation but also introduced a critical race condition where concurrent dictionary modifications could crash the application (`RuntimeError: dictionary changed size during iteration`).
+**Action:** Enforced strict boundaries by introducing a thread-safe getter `get_agent_names()` on the `Swarm` class. Refactored the API layer to consume this method, ensuring all interactions with the shared state are mediated by the `Swarm` instance and properly synchronized.
