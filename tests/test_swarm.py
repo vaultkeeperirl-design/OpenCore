@@ -39,6 +39,23 @@ class TestSwarm(unittest.TestCase):
         self.assertEqual(response, "Response from Worker: Task done.")
         worker.chat.assert_called()
 
+    def test_delegate_task_exception_handling(self):
+        swarm = Swarm("Boss")
+        boss = swarm.agents["Boss"]
+
+        # Create a worker manually
+        worker = MagicMock()
+        # Mock chat to raise an exception
+        worker.chat.side_effect = Exception("API connection timed out")
+        swarm.agents["Worker"] = worker
+
+        delegate_func = boss.tools["delegate_task"]
+        response = delegate_func("Worker", "Do X")
+
+        # Verify the exception was caught and a proper error string was returned
+        self.assertIn("Error: Delegation to 'Worker' failed: API connection timed out", response)
+        worker.chat.assert_called()
+
     def test_create_team(self):
         swarm = Swarm("Manager")
 

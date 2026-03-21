@@ -122,3 +122,8 @@
 
 **Learning:** Environment variables loaded via `os.getenv` in `opencore/config.py` were directly cast to integers using `int()`. If a user manually edited the `.env` file and entered a non-integer value (e.g., `HEARTBEAT_INTERVAL="abc"`), the application would completely crash on startup or reload due to an unhandled `ValueError`. This violates "Environment schema validation" and makes the application brittle to manual configuration errors.
 **Action:** Introduced a safe integer parser helper `_get_int_env` in `Settings` that catches `ValueError`, logs a warning message, and gracefully falls back to a sensible default. This prevents catastrophic application failure from simple configuration typos and hardens the application's configuration boundaries.
+
+## 2026-05-25 - Error Isolation in Agent Delegation
+
+**Learning:** The `delegate_task_wrapper` tool used for inter-agent communication did not catch unexpected exceptions raised by a target agent's `chat` method (such as an LLM provider timeout or a bug in a sub-agent's tool logic). Because this exception bubbled up, a failure in a single sub-agent would crash the delegating agent's thought process, making the entire swarm fragile to single-node failures.
+**Action:** Wrapped the `target_agent.chat()` invocation inside the `delegate_task_wrapper` within a `try/except Exception` block. When an error occurs during delegation, it is now caught and converted into a formatted string (e.g., `"Error: Delegation to ... failed"`). This isolates execution failures, allowing the delegating agent to handle the error gracefully without terminating its own execution cycle.
