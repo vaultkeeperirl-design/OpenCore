@@ -127,3 +127,8 @@
 
 **Learning:** The `delegate_task_wrapper` tool used for inter-agent communication did not catch unexpected exceptions raised by a target agent's `chat` method (such as an LLM provider timeout or a bug in a sub-agent's tool logic). Because this exception bubbled up, a failure in a single sub-agent would crash the delegating agent's thought process, making the entire swarm fragile to single-node failures.
 **Action:** Wrapped the `target_agent.chat()` invocation inside the `delegate_task_wrapper` within a `try/except Exception` block. When an error occurs during delegation, it is now caught and converted into a formatted string (e.g., `"Error: Delegation to ... failed"`). This isolates execution failures, allowing the delegating agent to handle the error gracefully without terminating its own execution cycle.
+
+## 2026-06-01 - Thread-Safe Agent Listing
+
+**Learning:** The API routing layer was directly iterating over `swarm.agents.keys()` without acquiring a lock. Because `swarm.agents` is shared mutable state and can be modified concurrently by other threads (e.g., when creating or removing agents), this direct access could cause thread-safety issues, such as a `RuntimeError` for dictionary resizing during iteration.
+**Action:** Introduced a thread-safe `get_agent_names` method to the `Swarm` class that acquires `self._lock` before listing the agents, and refactored the `/chat` and `/agents` endpoints to use this new synchronized getter. This prevents runtime exceptions caused by concurrent dictionary mutations and safely decouples API route logic from internal `Swarm` state structure.
