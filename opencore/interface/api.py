@@ -299,9 +299,12 @@ def update_config(config: ConfigRequest):
     try:
         config_dict = config.model_dump(exclude_unset=True)
         config_service.update_config(config_dict)
+    except ValueError as e:
+        logger.error(f"Validation error updating configuration: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Error updating configuration: {e}")
-        return ConfigUpdateResponse(status="error", message=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
     return ConfigUpdateResponse(status="success", message="Configuration updated.")
 
