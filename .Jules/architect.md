@@ -132,3 +132,8 @@
 
 **Learning:** The configuration update route (`POST /config`) caught all exceptions generically and returned a 200 OK with `{"status": "error", "message": "..."}`. This bypasses the application's centralized error handler (`global_exception_handler`), violates REST semantics, and produces inconsistent API contracts, as other endpoints return standardized `ErrorResponse` objects with appropriate HTTP status codes (400, 500) upon failure.
 **Action:** Refactored `update_config` in `opencore/interface/api.py` to raise standard `HTTPException` instances when it catches a `ValueError` (400) or an unexpected generic `Exception` (500). The `global_exception_handler` now captures these exceptions to enforce uniform schema compliance, improving observability and API boundary clarity.
+
+## 2026-06-15 - Thread Safety and State Encapsulation in API Routing
+
+**Learning:** The API routing layer (`opencore/interface/api.py`) was directly accessing and iterating over shared mutable state from the `Swarm` singleton (`list(swarm.agents.keys())`). In a multi-threaded environment like FastAPI's synchronous thread pool, iterating over a dictionary that might be simultaneously modified (e.g., via `create_agent` or `remove_agent`) can lead to unpredictable `RuntimeError: dictionary changed size during iteration` or corrupted reads.
+**Action:** Introduced a synchronized getter method `get_agent_names` to the `Swarm` class that wraps dictionary access in the existing `self._lock` block. Refactored the API endpoints to use this mediated access method, establishing clear boundaries between thread-safe domain logic and the HTTP routing layer.
