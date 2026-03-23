@@ -127,3 +127,8 @@
 
 **Learning:** The `delegate_task_wrapper` tool used for inter-agent communication did not catch unexpected exceptions raised by a target agent's `chat` method (such as an LLM provider timeout or a bug in a sub-agent's tool logic). Because this exception bubbled up, a failure in a single sub-agent would crash the delegating agent's thought process, making the entire swarm fragile to single-node failures.
 **Action:** Wrapped the `target_agent.chat()` invocation inside the `delegate_task_wrapper` within a `try/except Exception` block. When an error occurs during delegation, it is now caught and converted into a formatted string (e.g., `"Error: Delegation to ... failed"`). This isolates execution failures, allowing the delegating agent to handle the error gracefully without terminating its own execution cycle.
+
+## 2026-06-05 - Standardize API Error Responses in Configuration Route
+
+**Learning:** The configuration update route (`POST /config`) caught all exceptions generically and returned a 200 OK with `{"status": "error", "message": "..."}`. This bypasses the application's centralized error handler (`global_exception_handler`), violates REST semantics, and produces inconsistent API contracts, as other endpoints return standardized `ErrorResponse` objects with appropriate HTTP status codes (400, 500) upon failure.
+**Action:** Refactored `update_config` in `opencore/interface/api.py` to raise standard `HTTPException` instances when it catches a `ValueError` (400) or an unexpected generic `Exception` (500). The `global_exception_handler` now captures these exceptions to enforce uniform schema compliance, improving observability and API boundary clarity.
