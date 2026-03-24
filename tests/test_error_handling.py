@@ -54,8 +54,7 @@ class TestErrorHandling(unittest.TestCase):
     def test_successful_request(self, mock_swarm):
         # Setup mock to return success
         mock_swarm.chat.return_value = "Hello from swarm"
-        # swarm.agents is a dict, keys() is called
-        mock_swarm.agents = {"Manager": "agent_obj"}
+        mock_swarm.get_agent_names.return_value = ["Manager"]
         mock_swarm.get_graph_data.return_value = {"nodes": [], "edges": []}
 
         # Make request
