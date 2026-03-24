@@ -166,6 +166,11 @@ class Swarm:
         with self._lock:
             return self.agents.get(name)
 
+    def get_agent_names(self) -> List[str]:
+        """Returns a list of all active agent names safely."""
+        with self._lock:
+            return list(self.agents.keys())
+
     def _register_swarm_tools(self, agent: Agent):
         # Dynamically build model description
         available_models = get_available_model_list()

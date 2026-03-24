@@ -226,7 +226,7 @@ def chat(request: ChatRequest):
 
     return ChatResponse(
         response=response,
-        agents=list(swarm.agents.keys()),
+        agents=swarm.get_agent_names(),
         graph=swarm.get_graph_data(),
         activity_log=activity_log or []
     )
@@ -252,7 +252,7 @@ async def transcribe(file: UploadFile = File(...)):
 @app.get("/agents", response_model=AgentListResponse)
 def get_agents():
     return AgentListResponse(
-        agents=list(swarm.agents.keys()),
+        agents=swarm.get_agent_names(),
         graph=swarm.get_graph_data()
     )
 
