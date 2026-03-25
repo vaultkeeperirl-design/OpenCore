@@ -132,3 +132,8 @@
 
 **Learning:** The configuration update route (`POST /config`) caught all exceptions generically and returned a 200 OK with `{"status": "error", "message": "..."}`. This bypasses the application's centralized error handler (`global_exception_handler`), violates REST semantics, and produces inconsistent API contracts, as other endpoints return standardized `ErrorResponse` objects with appropriate HTTP status codes (400, 500) upon failure.
 **Action:** Refactored `update_config` in `opencore/interface/api.py` to raise standard `HTTPException` instances when it catches a `ValueError` (400) or an unexpected generic `Exception` (500). The `global_exception_handler` now captures these exceptions to enforce uniform schema compliance, improving observability and API boundary clarity.
+
+## 2026-06-10 - Thread-Safe Agent Name Retrieval
+
+**Learning:** The API routing layer was directly accessing and iterating over the global Swarm singleton's shared mutable state (`swarm.agents`). Under high concurrency, iterating over the dictionary while other threads added or removed agents could lead to `RuntimeError: dictionary changed size during iteration`, causing application crashes and violating thread safety.
+**Action:** Replaced direct access to `swarm.agents.keys()` with a synchronized getter method, `get_agent_names()`, protected by the Swarm's internal lock. Also adhered to the Python coding standard of preferring `list(dict)` over `list(dict.keys())` within the method implementation to prevent creating a redundant view object.
