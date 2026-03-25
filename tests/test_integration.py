@@ -12,7 +12,7 @@ class TestIntegration(unittest.TestCase):
     def test_api_chat_flow(self):
         with patch("opencore.interface.api.swarm") as mock_swarm:
             mock_swarm.chat.return_value = "Hello from Manager!"
-            mock_swarm.agents = {"Manager": MagicMock()}
+            mock_swarm.get_agent_names.return_value = ["Manager"]
             mock_swarm.get_graph_data.return_value = {"nodes": [], "edges": []}
 
             response = client.post("/chat", json={"message": "Hi"})
